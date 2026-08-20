@@ -271,6 +271,29 @@ html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--m
 .resumo-termos{margin-top:var(--s3);font-size:var(--fs-small);color:var(--text-2)}
 .resumo-termos b{color:var(--text)}
 
+/* Leitura escrita pela IA, no topo do resumo */
+.leitura{
+  border:1px solid var(--border);border-left:3px solid var(--marca-grafite);
+  border-radius:var(--r-md);background:var(--surface);
+  padding:var(--s4);
+}
+html[data-tema="escuro"] .leitura{border-left-color:var(--marca-areia)}
+.leitura-espera{
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  font-size:var(--fs-small);color:var(--muted);
+  background:none;border-style:dashed;
+}
+.leitura-texto p{margin-bottom:var(--s2);line-height:1.55}
+.leitura-texto p:last-child{margin-bottom:0}
+.leitura-pe{
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--border);
+  font-size:var(--fs-caption);color:var(--muted);
+}
+.leitura-pe .btn{margin-left:auto}
+.leitura-erro{margin-top:var(--s3);font-size:var(--fs-small);color:var(--atencao)}
+.leitura-ajuda{margin-top:var(--s1);font-size:var(--fs-caption);color:var(--text-2)}
+
 .resumo-bloco{break-inside:avoid}
 .resumo-cabeca{
   display:flex;align-items:baseline;gap:var(--s2);
@@ -489,6 +512,9 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
 
   /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
   .resumo{gap:14pt}
+  .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
+  .leitura-espera,.leitura-pe .btn,.leitura-erro{display:none}
+  .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
   .resumo-abertura{border-left-color:#DB2126}
   .resumo-lista{grid-template-columns:1fr 1fr;gap:8pt 16pt}
   .resumo-item{border-left-color:#ccc}
@@ -672,6 +698,7 @@ const estado = {
   emCarga: false,            // trava contra duas atualizações ao mesmo tempo
   resumo: false,             // visão de resumo do dia, pensada para o papel
   arquivo: null,             // { ano, termo, itens, carregando, erro } quando busca no arquivo
+  leitura: null,             // { texto, carregando, erro } da leitura escrita pela IA
   progresso: { feitas:0, total:0 },
   busca: "",
   veiculo: "",
@@ -1348,6 +1375,77 @@ function itensDoResumo(secaoId, quantos, peso){
     .map(o => o.it);
 }
 
+/* A leitura do dia é escrita pelo Claude, na função api/resumir.js. A chave
+   da API mora na Vercel; daqui só sai manchete e só volta texto pronto.
+   É sob demanda, no botão: cada clique custa alguns centavos. */
+async function pedirLeitura(){
+  const manchetes = [];
+  const assuntos = calcularAssuntos();
+  const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
+
+  for(const secao of SECOES){
+    for(const i of itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso)){
+      manchetes.push({ secao: secao.nome, titulo: i.titulo, veiculo: i.origem || i.veiculo });
+    }
+  }
+
+  if(!manchetes.length){
+    estado.leitura = { texto:"", carregando:false, erro:"não há manchete para ler ainda" };
+    renderizar();
+    return;
+  }
+
+  estado.leitura = { texto:"", carregando:true, erro:"" };
+  renderizar();
+
+  try{
+    const r = await fetch("/api/resumir", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ itens: manchetes })
+    });
+    const dados = await r.json().catch(() => ({}));
+
+    if(!r.ok){
+      estado.leitura = {
+        texto:"", carregando:false,
+        erro: dados.erro || ("a função respondeu " + r.status),
+        comoResolver: dados.comoResolver || ""
+      };
+    }else{
+      estado.leitura = { texto: dados.resumo || "", carregando:false, erro:"" };
+    }
+  }catch(e){
+    estado.leitura = { texto:"", carregando:false, erro: e?.message || "não foi possível falar com a função" };
+  }
+  renderizar();
+}
+
+function blocoLeitura(){
+  const l = estado.leitura;
+  const botao = `<button class="btn btn-secundario" id="btnLeitura" ${l?.carregando ? "disabled" : ""}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>
+    <span>${l?.texto ? "Reescrever leitura" : "Escrever a leitura do dia"}</span>
+  </button>`;
+
+  if(l?.carregando){
+    return `<div class="leitura leitura-espera">${botao}<span>Lendo as manchetes…</span></div>`;
+  }
+  if(l?.erro){
+    return `<div class="leitura">${botao}
+      <div class="leitura-erro"><b>Não saiu:</b> ${escapar(l.erro)}${
+        l.comoResolver ? `<div class="leitura-ajuda">${escapar(l.comoResolver)}</div>` : ""}</div>
+    </div>`;
+  }
+  if(l?.texto){
+    return `<div class="leitura">
+      <div class="leitura-texto">${l.texto.split(/\n+/).map(p => `<p>${escapar(p)}</p>`).join("")}</div>
+      <div class="leitura-pe">Escrito por IA a partir das manchetes acima · confira antes de repassar ${botao}</div>
+    </div>`;
+  }
+  return `<div class="leitura leitura-espera">${botao}<span>Um parágrafo com o fio do dia, escrito na hora.</span></div>`;
+}
+
 function montarResumo(){
   const assuntos = calcularAssuntos();
   const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
@@ -1391,6 +1489,7 @@ function montarResumo(){
       ${assuntos.length ? `<div class="resumo-termos"><b>Mais citados:</b> ${
         assuntos.slice(0, 8).map(a => escapar(a.rotulo) + " (" + a.n + ")").join(" · ")}</div>` : ""}
     </div>
+    ${blocoLeitura()}
     ${blocos}
   </div>`;
 }
@@ -1597,6 +1696,10 @@ el("btnResumo").addEventListener("click", () => {
 });
 
 el("btnImprimir").addEventListener("click", () => window.print());
+
+el("grade").addEventListener("click", e => {
+  if(e.target.closest("#btnLeitura")) pedirLeitura();
+});
 
 // No resumo os filtros não valem: ficam desligados para não enganar
 function aplicarModoResumo(){
