@@ -3,18 +3,22 @@
    As notícias NUNCA são cacheadas aqui — sempre vão à rede, para não
    correr o risco de a tela abrir com manchete velha achando que é a do dia. */
 
-const CACHE = "radar-casco-v1";
+const CACHE = "radar-casco-v2";
 const CASCO = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./logo-patrimar.png",
   "./icon-192.png",
   "./icon-512.png"
 ];
 
 self.addEventListener("install", evento => {
   evento.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(CASCO)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      // Item a item: um arquivo ausente não pode impedir a instalação inteira
+      .then(c => Promise.all(CASCO.map(u => c.add(u).catch(() => {}))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -32,7 +36,7 @@ self.addEventListener("fetch", evento => {
 
   const url = new URL(req.url);
 
-  // Feeds e proxies: sempre rede, nunca cache.
+  // Feeds e pontes: sempre rede, nunca cache.
   if(url.origin !== self.location.origin) return;
 
   // Casco: rede primeiro, cache como reserva quando estiver offline.
