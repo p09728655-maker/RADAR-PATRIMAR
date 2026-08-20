@@ -171,16 +171,21 @@ Link de aviso só é aceito em `http` ou `https`, para ninguém publicar um
 O painel é estático, então o texto precisa morar em algum lugar. O mural usa
 o Redis da Vercel:
 
-1. No projeto, aba **Storage**, criar um banco **Redis**. Ao conectar ao
-   projeto, a Vercel cadastra sozinha `KV_REST_API_URL` e `KV_REST_API_TOKEN`
-   (os nomes `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` também
-   servem — a Vercel entrega ora um par, ora o outro).
+1. No projeto, aba **Storage** → **Create Database** → **Upstash** → **Redis**.
+   Atenção ao item do menu chamado só "Redis" (*Official Redis for Vercel*):
+   é outro produto e entrega conexão TCP, não a API REST que as funções usam.
+   Ao conectar ao projeto, a Vercel cadastra sozinha `KV_REST_API_URL` e
+   `KV_REST_API_TOKEN` (os nomes `UPSTASH_REDIS_REST_URL` e
+   `UPSTASH_REDIS_REST_TOKEN` também servem — a Vercel entrega ora um par,
+   ora o outro).
 2. Em **Settings → Environment Variables**, criar `SENHA_MURAL` com a senha
    que a equipe vai usar para publicar.
 3. Publicar de novo.
 
 Sem isso, o mural aparece com o aviso de que não está configurado e o resto
-do painel funciona igual.
+do painel funciona igual. Para saber o que exatamente falta, abrir
+`/api/mural` no navegador: a resposta lista o que está faltando e os nomes
+das variáveis que aquele deploy enxerga — nomes apenas, nunca valores.
 
 ## Leitura do dia escrita por IA
 

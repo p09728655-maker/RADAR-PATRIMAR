@@ -13,6 +13,10 @@
    Os nomes UPSTASH_REDIS_REST_URL / _TOKEN também servem, porque a Vercel
    entrega ora um par, ora o outro, conforme o caminho da criação do banco.
 
+   O banco precisa ser o da Upstash, em Storage → Create Database → Upstash →
+   Redis. O item do menu chamado só "Redis" é outro produto e entrega uma
+   conexão TCP, que estas funções não usam.
+
    Ler é aberto: quem tem o app vê o mural. Escrever e apagar pedem a senha,
    conferida aqui no servidor — o navegador nunca decide isso sozinho. */
 
@@ -27,6 +31,21 @@ const token = () =>
   process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
 
 const configurado = () => Boolean(base() && token() && process.env.SENHA_MURAL);
+
+/* Quando falta configuração, dizer o que falta poupa adivinhação. Só nomes de
+   variáveis saem daqui — nunca o valor de nenhuma delas. */
+function oQueFalta() {
+  const falta = [];
+  if (!base()) falta.push("endereço do banco (KV_REST_API_URL ou UPSTASH_REDIS_REST_URL)");
+  if (!token()) falta.push("token do banco (KV_REST_API_TOKEN ou UPSTASH_REDIS_REST_TOKEN)");
+  if (!process.env.SENHA_MURAL) falta.push("SENHA_MURAL");
+
+  const encontradas = Object.keys(process.env)
+    .filter(nome => /^(KV_|UPSTASH_|REDIS_|SENHA_MURAL$|ANTHROPIC_API_KEY$)/i.test(nome))
+    .sort();
+
+  return { falta, encontradas };
+}
 
 async function lerMural() {
   const r = await fetch(`${base()}/get/${CHAVE}`, {
@@ -82,10 +101,14 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (!configurado()) {
+    const { falta, encontradas } = oQueFalta();
     return res.status(503).json({
       erro: "mural não configurado",
-      comoResolver:
-        "Na Vercel: crie um banco Redis em Storage e depois cadastre SENHA_MURAL em Settings → Environment Variables."
+      falta,
+      variaveisEncontradas: encontradas,
+      comoResolver: encontradas.length
+        ? "As variáveis acima são as que este deploy enxerga. Se as do banco já aparecem aí, o que falta é publicar de novo: Deployments → ⋯ → Redeploy."
+        : "Na Vercel: Storage → Create Database → Upstash → Redis (não o item chamado 'Redis', que dá conexão TCP em vez da API REST). Conecte ao projeto, cadastre SENHA_MURAL em Settings → Environment Variables e publique de novo (Deployments → ⋯ → Redeploy)."
     });
   }
 
