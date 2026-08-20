@@ -9,11 +9,14 @@ Inteligência Artificial, Moveleiro, PPCP e Indústria.
 | Arquivo | Função |
 |---|---|
 | `index.html` | O painel inteiro: estrutura, estilo e lógica |
-| `manifest.json` | Permite instalar como aplicativo no celular |
+| `api/feed.js` | Ponte própria: busca os feeds pelo mesmo domínio, sem CORS |
+| `manifest.json` | Permite instalar como aplicativo no celular e no PC |
 | `sw.js` | Service worker: guarda o casco do app, nunca as notícias |
 | `logo-patrimar.png` | Logotipo do cabeçalho |
 | `icon-192.png` | Ícone do atalho |
-| `icon-512.png` | Ícone em alta resolução e versão adaptável |
+| `icon-512.png` | Ícone em alta resolução |
+| `icon-maskable-512.png` | Versão adaptável, para a máscara do Android |
+| `apple-touch-icon.png` | Ícone da tela de início do iPhone |
 | `Logotipo Patrimar.jpg` | Arte original da marca, de onde saíram o logo e os ícones |
 
 Todos ficam na raiz do repositório, sem subpastas.
@@ -53,9 +56,18 @@ Notícias em português.
 
 ### Como o painel chega até os feeds
 
-O navegador não consegue ler RSS de outro domínio sem um intermediário. O
-painel mantém cinco pontes públicas gratuitas na constante `PONTES` e vai
-testando uma a uma:
+O navegador não consegue ler RSS de outro domínio sem um intermediário.
+
+A ponte principal é a própria: `api/feed.js` roda como função da Vercel, no
+mesmo endereço do painel. Não há CORS, não há cota de terceiro e a resposta
+fica cinco minutos no cache da borda — as fontes recebem uma visita em vez de
+uma para cada aparelho que abre o app. Ela só aceita os domínios das fontes
+configuradas; uma ponte aberta viraria proxy de qualquer endereço da internet.
+Ao acrescentar uma fonte nova, incluir o domínio dela na lista `DOMINIOS` do
+`api/feed.js`.
+
+Como reserva, o painel mantém sete pontes públicas gratuitas na constante
+`PONTES` e vai testando uma a uma:
 
 - começa pela ponte que respondeu da última vez, guardada no aparelho;
 - ponte que falha vai perdendo posição e, depois de quatro tropeços seguidos,
@@ -70,10 +82,10 @@ fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
 
-Para eliminar a dependência de terceiros, publicar um Apps Script próprio que
-devolva o conteúdo do feed e preencher a URL do `/exec` em
-`CONFIG.PROXY_PROPRIO`, no topo do bloco de script. Quando preenchido, ele
-entra na frente das pontes públicas.
+Fora da Vercel — em um servidor sem `/api`, por exemplo — a ponte própria
+falha três vezes, sai da rodada e as públicas assumem sozinhas. Para apontar
+para outro intermediário, como um Apps Script, basta trocar o valor de
+`CONFIG.PROXY_PROPRIO` no topo do bloco de script.
 
 ### Quando uma fonte não responde
 
@@ -82,10 +94,30 @@ fonte, marca o veículo em âmbar no rodapé e mostra o horário de cada matéri
 para não passar manchete velha por nova. Se nenhuma fonte de uma seção
 responder, aparece um aviso explicando o que fazer.
 
+## Resumo do dia e impressão
+
+O botão **Resumo do dia**, na barra de filtros, troca a lista pelas principais
+manchetes de cada seção. A escolha não usa IA: cada manchete ganha nota pelos
+assuntos mais repetidos do dia que ela contém, com um empurrão para as mais
+recentes — assunto que vários veículos publicam ao mesmo tempo costuma ser o
+que importa. Quantas entram por seção é `CONFIG.RESUMO_POR_SECAO`.
+
+O botão **Imprimir** abre a caixa de impressão do navegador, que também salva
+em PDF. O papel sai sem cabeçalho, filtros nem rodapé: só o logotipo, a data e
+as notícias em duas colunas. Vale para as duas telas — no resumo sai o resumo,
+na lista sai a seção aberta.
+
+## Instalação
+
+No Chrome e no Edge o painel mostra o botão **Instalar** assim que o navegador
+reconhece o app. No iPhone o Safari não oferece esse convite, então aparece uma
+faixa explicando o caminho: Compartilhar → Adicionar à Tela de Início. A faixa
+some depois de fechada uma vez.
+
 ### Depois de alterar o `sw.js`
 
-Aumentar o número da versão em `const CACHE = "radar-casco-v2"` para
-`v3`, `v4` e assim por diante. Sem isso, o navegador continua servindo a
+Aumentar o número da versão em `const CACHE = "radar-casco-v3"` para
+`v4`, `v5` e assim por diante. Sem isso, o navegador continua servindo a
 versão antiga guardada.
 
 ### Trocar a marca
@@ -108,3 +140,5 @@ aumentar a versão do `sw.js`.
   parada até a última delas.
 - Manchetes vindas do Google Notícias perdem o sufixo " - Veículo" e passam a
   exibir o veículo de origem ao lado do assunto.
+- A grade acompanha a tela: quatro colunas no monitor largo, três no PC comum
+  e no tablet deitado, duas no tablet em pé e uma no celular.

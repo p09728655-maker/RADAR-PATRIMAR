@@ -1,14 +1,18 @@
 {
+  "id": "/",
   "name": "Radar Diário — Patrimar",
   "short_name": "Radar Patrimar",
   "description": "Painel diário de notícias do Brasil, do mundo, de IA, do setor moveleiro e de PPCP.",
   "lang": "pt-BR",
-  "start_url": "./index.html",
+  "dir": "ltr",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#F4F5F7",
   "theme_color": "#DB2126",
+  "categories": ["news", "business", "productivity"],
   "icons": [
     {
       "src": "icon-192.png",
@@ -20,7 +24,13 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
