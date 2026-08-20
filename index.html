@@ -200,6 +200,12 @@ html[data-tema="escuro"] .chip[aria-pressed="true"]{background:var(--marca-areia
 .aba:hover{color:var(--text)}
 .aba[aria-selected="true"]{color:var(--marca-vermelho);border-bottom-color:var(--marca-vermelho)}
 html[data-tema="escuro"] .aba[aria-selected="true"]{color:#F2727A;border-bottom-color:#F2727A}
+/* A aba da casa fica marcada mesmo sem estar aberta, com a estrela da marca */
+.aba-destaque{color:var(--marca-vermelho);font-weight:700}
+html[data-tema="escuro"] .aba-destaque{color:#F2727A}
+.aba-estrela{width:13px;height:13px;flex:0 0 13px;fill:#D9B414}
+.aba-destaque .aba-n{border-color:var(--marca-vermelho);color:var(--marca-vermelho)}
+html[data-tema="escuro"] .aba-destaque .aba-n{border-color:#F2727A;color:#F2727A}
 .aba-n{
   font-size:var(--fs-label);font-weight:700;color:var(--muted);
   background:var(--bg);border:1px solid var(--border);
@@ -617,50 +623,48 @@ const gn = q => "https://news.google.com/rss/search?q=" +
   encodeURIComponent(q) + "&hl=pt-BR&gl=BR&ceid=BR:pt-419";
 
 const SECOES = [
-  { id:"brasil", nome:"Brasil", fontes:[
-    { v:"G1",             u:"https://g1.globo.com/rss/g1/", reserva:gn("site:g1.globo.com") },
-    { v:"Folha",          u:"https://feeds.folha.uol.com.br/emcimadahora/rss091.xml", reserva:gn("site:folha.uol.com.br") },
-    { v:"Agência Brasil", u:"https://agenciabrasil.ebc.com.br/rss/geral/feed.xml", reserva:gn("site:agenciabrasil.ebc.com.br") },
-    { v:"Poder360",       u:"https://www.poder360.com.br/feed/", reserva:gn("site:poder360.com.br") },
-    { v:"CNN Brasil",     u:"https://www.cnnbrasil.com.br/feed/", reserva:gn("site:cnnbrasil.com.br") }
-  ]},
-  { id:"mundo", nome:"Mundo", fontes:[
-    { v:"BBC Brasil",     u:"https://feeds.bbci.co.uk/portuguese/rss.xml", reserva:gn("site:bbc.com/portuguese") },
-    { v:"DW Brasil",      u:"https://rss.dw.com/rdf/rss-br-all", reserva:gn("site:dw.com notícias Brasil") },
-    { v:"France 24",      u:"https://www.france24.com/pt/rss", reserva:gn("site:france24.com/pt") },
-    { v:"G1 Mundo",       u:"https://g1.globo.com/rss/g1/mundo/", reserva:gn("site:g1.globo.com/mundo") },
-    { v:"ONU News",       u:"https://news.un.org/feed/subscribe/pt/news/all/rss.xml", reserva:gn("ONU News Nações Unidas") },
-    { v:"New York Times", u:"https://rss.nytimes.com/services/xml/rss/nyt/World.xml", reserva:gn("site:nytimes.com world") }
-  ]},
-  { id:"ia", nome:"Inteligência Artificial", fontes:[
-    { v:"MIT Tech Review",u:"https://www.technologyreview.com/topic/artificial-intelligence/feed", reserva:gn("site:technologyreview.com artificial intelligence") },
-    { v:"Ars Technica",   u:"https://arstechnica.com/ai/feed/", reserva:gn("site:arstechnica.com AI") },
-    { v:"The Verge",      u:"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", reserva:gn("site:theverge.com artificial intelligence") },
-    { v:"TechCrunch",     u:"https://techcrunch.com/category/artificial-intelligence/feed/", reserva:gn("site:techcrunch.com artificial intelligence") },
-    { v:"IA no Brasil",   u:gn("inteligência artificial empresas Brasil") },
-    { v:"IA na indústria",u:gn("inteligência artificial indústria manufatura") }
-  ]},
-  { id:"moveleiro", nome:"Moveleiro", fontes:[
-    { v:"Setor moveleiro",u:gn("indústria moveleira OR \"setor moveleiro\"") },
-    { v:"Móveis Brasil",  u:gn("fábrica de móveis produção exportação") },
-    { v:"Madeira e MDF",  u:gn("MDF OR MDP OR painéis de madeira preço mercado") },
-    { v:"Polos moveleiros",u:gn("Votuporanga OR Mirassol OR Bento Gonçalves OR Arapongas móveis") },
-    { v:"Movelaria/varejo",u:gn("varejo de móveis vendas mercado moveleiro") }
+  { id:"patrimar", nome:"Patrimar", destaque:true, fontes:[
+    { v:"Patrimar Móveis",    u:gn('"Patrimar Móveis"') },
+    { v:"Menções à marca",    u:gn('"Patrimar" móveis OR planejados OR moveleira') },
+    { v:"Móveis planejados",  u:gn('"móveis planejados" mercado OR fábrica OR lançamento') },
+    { v:"Concorrência",       u:gn('Todeschini OR "Dell Anno" OR Italínea OR Bontempo OR "SCA Móveis" planejados') },
+    { v:"Varejo e franquias", u:gn('franquia de móveis planejados OR loja de móveis planejados expansão') }
   ]},
   { id:"ppcp", nome:"PPCP e Indústria", fontes:[
-    { v:"Produção industrial",u:gn("produção industrial IBGE PIM indústria brasileira") },
-    { v:"PCP e Lean",     u:gn("\"planejamento e controle da produção\" OR lean manufacturing OR PCP indústria") },
-    { v:"Manufatura 4.0", u:gn("indústria 4.0 automação manufatura fábrica") },
-    { v:"Supply chain",   u:gn("cadeia de suprimentos OR supply chain OR logística indústria Brasil") },
-    { v:"CNI / Indústria",u:gn("CNI confiança do empresário industrial capacidade instalada") }
+    { v:"Produção industrial", u:gn('produção industrial IBGE PIM indústria brasileira') },
+    { v:"PCP e Lean",          u:gn('"planejamento e controle da produção" OR "lean manufacturing" OR PCP indústria') },
+    { v:"Manufatura 4.0",      u:gn('"indústria 4.0" automação manufatura fábrica') },
+    { v:"Supply chain",        u:gn('"cadeia de suprimentos" OR "supply chain" logística indústria Brasil') },
+    { v:"CNI / Indústria",     u:gn('CNI confiança do empresário industrial capacidade instalada') },
+    { v:"Custos e insumos",    u:gn('custo de produção indústria OR preço do aço OR insumos industriais Brasil') },
+    { v:"New York Times",      u:"https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+                               reserva:gn('site:nytimes.com manufacturing OR supply chain') }
+  ]},
+  { id:"moveleiro", nome:"Moveleiro", fontes:[
+    { v:"Setor moveleiro",   u:gn('"indústria moveleira" OR "setor moveleiro"') },
+    { v:"Móveis Brasil",     u:gn('fábrica de móveis produção exportação') },
+    { v:"Madeira e MDF",     u:gn('MDF OR MDP OR "painéis de madeira" preço mercado') },
+    { v:"Polos moveleiros",  u:gn('Votuporanga OR Mirassol OR "Bento Gonçalves" OR Arapongas móveis') },
+    { v:"Movelaria/varejo",  u:gn('varejo de móveis vendas mercado moveleiro') },
+    { v:"Entidades e feiras",u:gn('Movergs OR Sindmóveis OR Abimóvel OR Movelsul OR FIMMA móveis') }
+  ]},
+  { id:"ia", nome:"Inteligência Artificial", fontes:[
+    { v:"IA na indústria",  u:gn('inteligência artificial indústria manufatura') },
+    { v:"IA em produção",   u:gn('inteligência artificial "chão de fábrica" OR "planejamento da produção" OR "previsão de demanda"') },
+    { v:"IA no Brasil",     u:gn('inteligência artificial empresas Brasil') },
+    { v:"MIT Tech Review",  u:"https://www.technologyreview.com/topic/artificial-intelligence/feed", reserva:gn('site:technologyreview.com artificial intelligence') },
+    { v:"Ars Technica",     u:"https://arstechnica.com/ai/feed/", reserva:gn('site:arstechnica.com AI') },
+    { v:"The Verge",        u:"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", reserva:gn('site:theverge.com artificial intelligence') },
+    { v:"TechCrunch",       u:"https://techcrunch.com/category/artificial-intelligence/feed/", reserva:gn('site:techcrunch.com artificial intelligence') }
   ]}
 ];
+
 
 /* ============================================================
    2. ESTADO
    ============================================================ */
 const estado = {
-  secao: "brasil",
+  secao: "patrimar",         // o painel abre na aba da casa
   brutos: {},                // { secaoId: { veiculo: [item, ...] } }
   itens: {},                 // { secaoId: [item, ...] } — já deduplicado e ordenado
   falhas: {},                // { secaoId: [veiculo, ...] }
@@ -900,6 +904,33 @@ function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
   return { titulo, link, resumo, origem, veiculo, ts: paraTs(dataBruta), chave: chaveDe(titulo) };
 }
 
+/* Nem todo feed é UTF-8. O da Folha vem em ISO-8859-1 e, lido como UTF-8,
+   transforma "vigário" em "vig?rio". A codificação certa é procurada em
+   ordem: cabeçalho HTTP, declaração do próprio XML e os dois palpites
+   comuns. Vence a primeira leitura sem caractere perdido. */
+async function lerTexto(r){
+  const bytes = new Uint8Array(await r.arrayBuffer());
+  const tipo = r.headers.get("content-type") || "";
+  const espiada = new TextDecoder("windows-1252").decode(bytes.slice(0, 400));
+
+  const candidatas = [
+    (tipo.match(/charset=["']?([\w-]+)/i) || [])[1],
+    (espiada.match(/encoding=["']([\w-]+)["']/i) || [])[1],
+    "utf-8",
+    "windows-1252"
+  ].filter(Boolean).map(c => c.toLowerCase());
+
+  let primeira = null;
+  for(const nome of new Set(candidatas)){
+    let texto;
+    try{ texto = new TextDecoder(nome).decode(bytes); }
+    catch{ continue; }
+    if(primeira === null) primeira = texto;
+    if(!texto.includes("\uFFFD")) return texto;
+  }
+  return primeira ?? "";
+}
+
 function lerFeed(xmlTexto, veiculo){
   const bruto = String(xmlTexto ?? "").replace(/^﻿/, "").trim();
   if(bruto.length < 80) throw new Error("resposta curta demais");
@@ -977,7 +1008,7 @@ async function pelaPonte(ponte, url, veiculo){
       const j = await r.json();
       return lerFeed(decodificarConteudo(j.contents ?? j.body ?? ""), veiculo);
     }
-    return lerFeed(await r.text(), veiculo);
+    return lerFeed(await lerTexto(r), veiculo);
   }finally{
     clearTimeout(relogio);
   }
@@ -1379,11 +1410,12 @@ function cartaoNoticia(i, termo){
 }
 
 function renderizarAbas(){
+  const estrela = `<svg class="aba-estrela" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>`;
   el("abas").innerHTML = SECOES.map(s => {
     const n = (estado.itens[s.id] || []).length;
-    return `<button class="aba" role="tab" data-secao="${s.id}"
+    return `<button class="aba${s.destaque ? " aba-destaque" : ""}" role="tab" data-secao="${s.id}"
       aria-selected="${estado.secao === s.id}">
-      ${escapar(s.nome)}${n ? `<span class="aba-n">${n}</span>` : ""}
+      ${s.destaque ? estrela : ""}${escapar(s.nome)}${n ? `<span class="aba-n">${n}</span>` : ""}
     </button>`;
   }).join("");
 }
