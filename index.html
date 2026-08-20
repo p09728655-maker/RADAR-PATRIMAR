@@ -384,6 +384,17 @@ html[data-tema="escuro"] .dica{color:#E4DCC0}
 }
 .aviso svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}
 .aviso-detalhe{margin-top:var(--s2);font-size:var(--fs-label);opacity:.8;font-family:ui-monospace,Consolas,monospace}
+.faixa-arquivo{
+  grid-column:1/-1;
+  display:flex;gap:var(--s3);align-items:flex-start;
+  background:var(--marca-areia);
+  border:1px solid var(--border);border-left:3px solid var(--marca-grafite);
+  border-radius:var(--r-md);padding:var(--s3) var(--s4);
+  font-size:var(--fs-small);color:#5C4B12;
+  margin-bottom:var(--s2);
+}
+html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var(--marca-areia);color:#E4DCC0}
+.faixa-arquivo svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}
 .aviso b{display:block;margin-bottom:2px}
 
 /* ============================================================
@@ -540,10 +551,13 @@ html[data-tema="escuro"] .dica{color:#E4DCC0}
   </div>
   <select id="filtroVeiculo" aria-label="Filtrar por veículo"><option value="">Todos os veículos</option></select>
   <select id="filtroPeriodo" aria-label="Filtrar por período">
-    <option value="0">Qualquer período</option>
-    <option value="6">Últimas 6 horas</option>
-    <option value="24">Últimas 24 horas</option>
-    <option value="72">Últimos 3 dias</option>
+    <optgroup label="Notícias do dia">
+      <option value="0">Qualquer período</option>
+      <option value="6">Últimas 6 horas</option>
+      <option value="24">Últimas 24 horas</option>
+      <option value="72">Últimos 3 dias</option>
+    </optgroup>
+    <optgroup label="Arquivo" id="grupoArquivo"></optgroup>
   </select>
   <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Resumo do dia: as principais de cada seção">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
@@ -590,6 +604,7 @@ const CONFIG = {
   PROXY_PROPRIO: "/api/feed?url=",
   MAX_POR_FONTE: 14,
   RESUMO_POR_SECAO: 6,               // manchetes por seção no resumo do dia
+  ARQUIVO_ANOS: 4,                   // quantos anos entram na busca de arquivo
   INTERVALO_MS: 10 * 60 * 1000,      // atualização automática: 10 min
   TIMEOUT_MS: 13000,                 // por tentativa de ponte
   TENTATIVAS: 4,                     // pontes testadas por endereço
@@ -652,6 +667,7 @@ const estado = {
   carregando: true,          // primeira pintura: mostra esqueleto
   emCarga: false,            // trava contra duas atualizações ao mesmo tempo
   resumo: false,             // visão de resumo do dia, pensada para o papel
+  arquivo: null,             // { ano, termo, itens, carregando, erro } quando busca no arquivo
   progresso: { feitas:0, total:0 },
   busca: "",
   veiculo: "",
@@ -1180,6 +1196,107 @@ function realcar(texto, termo){
 }
 
 /* ------------------------------------------------------------
+   Arquivo
+   ------------------------------------------------------------
+   Feed RSS só carrega o que saiu nos últimos dias. Para alcançar
+   matéria de anos anteriores o caminho é o arquivo do Google
+   Notícias, que aceita recorte de data na própria consulta. */
+function anosDoArquivo(){
+  const atual = new Date().getFullYear();
+  return Array.from({ length: CONFIG.ARQUIVO_ANOS }, (_, i) => atual - i);
+}
+
+function montarAnosDoArquivo(){
+  el("grupoArquivo").innerHTML = anosDoArquivo()
+    .map(a => `<option value="ano:${a}">Arquivo de ${a}</option>`).join("");
+}
+
+async function buscarNoArquivo(){
+  const termo = el("busca").value.trim();
+  const ano = estado.arquivo?.ano;
+  if(!ano) return;
+
+  if(!termo){
+    estado.arquivo = { ano, termo:"", itens:[], carregando:false, erro:"" };
+    renderizar();
+    return;
+  }
+
+  estado.arquivo = { ano, termo, itens:[], carregando:true, erro:"" };
+  renderizar();
+
+  // Busca do usuário não entra na fila da atualização: sai na frente
+  const consulta = `${termo} after:${ano}-01-01 before:${ano + 1}-01-01`;
+  let achados = null, erro = "";
+  try{
+    achados = await buscarFonte({ v:"Arquivo " + ano, u:gn(consulta) }, 0);
+  }catch(e){
+    erro = e?.message || "não foi possível consultar o arquivo";
+  }
+
+  if(estado.arquivo?.ano !== ano || estado.arquivo?.termo !== termo) return;  // busca vencida
+
+  // O recorte de data é conferido aqui também: se o arquivo devolver matéria
+  // de outro ano, ela não passa, e o total de descartadas explica o vazio.
+  const todos = achados || [];
+  const doAno = todos.filter(i => i.ts && new Date(i.ts).getFullYear() === ano);
+
+  estado.arquivo = {
+    ano, termo, erro, carregando:false,
+    itens: doAno.sort((a, b) => b.ts - a.ts),
+    foraDoAno: todos.length - doAno.length
+  };
+  renderizar();
+}
+
+function montarArquivo(){
+  const { ano, termo, itens, carregando, erro } = estado.arquivo;
+
+  if(!termo){
+    return `<div class="estado">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <div class="estado-t">Arquivo de ${ano}</div>
+      <div class="estado-d">Digite uma palavra-chave no campo de busca e tecle <b>Enter</b>
+        para procurar matérias publicadas em ${ano}.</div>
+    </div>`;
+  }
+
+  const faixa = `<div class="faixa-arquivo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v13H3z"/><path d="M3 7l2-3h14l2 3"/><path d="M10 12h4"/></svg>
+    <div><b>Arquivo de ${ano}</b> · resultados para “${escapar(termo)}”, fora da lista do dia.
+    Para voltar ao radar, escolha <i>Qualquer período</i>.</div>
+  </div>`;
+
+  if(carregando){
+    return faixa + Array.from({ length:4 }, () => `
+      <div class="esqueleto">
+        <div class="esq-linha" style="width:32%;height:9px"></div>
+        <div class="esq-linha" style="width:96%"></div>
+        <div class="esq-linha" style="width:72%"></div>
+      </div>`).join("");
+  }
+
+  if(erro){
+    return faixa + `<div class="aviso" role="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+      <div><b>A consulta ao arquivo não voltou</b> ${escapar(erro)} — tecle Enter para tentar de novo.</div>
+    </div>`;
+  }
+
+  if(!itens.length){
+    const fora = estado.arquivo.foraDoAno || 0;
+    return faixa + `<div class="estado">
+      <div class="estado-t">Nada encontrado em ${ano}</div>
+      <div class="estado-d">Nenhuma matéria de ${ano} para <b>${escapar(termo)}</b>.
+        ${fora ? `O arquivo devolveu ${fora} ${fora === 1 ? "resultado" : "resultados"} de outros anos, que ficaram de fora. ` : ""}
+        Tente outras palavras ou outro ano.</div>
+    </div>`;
+  }
+
+  return faixa + itens.map(i => cartaoNoticia(i, termo)).join("");
+}
+
+/* ------------------------------------------------------------
    Resumo do dia
    ------------------------------------------------------------
    Sem IA: a nota de cada manchete vem de quantos assuntos mais
@@ -1247,6 +1364,20 @@ function montarResumo(){
   </div>`;
 }
 
+function cartaoNoticia(i, termo){
+  const novo = i.ts && i.ts > estado.ultimaVisita && (Date.now() - i.ts) < 24*3600*1000;
+  return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
+    <div class="n-meta">
+      <span class="n-veiculo">${escapar(i.veiculo)}</span>
+      ${i.origem && i.origem !== i.veiculo ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(i.origem)}</span>` : ""}
+      ${i.ts ? `<span class="n-ponto">·</span><span class="n-hora">${escapar(tempoRelativo(i.ts))}</span>` : ""}
+      ${novo ? `<span class="n-novo">novo</span>` : ""}
+    </div>
+    <div class="n-titulo">${realcar(i.titulo, termo)}</div>
+    ${i.resumo ? `<div class="n-resumo">${realcar(i.resumo, termo)}</div>` : ""}
+  </a>`;
+}
+
 function renderizarAbas(){
   el("abas").innerHTML = SECOES.map(s => {
     const n = (estado.itens[s.id] || []).length;
@@ -1260,7 +1391,7 @@ function renderizarAbas(){
 function renderizarGrade(){
   const grade = el("grade");
 
-  if(estado.carregando && !(estado.itens[estado.secao] || []).length){
+  if(!estado.arquivo && estado.carregando && !(estado.itens[estado.secao] || []).length){
     grade.innerHTML = Array.from({ length:6 }, () => `
       <div class="esqueleto">
         <div class="esq-linha" style="width:32%;height:9px"></div>
@@ -1271,6 +1402,15 @@ function renderizarGrade(){
     el("contagem").textContent = estado.progresso.total
       ? `Buscando fontes… ${estado.progresso.feitas}/${estado.progresso.total}`
       : "Buscando fontes…";
+    return;
+  }
+
+  if(estado.arquivo){
+    grade.innerHTML = montarArquivo();
+    const n = estado.arquivo.itens.length;
+    el("contagem").textContent = estado.arquivo.carregando
+      ? "Consultando o arquivo…"
+      : (estado.arquivo.termo && !estado.arquivo.erro ? `${n} ${n === 1 ? "resultado" : "resultados"} em ${estado.arquivo.ano}` : "");
     return;
   }
 
@@ -1317,19 +1457,7 @@ function renderizarGrade(){
     return;
   }
 
-  html += itens.map(i => {
-    const novo = i.ts && i.ts > estado.ultimaVisita && (Date.now() - i.ts) < 24*3600*1000;
-    return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
-      <div class="n-meta">
-        <span class="n-veiculo">${escapar(i.veiculo)}</span>
-        ${i.origem && i.origem !== i.veiculo ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(i.origem)}</span>` : ""}
-        ${i.ts ? `<span class="n-ponto">·</span><span class="n-hora">${escapar(tempoRelativo(i.ts))}</span>` : ""}
-        ${novo ? `<span class="n-novo">novo</span>` : ""}
-      </div>
-      <div class="n-titulo">${realcar(i.titulo, termo)}</div>
-      ${i.resumo ? `<div class="n-resumo">${realcar(i.resumo, termo)}</div>` : ""}
-    </a>`;
-  }).join("");
+  html += itens.map(i => cartaoNoticia(i, termo)).join("");
 
   grade.innerHTML = html;
 
@@ -1388,6 +1516,7 @@ el("abas").addEventListener("click", e => {
   if(!aba) return;
   estado.secao = aba.dataset.secao;
   if(estado.resumo){ estado.resumo = false; aplicarModoResumo(); }
+  if(estado.arquivo){ estado.arquivo = null; el("filtroPeriodo").value = "0"; ajustarBuscaArquivo(); }
   montarFiltroVeiculos();
   renderizar();
   window.scrollTo({ top:0, behavior:"smooth" });
@@ -1406,6 +1535,7 @@ let temporizadorBusca;
 el("busca").addEventListener("input", e => {
   clearTimeout(temporizadorBusca);
   el("btnLimpar").classList.toggle("oculto", !e.target.value);
+  if(estado.arquivo) return;          // no arquivo, quem manda é o Enter
   temporizadorBusca = setTimeout(() => {
     estado.busca = e.target.value;
     estado.assuntoAtivo = null;
@@ -1417,12 +1547,18 @@ el("btnLimpar").addEventListener("click", () => {
   el("busca").value = "";
   estado.busca = "";
   el("btnLimpar").classList.add("oculto");
+  if(estado.arquivo) estado.arquivo = { ...estado.arquivo, termo:"", itens:[], erro:"", carregando:false };
   renderizar();
   el("busca").focus();
 });
 
 el("btnResumo").addEventListener("click", () => {
   estado.resumo = !estado.resumo;
+  if(estado.resumo && estado.arquivo){
+    estado.arquivo = null;
+    el("filtroPeriodo").value = "0";
+    ajustarBuscaArquivo();
+  }
   aplicarModoResumo();
   renderizar();
   window.scrollTo({ top:0, behavior:"smooth" });
@@ -1437,7 +1573,40 @@ function aplicarModoResumo(){
 }
 
 el("filtroVeiculo").addEventListener("change", e => { estado.veiculo = e.target.value; renderizar(); });
-el("filtroPeriodo").addEventListener("change", e => { estado.periodo = Number(e.target.value); renderizar(); });
+el("filtroPeriodo").addEventListener("change", e => {
+  const valor = e.target.value;
+
+  if(valor.startsWith("ano:")){
+    const ano = Number(valor.slice(4));
+    estado.periodo = 0;
+    if(estado.resumo){ estado.resumo = false; aplicarModoResumo(); }
+    estado.arquivo = { ano, termo:"", itens:[], carregando:false, erro:"" };
+    ajustarBuscaArquivo();
+    buscarNoArquivo();          // se já houver palavra digitada, consulta na hora
+    renderizar();
+    return;
+  }
+
+  estado.arquivo = null;
+  estado.periodo = Number(valor);
+  ajustarBuscaArquivo();
+  renderizar();
+});
+
+// No arquivo a busca não filtra a lista: ela dispara a consulta ao teclar Enter
+function ajustarBuscaArquivo(){
+  el("busca").placeholder = estado.arquivo
+    ? `Buscar no arquivo de ${estado.arquivo.ano} e teclar Enter…`
+    : "Buscar por palavra-chave…";
+}
+
+el("busca").addEventListener("keydown", e => {
+  if(e.key === "Enter" && estado.arquivo){
+    e.preventDefault();
+    clearTimeout(temporizadorBusca);
+    buscarNoArquivo();
+  }
+});
 el("btnAtualizar").addEventListener("click", () => carregarTudo());
 
 el("btnTema").addEventListener("click", () => {
@@ -1545,6 +1714,7 @@ document.addEventListener("visibilitychange", () => {
   }
   renderizar();
 
+  montarAnosDoArquivo();
   avaliarDicaInstalar();
   medirCabecalho();
   window.addEventListener("resize", medirCabecalho);
