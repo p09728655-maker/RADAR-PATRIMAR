@@ -271,6 +271,78 @@ html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--m
 .resumo-termos{margin-top:var(--s3);font-size:var(--fs-small);color:var(--text-2)}
 .resumo-termos b{color:var(--text)}
 
+/* ============================================================
+   MURAL INTERNO
+   ============================================================ */
+.mural{
+  grid-column:1/-1;
+  border:1px solid var(--border);border-left:3px solid var(--marca-vermelho);
+  border-radius:var(--r-md);background:var(--surface);
+  padding:var(--s4);margin-bottom:var(--s2);
+}
+.mural-topo{
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  margin-bottom:var(--s3);
+}
+.mural-nome{font-size:var(--fs-h2);font-weight:700}
+.mural-conta{font-size:var(--fs-label);color:var(--muted);font-weight:600}
+.mural-acoes{margin-left:auto;display:flex;gap:var(--s2)}
+.mural-lista{display:flex;flex-direction:column;gap:var(--s3)}
+.mural-item{
+  display:flex;gap:var(--s3);align-items:flex-start;
+  padding-left:var(--s3);border-left:2px solid var(--border);
+  break-inside:avoid;
+}
+.mural-corpo{min-width:0;flex:1}
+.mural-t{font-weight:600;line-height:1.35}
+.mural-x{font-size:var(--fs-small);color:var(--text-2);margin-top:2px;white-space:pre-wrap}
+.mural-m{font-size:var(--fs-caption);color:var(--muted);margin-top:4px}
+.mural-selo{
+  font-size:var(--fs-label);font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  padding:1px 7px;border-radius:100px;flex:0 0 auto;
+  background:var(--marca-areia);color:#5C4B12;
+}
+html[data-tema="escuro"] .mural-selo{background:#2B2718;color:#E4DCC0}
+.mural-selo.noticia{background:var(--ok-bg);color:var(--ok)}
+.mural-tirar{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 var(--s2);border-radius:var(--r-sm)}
+.mural-tirar:hover{color:var(--atencao);background:var(--surface-2)}
+.mural-vazio{font-size:var(--fs-small);color:var(--muted)}
+
+/* Alfinete no cartão, só no modo de publicação */
+.n-fixar{
+  position:absolute;top:6px;right:6px;
+  width:28px;height:28px;border-radius:var(--r-sm);
+  display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--border);color:var(--muted);
+}
+.n-fixar:hover{color:var(--marca-vermelho);border-color:var(--marca-vermelho)}
+.n-fixar svg{width:15px;height:15px}
+
+/* Caixa de publicação */
+#dlgPublicar{
+  border:1px solid var(--border-forte);border-radius:var(--r-lg);
+  background:var(--surface);color:var(--text);
+  padding:0;width:min(560px,92vw);box-shadow:0 12px 40px rgba(0,0,0,.22);
+}
+#dlgPublicar::backdrop{background:rgba(15,18,22,.55)}
+.dlg{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s5)}
+.dlg-topo{display:flex;align-items:center;gap:var(--s3);font-size:var(--fs-h2)}
+.dlg-topo .dica-x{margin-left:auto}
+.dlg-campo{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-small)}
+.dlg-campo span{color:var(--text-2);font-weight:600}
+.dlg-campo i{font-weight:400;color:var(--muted);font-style:normal}
+.dlg-campo input,.dlg-campo textarea{
+  font-family:inherit;font-size:var(--fs-body);color:var(--text);
+  background:var(--surface-2);border:1px solid var(--border-forte);
+  border-radius:var(--r-md);padding:8px var(--s3);width:100%;resize:vertical;
+}
+.dlg-campo input:focus,.dlg-campo textarea:focus{outline:none;border-color:var(--info);box-shadow:0 0 0 3px rgba(31,95,168,.12)}
+.dlg-dupla{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.dlg-erro{font-size:var(--fs-small);color:var(--atencao)}
+.dlg-pe{display:flex;gap:var(--s2);justify-content:flex-end;margin-top:var(--s2)}
+
+@media (max-width:640px){ .dlg-dupla{grid-template-columns:1fr} }
+
 /* Leitura escrita pela IA, no topo do resumo */
 .leitura{
   border:1px solid var(--border);border-left:3px solid var(--marca-grafite);
@@ -321,6 +393,7 @@ main{max-width:var(--max);margin:0 auto;padding:var(--s4) var(--s5) var(--s7);wi
 .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:var(--s3)}
 
 .noticia{
+  position:relative;
   background:var(--surface);
   border:1px solid var(--border);
   border-radius:var(--r-lg);
@@ -512,6 +585,8 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
 
   /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
   .resumo{gap:14pt}
+  .mural{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none;margin-bottom:10pt}
+  .mural-acoes,.mural-tirar,.n-fixar{display:none}
   .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
   .leitura-espera,.leitura-pe .btn,.leitura-erro{display:none}
   .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
@@ -601,6 +676,32 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   </button>
   <span class="contagem" id="contagem"></span>
 </div>
+
+<dialog id="dlgPublicar">
+  <form method="dialog" class="dlg">
+    <div class="dlg-topo">
+      <b id="dlgTitulo">Novo recado no mural</b>
+      <button class="dica-x" value="cancelar" aria-label="Fechar">✕</button>
+    </div>
+    <label class="dlg-campo"><span>Título</span>
+      <input id="pubTitulo" maxlength="140" placeholder="Ex.: Parada programada da linha 2 na sexta"></label>
+    <label class="dlg-campo"><span>Recado</span>
+      <textarea id="pubTexto" rows="4" maxlength="1200" placeholder="O que a equipe precisa saber."></textarea></label>
+    <label class="dlg-campo"><span>Link <i>(opcional)</i></span>
+      <input id="pubLink" type="url" maxlength="600" placeholder="https://"></label>
+    <div class="dlg-dupla">
+      <label class="dlg-campo"><span>Quem publica <i>(opcional)</i></span>
+        <input id="pubAutor" maxlength="60" placeholder="PCP"></label>
+      <label class="dlg-campo"><span>Senha do mural</span>
+        <input id="pubSenha" type="password" autocomplete="current-password"></label>
+    </div>
+    <div class="dlg-erro oculto" id="pubErro"></div>
+    <div class="dlg-pe">
+      <button class="btn btn-secundario" value="cancelar">Cancelar</button>
+      <button class="btn btn-primario" id="btnPublicar" value="publicar">Publicar no mural</button>
+    </div>
+  </form>
+</dialog>
 
 <main>
   <div class="folha-topo" aria-hidden="true">
@@ -699,6 +800,9 @@ const estado = {
   resumo: false,             // visão de resumo do dia, pensada para o papel
   arquivo: null,             // { ano, termo, itens, carregando, erro } quando busca no arquivo
   leitura: null,             // { texto, carregando, erro } da leitura escrita pela IA
+  mural: { itens:[], carregado:false, erro:"", comoResolver:"" },
+  publicando: false,         // modo de publicação: mostra alfinete nos cartões
+  senhaMural: "",            // fica só na memória da aba, nunca é gravada
   progresso: { feitas:0, total:0 },
   busca: "",
   veiculo: "",
@@ -1254,6 +1358,145 @@ function realcar(texto, termo){
 }
 
 /* ------------------------------------------------------------
+   Mural interno
+   ------------------------------------------------------------
+   O que é publicado aqui aparece na aba Patrimar para todo mundo
+   que abre o app. O texto mora no banco da Vercel, atrás de
+   api/mural.js; o painel só lê e escreve por ali. */
+async function carregarMural(){
+  try{
+    const r = await fetch("/api/mural", { cache:"no-store" });
+    const dados = await r.json().catch(() => ({}));
+    estado.mural = r.ok
+      ? { itens: Array.isArray(dados.avisos) ? dados.avisos : [], carregado:true, erro:"", comoResolver:"" }
+      : { itens:[], carregado:true, erro: dados.erro || ("a função respondeu " + r.status), comoResolver: dados.comoResolver || "" };
+  }catch(e){
+    estado.mural = { itens:[], carregado:true, erro:"mural fora de alcance", comoResolver:"" };
+  }
+  renderizar();
+}
+
+function montarMural(){
+  const { itens, erro, comoResolver } = estado.mural;
+  const podePublicar = !erro;
+
+  const acoes = `
+    <div class="mural-acoes">
+      ${podePublicar ? `<button class="btn btn-secundario" id="btnRecado">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="btn-rotulo">Novo recado</span>
+      </button>` : ""}
+      ${podePublicar ? `<button class="btn btn-secundario" id="btnFixarModo" aria-pressed="${estado.publicando}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
+        <span class="btn-rotulo">${estado.publicando ? "Sair de fixar" : "Fixar notícia"}</span>
+      </button>` : ""}
+    </div>`;
+
+  let miolo;
+  if(erro){
+    miolo = `<div class="mural-vazio"><b>${escapar(erro)}</b>${
+      comoResolver ? `<div class="leitura-ajuda">${escapar(comoResolver)}</div>` : ""}</div>`;
+  }else if(!itens.length){
+    miolo = `<div class="mural-vazio">Nada publicado ainda. Use <b>Novo recado</b> para escrever, ou
+      <b>Fixar notícia</b> e escolha uma manchete do painel.</div>`;
+  }else{
+    miolo = `<div class="mural-lista">${itens.map(a => {
+      const corpo = `
+        <div class="mural-corpo">
+          ${a.titulo ? `<div class="mural-t">${escapar(a.titulo)}</div>` : ""}
+          ${a.texto ? `<div class="mural-x">${escapar(a.texto)}</div>` : ""}
+          <div class="mural-m">${a.autor ? escapar(a.autor) + " · " : ""}${escapar(tempoRelativo(a.quando))}</div>
+        </div>`;
+      return `<div class="mural-item">
+        <span class="mural-selo ${a.tipo === "noticia" ? "noticia" : ""}">${a.tipo === "noticia" ? "fixada" : "recado"}</span>
+        ${a.link ? `<a class="mural-corpo" href="${escapar(a.link)}" target="_blank" rel="noopener noreferrer">${corpo}</a>` : corpo}
+        ${estado.publicando ? `<button class="mural-tirar" data-tirar="${escapar(a.id)}" title="Tirar do mural" aria-label="Tirar do mural">✕</button>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+  }
+
+  return `<section class="mural">
+    <div class="mural-topo">
+      <span class="mural-nome">Mural interno</span>
+      ${itens.length ? `<span class="mural-conta">${itens.length}</span>` : ""}
+      ${acoes}
+    </div>
+    ${miolo}
+  </section>`;
+}
+
+function abrirPublicacao({ tipo, titulo = "", texto = "", link = "" }){
+  el("dlgTitulo").textContent = tipo === "noticia" ? "Fixar notícia no mural" : "Novo recado no mural";
+  el("pubTitulo").value = titulo;
+  el("pubTexto").value = texto;
+  el("pubLink").value = link;
+  el("pubSenha").value = estado.senhaMural;
+  el("pubErro").classList.add("oculto");
+  el("dlgPublicar").dataset.tipo = tipo;
+  el("dlgPublicar").showModal();
+  (titulo ? el("pubTexto") : el("pubTitulo")).focus();
+}
+
+async function publicarNoMural(){
+  const caixa = el("dlgPublicar");
+  const senha = el("pubSenha").value;
+  const corpo = {
+    tipo: caixa.dataset.tipo,
+    titulo: el("pubTitulo").value,
+    texto: el("pubTexto").value,
+    link: el("pubLink").value,
+    autor: el("pubAutor").value
+  };
+
+  if(!corpo.titulo.trim() && !corpo.texto.trim()){
+    return mostrarErroPublicacao("Escreva ao menos um título ou um texto.");
+  }
+
+  el("btnPublicar").disabled = true;
+  try{
+    const r = await fetch("/api/mural", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "x-senha": senha },
+      body: JSON.stringify(corpo)
+    });
+    const dados = await r.json().catch(() => ({}));
+    if(!r.ok) return mostrarErroPublicacao(dados.erro || ("a função respondeu " + r.status));
+
+    estado.senhaMural = senha;                 // poupa redigitar nas próximas
+    estado.mural.itens.unshift(dados.aviso);
+    caixa.close();
+    renderizar();
+  }catch(e){
+    mostrarErroPublicacao(e?.message || "não foi possível publicar");
+  }finally{
+    el("btnPublicar").disabled = false;
+  }
+}
+
+function mostrarErroPublicacao(mensagem){
+  const alvo = el("pubErro");
+  alvo.textContent = mensagem;
+  alvo.classList.remove("oculto");
+}
+
+async function tirarDoMural(id){
+  if(!confirm("Tirar este aviso do mural?")) return;
+  const senha = estado.senhaMural || prompt("Senha do mural:") || "";
+  try{
+    const r = await fetch("/api/mural?id=" + encodeURIComponent(id), {
+      method:"DELETE", headers:{ "x-senha": senha }
+    });
+    const dados = await r.json().catch(() => ({}));
+    if(!r.ok){ alert(dados.erro || "não foi possível tirar"); return; }
+    estado.senhaMural = senha;
+    estado.mural.itens = estado.mural.itens.filter(a => a.id !== id);
+    renderizar();
+  }catch(e){
+    alert(e?.message || "não foi possível tirar");
+  }
+}
+
+/* ------------------------------------------------------------
    Arquivo
    ------------------------------------------------------------
    Feed RSS só carrega o que saiu nos últimos dias. Para alcançar
@@ -1496,7 +1739,12 @@ function montarResumo(){
 
 function cartaoNoticia(i, termo){
   const novo = i.ts && i.ts > estado.ultimaVisita && (Date.now() - i.ts) < 24*3600*1000;
-  return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
+  const alfinete = estado.publicando
+    ? `<button class="n-fixar" data-fixar="${escapar(i.chave)}" title="Fixar no mural" aria-label="Fixar no mural">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
+       </button>`
+    : "";
+  return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">${alfinete}
     <div class="n-meta">
       <span class="n-veiculo">${escapar(i.veiculo)}</span>
       ${i.origem && i.origem !== i.veiculo ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(i.origem)}</span>` : ""}
@@ -1557,6 +1805,9 @@ function renderizarGrade(){
   const falhas = estado.falhas[estado.secao] || [];
 
   let html = "";
+
+  // O mural é da casa: aparece só na aba Patrimar, antes das notícias
+  if(estado.secao === "patrimar" && estado.mural.carregado) html += montarMural();
 
   if(falhas.length && !estado.carregando){
     const secaoAtual = SECOES.find(s => s.id === estado.secao);
@@ -1698,7 +1949,45 @@ el("btnResumo").addEventListener("click", () => {
 el("btnImprimir").addEventListener("click", () => window.print());
 
 el("grade").addEventListener("click", e => {
-  if(e.target.closest("#btnLeitura")) pedirLeitura();
+  if(e.target.closest("#btnLeitura")){ pedirLeitura(); return; }
+
+  if(e.target.closest("#btnRecado")){
+    abrirPublicacao({ tipo:"recado" });
+    return;
+  }
+
+  if(e.target.closest("#btnFixarModo")){
+    estado.publicando = !estado.publicando;
+    renderizar();
+    return;
+  }
+
+  const tirar = e.target.closest("[data-tirar]");
+  if(tirar){ tirarDoMural(tirar.dataset.tirar); return; }
+
+  // O alfinete mora dentro do cartão, que é um link: segurar o clique
+  const fixar = e.target.closest("[data-fixar]");
+  if(fixar){
+    e.preventDefault();
+    e.stopPropagation();
+    const chave = fixar.dataset.fixar;
+    const noticia = (estado.itens[estado.secao] || []).find(i => i.chave === chave);
+    if(noticia) abrirPublicacao({
+      tipo:"noticia",
+      titulo: noticia.titulo,
+      texto: "",
+      link: noticia.link
+    });
+  }
+});
+
+el("dlgPublicar").addEventListener("close", () => {
+  if(el("dlgPublicar").returnValue === "publicar") return;   // já tratado no submit
+});
+
+el("btnPublicar").addEventListener("click", e => {
+  e.preventDefault();          // o form fecharia sozinho antes de publicar
+  publicarNoMural();
 });
 
 // No resumo os filtros não valem: ficam desligados para não enganar
@@ -1856,6 +2145,7 @@ document.addEventListener("visibilitychange", () => {
   if(window.ResizeObserver) new ResizeObserver(medirCabecalho).observe(document.querySelector(".topo"));
   document.fonts?.ready.then(medirCabecalho).catch(() => {});
 
+  carregarMural();
   carregarTudo();
   setInterval(() => { if(document.visibilityState === "visible") carregarTudo(); }, CONFIG.INTERVALO_MS);
 

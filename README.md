@@ -19,7 +19,8 @@ consultas fechadas no assunto.
 | `index.html` | O painel inteiro: estrutura, estilo e lógica |
 | `api/feed.js` | Ponte própria: busca os feeds pelo mesmo domínio, sem CORS |
 | `api/resumir.js` | Escreve a leitura do dia com o Claude, guardando a chave no servidor |
-| `package.json` | Só a dependência das funções; o painel continua sem etapa de compilação |
+| `api/mural.js` | Mural interno: guarda os recados e as notícias fixadas da aba Patrimar |
+| `package.json` | Dependência e o `type: module` das funções; o painel segue sem compilação |
 | `manifest.json` | Permite instalar como aplicativo no celular e no PC |
 | `sw.js` | Service worker: guarda o casco do app, nunca as notícias |
 | `logo-patrimar.png` | Logotipo do cabeçalho |
@@ -141,6 +142,45 @@ ainda passa por uma conferência de data no navegador: matéria de outro ano é
 descartada e o total de descartadas aparece quando a busca fica vazia. Para
 voltar ao radar, escolher *Qualquer período*. Quantos anos aparecem na lista é
 `CONFIG.ARQUIVO_ANOS`.
+
+## Mural interno
+
+Na aba Patrimar, acima das notícias, fica o mural: o que é publicado ali
+aparece para todo mundo que abre o app.
+
+Dois tipos de aviso convivem no mesmo bloco, do mais recente para o mais
+antigo:
+
+- **Recado** — texto escrito pela equipe. Botão **Novo recado**.
+- **Fixada** — manchete do próprio painel. Botão **Fixar notícia** liga o
+  modo de fixar, que faz aparecer um alfinete no canto de cada cartão;
+  clicar no alfinete abre a caixa já com o título e o link preenchidos.
+
+No modo de fixar também aparece o ✕ para tirar um aviso do mural.
+
+Publicar e apagar pedem a senha, conferida no servidor — o navegador nunca
+decide isso sozinho. A senha digitada fica só na memória da aba, para não
+precisar redigitar a cada aviso, e some quando a aba fecha. Ler é aberto:
+quem tem o app vê o mural sem senha nenhuma.
+
+Link de aviso só é aceito em `http` ou `https`, para ninguém publicar um
+`javascript:` que rodaria no aparelho de quem abrisse.
+
+### O que ligar na Vercel
+
+O painel é estático, então o texto precisa morar em algum lugar. O mural usa
+o Redis da Vercel:
+
+1. No projeto, aba **Storage**, criar um banco **Redis**. Ao conectar ao
+   projeto, a Vercel cadastra sozinha `KV_REST_API_URL` e `KV_REST_API_TOKEN`
+   (os nomes `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` também
+   servem — a Vercel entrega ora um par, ora o outro).
+2. Em **Settings → Environment Variables**, criar `SENHA_MURAL` com a senha
+   que a equipe vai usar para publicar.
+3. Publicar de novo.
+
+Sem isso, o mural aparece com o aviso de que não está configurado e o resto
+do painel funciona igual.
 
 ## Leitura do dia escrita por IA
 

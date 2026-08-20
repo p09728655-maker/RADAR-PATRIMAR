@@ -1,6 +1,7 @@
 {
   "name": "radar-patrimar",
   "private": true,
+  "type": "module",
   "description": "Painel diário de notícias da Patrimar Móveis. O painel é estático; esta dependência serve às funções em api/.",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.0"
