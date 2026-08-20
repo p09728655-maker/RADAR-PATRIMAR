@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#DB2126">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Radar Patrimar">
@@ -53,7 +55,8 @@
   --fs-display:22px; --fs-h1:19px; --fs-h2:16px; --fs-body:15px;
   --fs-small:13px; --fs-caption:12px; --fs-label:11px;
 
-  --max:1320px;
+  --max:1560px;
+  --h-topo:64px;             /* medida em tempo real: a barra de seções encosta logo abaixo */
 }
 html[data-tema="escuro"]{
   --bg:#14171A;
@@ -79,6 +82,10 @@ body{
   color:var(--text);
   background:var(--bg);
   -webkit-font-smoothing:antialiased;
+  /* coluna única: o miolo cresce e o rodapé fica no pé da tela, sem vão branco */
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;flex-direction:column;
 }
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
@@ -122,6 +129,8 @@ button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;backgrou
   min-height:38px;
 }
 .btn-topo{color:#E7EAEE;border-color:#3A424B;background:#262C33}
+.btn-instalar{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.10)}
+.btn-instalar:hover{background:rgba(255,255,255,.18)}
 .btn-topo:hover{background:#31383F}
 .btn-primario{background:var(--marca-vermelho);color:#fff}
 .btn-primario:hover{background:var(--marca-bordeaux)}
@@ -177,7 +186,7 @@ html[data-tema="escuro"] .chip[aria-pressed="true"]{background:var(--marca-areia
 .nav{
   background:var(--surface);
   border-bottom:1px solid var(--border);
-  position:sticky;top:0;z-index:30;
+  position:sticky;top:var(--h-topo);z-index:30;
 }
 .nav-in{max-width:var(--max);margin:0 auto;padding:0 var(--s5);display:flex;gap:var(--s5);overflow-x:auto}
 .nav-in::-webkit-scrollbar{display:none}
@@ -201,7 +210,9 @@ html[data-tema="escuro"] .aba[aria-selected="true"]{color:#F2727A;border-bottom-
    BARRA DE CONTROLE
    ============================================================ */
 .controles{
-  max-width:var(--max);margin:0 auto;
+  /* width:100% é necessário: margem automática em item de flex-column
+     desliga o esticamento e o bloco encolheria para caber no conteúdo */
+  width:100%;max-width:var(--max);margin:0 auto;
   padding:var(--s4) var(--s5) 0;
   display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap;
 }
@@ -230,13 +241,55 @@ select{
   border:1px solid var(--border-forte);border-radius:var(--r-md);
   min-height:38px;cursor:pointer;
 }
+.btn-secundario{
+  background:var(--surface);color:var(--text-2);
+  border-color:var(--border-forte);min-height:38px;
+}
+.btn-secundario:hover{background:var(--surface-2);color:var(--text)}
+.btn-secundario[aria-pressed="true"]{
+  background:var(--marca-grafite);border-color:var(--marca-grafite);color:#fff;
+}
+html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--marca-areia);color:#2B2718;border-color:var(--marca-areia)}
 .contagem{font-size:var(--fs-small);color:var(--muted);margin-left:auto}
+
+/* ============================================================
+   RESUMO DO DIA
+   ============================================================ */
+.resumo{grid-column:1/-1;display:flex;flex-direction:column;gap:var(--s5)}
+.resumo-abertura{
+  border-left:3px solid var(--marca-vermelho);
+  padding-left:var(--s4);
+}
+.resumo-titulo{font-size:var(--fs-h1);font-weight:700;line-height:1.2}
+.resumo-linha{font-size:var(--fs-small);color:var(--muted);margin-top:2px}
+.resumo-termos{margin-top:var(--s3);font-size:var(--fs-small);color:var(--text-2)}
+.resumo-termos b{color:var(--text)}
+
+.resumo-bloco{break-inside:avoid}
+.resumo-cabeca{
+  display:flex;align-items:baseline;gap:var(--s2);
+  border-bottom:1px solid var(--border);padding-bottom:var(--s2);margin-bottom:var(--s3);
+}
+.resumo-secao{font-size:var(--fs-h2);font-weight:700}
+.resumo-qtd{font-size:var(--fs-label);color:var(--muted);font-weight:600}
+.resumo-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:var(--s3) var(--s5)}
+.resumo-item{
+  display:block;break-inside:avoid;
+  padding-left:var(--s3);border-left:2px solid var(--border);
+}
+.resumo-item:hover{border-left-color:var(--marca-vermelho)}
+.resumo-item-t{font-weight:600;line-height:1.35}
+.resumo-item:hover .resumo-item-t{color:var(--marca-bordeaux)}
+.resumo-item-m{font-size:var(--fs-caption);color:var(--muted);margin-top:2px}
+
+/* Cabeçalho impresso: só existe no papel */
+.folha-topo{display:none}
 
 /* ============================================================
    LISTA DE NOTÍCIAS
    ============================================================ */
-main{max-width:var(--max);margin:0 auto;padding:var(--s4) var(--s5) var(--s7)}
-.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:var(--s3)}
+main{max-width:var(--max);margin:0 auto;padding:var(--s4) var(--s5) var(--s7);width:100%;flex:1 0 auto}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:var(--s3)}
 
 .noticia{
   background:var(--surface);
@@ -303,6 +356,23 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
 /* ============================================================
    AVISO DE FONTES
    ============================================================ */
+.dica{
+  max-width:var(--max);margin:0 auto;
+  padding:var(--s3) var(--s5);
+  display:flex;gap:var(--s3);align-items:center;
+  font-size:var(--fs-small);color:var(--text-2);
+}
+.dica-faixa{background:var(--marca-areia);border-bottom:1px solid var(--border)}
+html[data-tema="escuro"] .dica-faixa{background:#2B2718;border-bottom-color:#3A3524}
+html[data-tema="escuro"] .dica{color:#E4DCC0}
+.dica svg{width:18px;height:18px;flex:0 0 18px}
+.dica-x{
+  margin-left:auto;flex:0 0 auto;
+  border:0;background:none;cursor:pointer;color:inherit;opacity:.65;
+  padding:var(--s1) var(--s2);border-radius:var(--r-sm);line-height:1;
+}
+.dica-x:hover{opacity:1;background:rgba(0,0,0,.06)}
+
 .aviso{
   grid-column:1/-1;
   display:flex;gap:var(--s3);align-items:flex-start;
@@ -313,6 +383,7 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
   margin-bottom:var(--s2);
 }
 .aviso svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}
+.aviso-detalhe{margin-top:var(--s2);font-size:var(--fs-label);opacity:.8;font-family:ui-monospace,Consolas,monospace}
 .aviso b{display:block;margin-bottom:2px}
 
 /* ============================================================
@@ -322,6 +393,7 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
   border-top:1px solid var(--border);
   background:var(--surface);
   padding:var(--s5);
+  margin-top:auto;
 }
 .rodape-in{
   max-width:var(--max);margin:0 auto;
@@ -342,25 +414,72 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
 /* ============================================================
    RESPONSIVO
    ============================================================ */
+/* Tablet: respiro menor nas laterais e cartão que ainda cabe em duas colunas */
+@media (max-width:1100px){
+  .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape,.dica{padding-left:var(--s4);padding-right:var(--s4)}
+  .grade{grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+  .campo{max-width:none}
+}
 @media (max-width:860px){
   .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape{padding-left:var(--s4);padding-right:var(--s4)}
   .marca-titulo{font-size:18px}
   .marca-sub{display:none}
   .marca-logo{height:32px;padding:4px 8px}
   .marca{gap:var(--s2)}
+  .dica{padding-left:var(--s4);padding-right:var(--s4)}
   .btn-rotulo{display:none}
   .btn{padding:var(--s2)}
-  .grade{grid-template-columns:1fr;gap:var(--s2)}
-  .contagem{margin-left:0;width:100%}
+  /* No celular esses dois ficam numa linha só para eles: cabe o nome por extenso */
+  #btnResumo .btn-rotulo,#btnImprimir .btn-rotulo{display:inline}
+  #btnResumo,#btnImprimir{padding:var(--s2) var(--s3)}
+  .contagem{margin-left:0;width:100%;order:9}
+  #btnResumo,#btnImprimir{margin-left:0}
   .assuntos-rot{display:none}
 }
+/* Celular: uma notícia por vez */
+@media (max-width:640px){
+  .grade{grid-template-columns:1fr;gap:var(--s2)}
+  .resumo-lista{grid-template-columns:1fr}
+  .resumo{gap:var(--s4)}
+}
 @media (min-width:1500px){
-  .grade{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+  .grade{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+  .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape,.dica{padding-left:var(--s6);padding-right:var(--s6)}
 }
 @media print{
-  .topo-acoes,.controles,.nav,.assuntos,.rodape{display:none}
-  .marca-logo{box-shadow:none;padding:0}
-  .noticia{break-inside:avoid;border-color:#ccc}
+  @page{ margin:14mm; }
+
+  .topo,.controles,.nav,.assuntos,.dica-faixa,.rodape{display:none !important}
+  body{background:#fff;color:#000;font-size:10.5pt;display:block}
+  main{max-width:none;padding:0;flex:none}
+
+  .folha-topo{
+    display:flex;align-items:center;gap:12px;
+    border-bottom:2px solid #DB2126;padding-bottom:8px;margin-bottom:14px;
+  }
+  .folha-topo img{height:30px;width:auto}
+  .folha-titulo{font-size:15pt;font-weight:700;line-height:1.1}
+  .folha-data{font-size:9pt;color:#444}
+
+  .grade{display:block}
+  .noticia{
+    break-inside:avoid;border:0;border-left:2px solid #ccc;border-radius:0;
+    padding:0 0 0 8px;margin-bottom:9pt;background:none;box-shadow:none;
+  }
+  .n-resumo{color:#333}
+  .n-novo{display:none}
+  .aviso{border-color:#999;color:#333;background:none}
+
+  /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
+  .resumo{gap:14pt}
+  .resumo-abertura{border-left-color:#DB2126}
+  .resumo-lista{grid-template-columns:1fr 1fr;gap:8pt 16pt}
+  .resumo-item{border-left-color:#ccc}
+  .resumo-item-t{font-size:10pt}
+  .resumo-item-m{color:#555}
+  .resumo-bloco{break-inside:avoid-page}
+
+  a{color:#000}
 }
 </style>
 </head>
@@ -377,6 +496,10 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
       </div>
     </div>
     <div class="topo-acoes">
+      <button class="btn btn-instalar oculto" id="btnInstalar" title="Instalar como aplicativo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
+        <span class="btn-rotulo">Instalar</span>
+      </button>
       <button class="btn btn-topo" id="btnTema" title="Alternar tema claro/escuro" aria-label="Alternar tema">
         <svg id="iconeTema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
       </button>
@@ -387,6 +510,14 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
     </div>
   </div>
 </header>
+
+<div class="dica-faixa" id="dicaInstalar" hidden>
+  <div class="dica">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M8 8l4-4 4 4"/><path d="M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
+    <div>Para instalar no iPhone: toque em <b>Compartilhar</b> e escolha <b>Adicionar à Tela de Início</b>.</div>
+    <button class="dica-x" id="btnDicaFechar" aria-label="Fechar aviso">✕</button>
+  </div>
+</div>
 
 <section class="assuntos" id="faixaAssuntos" hidden>
   <div class="assuntos-in">
@@ -414,10 +545,25 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
     <option value="24">Últimas 24 horas</option>
     <option value="72">Últimos 3 dias</option>
   </select>
+  <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Resumo do dia: as principais de cada seção">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
+    <span class="btn-rotulo">Resumo do dia</span>
+  </button>
+  <button class="btn btn-secundario" id="btnImprimir" title="Imprimir ou salvar em PDF">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 01-1-1v-5a2 2 0 012-2h14a2 2 0 012 2v5a1 1 0 01-1 1h-2"/><path d="M6 14h12v7H6z"/></svg>
+    <span class="btn-rotulo">Imprimir</span>
+  </button>
   <span class="contagem" id="contagem"></span>
 </div>
 
 <main>
+  <div class="folha-topo" aria-hidden="true">
+    <img src="logo-patrimar.png" width="760" height="246" alt="">
+    <div>
+      <div class="folha-titulo">Radar Diário</div>
+      <div class="folha-data" id="folhaData"></div>
+    </div>
+  </div>
   <div class="grade" id="grade"></div>
 </main>
 
@@ -439,12 +585,17 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
    prioridade sobre os proxies públicos.
    ============================================================ */
 const CONFIG = {
-  PROXY_PROPRIO: "",                 // ex.: "https://script.google.com/macros/s/XXXX/exec?url="
+  // Ponte própria, no mesmo domínio (api/feed.js). Fica sempre em primeiro
+  // lugar; as pontes públicas seguem como reserva se ela não existir.
+  PROXY_PROPRIO: "/api/feed?url=",
   MAX_POR_FONTE: 14,
+  RESUMO_POR_SECAO: 6,               // manchetes por seção no resumo do dia
   INTERVALO_MS: 10 * 60 * 1000,      // atualização automática: 10 min
   TIMEOUT_MS: 13000,                 // por tentativa de ponte
-  TENTATIVAS: 3,                     // pontes testadas por endereço
-  CONCORRENCIA: 6                    // requisições simultâneas no painel inteiro
+  TENTATIVAS: 4,                     // pontes testadas por endereço
+  CONCORRENCIA: 6,                   // requisições simultâneas no painel inteiro
+  INTERVALO_DISPARO: 90,             // ms entre disparos, para não parecer enxurrada
+  ESPERA_LIMITE: 900                 // pausa depois de um "excesso de requisições"
 };
 
 const gn = q => "https://news.google.com/rss/search?q=" +
@@ -463,7 +614,8 @@ const SECOES = [
     { v:"DW Brasil",      u:"https://rss.dw.com/rdf/rss-br-all", reserva:gn("site:dw.com notícias Brasil") },
     { v:"France 24",      u:"https://www.france24.com/pt/rss", reserva:gn("site:france24.com/pt") },
     { v:"G1 Mundo",       u:"https://g1.globo.com/rss/g1/mundo/", reserva:gn("site:g1.globo.com/mundo") },
-    { v:"ONU News",       u:"https://news.un.org/feed/subscribe/pt/news/all/rss.xml", reserva:gn("ONU News Nações Unidas") }
+    { v:"ONU News",       u:"https://news.un.org/feed/subscribe/pt/news/all/rss.xml", reserva:gn("ONU News Nações Unidas") },
+    { v:"New York Times", u:"https://rss.nytimes.com/services/xml/rss/nyt/World.xml", reserva:gn("site:nytimes.com world") }
   ]},
   { id:"ia", nome:"Inteligência Artificial", fontes:[
     { v:"MIT Tech Review",u:"https://www.technologyreview.com/topic/artificial-intelligence/feed", reserva:gn("site:technologyreview.com artificial intelligence") },
@@ -499,6 +651,7 @@ const estado = {
   falhas: {},                // { secaoId: [veiculo, ...] }
   carregando: true,          // primeira pintura: mostra esqueleto
   emCarga: false,            // trava contra duas atualizações ao mesmo tempo
+  resumo: false,             // visão de resumo do dia, pensada para o papel
   progresso: { feitas:0, total:0 },
   busca: "",
   veiculo: "",
@@ -562,51 +715,72 @@ const PONTES = [
     montar:u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
   { id:"codetabs", tipo:"texto",
     montar:u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { id:"feed2json", tipo:"feed2json",
+    montar:u => "https://www.toptal.com/developers/feed2json/convert?url=" + encodeURIComponent(u) },
   { id:"corsproxy", tipo:"texto",
     montar:u => "https://corsproxy.io/?url=" + encodeURIComponent(u) },
+  { id:"rss2json", tipo:"rss2json",
+    montar:u => "https://api.rss2json.com/v1/api.json?count=20&rss_url=" + encodeURIComponent(u) },
   { id:"allorigins-json", tipo:"envelope",
     montar:u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u) },
-  { id:"rss2json", tipo:"pronto",
-    montar:u => "https://api.rss2json.com/v1/api.json?count=20&rss_url=" + encodeURIComponent(u) }
+  { id:"cors-lol", tipo:"texto",
+    montar:u => "https://api.cors.lol/?url=" + encodeURIComponent(u) }
 ];
 
 const pontes = {
   falhas: new Map(),                       // id -> falhas seguidas
-  preferida: guardar.ler("radar_ponte"),
+  motivos: new Map(),                      // id -> último motivo, para o aviso de queda
 
-  todas(){
-    return CONFIG.PROXY_PROPRIO
-      ? [{ id:"proprio", tipo:"texto", montar:u => CONFIG.PROXY_PROPRIO + encodeURIComponent(u) }, ...PONTES]
-      : PONTES;
+  propria(){
+    if(!CONFIG.PROXY_PROPRIO) return null;
+    return { id:"própria", tipo:"texto", montar:u => CONFIG.PROXY_PROPRIO + encodeURIComponent(u) };
   },
 
-  // Menos falhas primeiro; entre iguais, a que respondeu por último.
-  // Quatro tropeços seguidos tiram a ponte do resto da rodada.
-  ordem(){
-    const postas = this.todas()
-      .map((p, i) => ({ p, i, f: this.falhas.get(p.id) || 0, pref: p.id === this.preferida ? 0 : 1 }))
-      .sort((a, b) => a.f - b.f || a.pref - b.pref || a.i - b.i);
-    const vivas = postas.filter(o => o.f < 4);
-    return (vivas.length ? vivas : postas).map(o => o.p);
+  todas(){
+    const p = this.propria();
+    return p ? [p, ...PONTES] : PONTES;
+  },
+
+  /* A ponte própria vem sempre na frente: é do mesmo domínio, não tem CORS
+     nem cota. As públicas ficam de reserva e entram em rodízio — se todas as
+     fontes partissem da mesma, as 26 chamadas cairiam no mesmo serviço e
+     voltariam como excesso de requisições, que foi o que esvaziou o painel. */
+  ordem(desvio = 0){
+    const postas = PONTES
+      .map((p, i) => ({ p, i, f: this.falhas.get(p.id) || 0 }))
+      .sort((a, b) => a.f - b.f || a.i - b.i);
+    const vivas = postas.filter(o => o.f < 3);
+    let lista = (vivas.length ? vivas : postas).map(o => o.p);
+
+    if(lista.length > 1){
+      const corte = ((desvio % lista.length) + lista.length) % lista.length;
+      lista = [...lista.slice(corte), ...lista.slice(0, corte)];
+    }
+
+    const propria = this.propria();
+    const desistiu = (this.falhas.get("própria") || 0) >= 3;   // sem /api no destino
+    return propria && !desistiu ? [propria, ...lista] : lista;
   },
 
   // Cada atualização começa com o placar limpo: ponte que voltou volta a ser tentada
-  zerar(){ this.falhas.clear(); },
+  zerar(){ this.falhas.clear(); this.motivos.clear(); },
 
-  registrar(id, ok){
-    if(ok){
-      this.falhas.set(id, 0);
-      if(this.preferida !== id){ this.preferida = id; guardar.gravar("radar_ponte", id); }
-    }else{
-      this.falhas.set(id, (this.falhas.get(id) || 0) + 1);
-    }
+  registrar(id, ok, motivo){
+    if(ok){ this.falhas.set(id, 0); this.motivos.delete(id); return; }
+    this.falhas.set(id, (this.falhas.get(id) || 0) + 1);
+    if(motivo) this.motivos.set(id, motivo);
+  },
+
+  // Linha curta de diagnóstico para quando nada responde
+  resumo(){
+    return [...this.motivos].map(([id, motivo]) => id + ": " + motivo).join(" · ");
   }
 };
 
-/* Fila única para o painel inteiro. Sem ela, as 26 fontes disparam de
-   uma vez, o navegador segura a maioria na fila de conexões e o
-   cronômetro de tempo limite estoura antes de a requisição sair. */
-const fila = { ativas: 0, espera: [] };
+/* Fila única para o painel inteiro, com um respiro entre os disparos. Sem ela
+   as 26 fontes saem juntas, o navegador segura a maioria na fila de conexões
+   e o cronômetro estoura antes de a requisição sair. */
+const fila = { ativas: 0, espera: [], ultimoDisparo: 0, agendado: false };
 
 function enfileirar(tarefa){
   return new Promise(resolver => {
@@ -617,11 +791,22 @@ function enfileirar(tarefa){
 
 function bombear(){
   while(fila.ativas < CONFIG.CONCORRENCIA && fila.espera.length){
+    const falta = CONFIG.INTERVALO_DISPARO - (Date.now() - fila.ultimoDisparo);
+    if(falta > 0){
+      if(!fila.agendado){
+        fila.agendado = true;
+        setTimeout(() => { fila.agendado = false; bombear(); }, falta);
+      }
+      return;
+    }
+    fila.ultimoDisparo = Date.now();
     const proxima = fila.espera.shift();
     fila.ativas++;
     proxima().finally(() => { fila.ativas--; bombear(); });
   }
 }
+
+const esperar = ms => new Promise(r => setTimeout(r, ms));
 
 /* ============================================================
    5. LEITURA DOS FEEDS
@@ -731,19 +916,23 @@ function lerFeed(xmlTexto, veiculo){
 function lerJson(lista, veiculo){
   const itens = [];
   for(const bruto of lista.slice(0, CONFIG.MAX_POR_FONTE)){
-    const item = montarItem({
-      veiculo,
-      titulo:    bruto.title,
-      link:      bruto.link || bruto.guid || "",
-      resumo:    bruto.description || bruto.content || "",
-      origem:    bruto.author || "",
-      dataBruta: bruto.pubDate || ""
-    });
+    const item = montarItem({ veiculo, ...bruto });
     if(item) itens.push(item);
   }
   if(!itens.length) throw new Error("nenhum item aproveitável");
   return itens;
 }
+
+// rss2json e feed2json devolvem o feed já convertido, cada um com nomes próprios
+const deRss2json = x => ({
+  titulo: x.title, link: x.link || x.guid || "", resumo: x.description || x.content || "",
+  origem: x.author || "", dataBruta: x.pubDate || ""
+});
+
+const deFeed2json = x => ({
+  titulo: x.title, link: x.url || x.external_url || "", resumo: x.summary || x.content_text || x.content_html || "",
+  origem: typeof x.author === "string" ? x.author : (x.author?.name || ""), dataBruta: x.date_published || x.date_modified || ""
+});
 
 async function pelaPonte(ponte, url, veiculo){
   const abortar = new AbortController();
@@ -752,12 +941,21 @@ async function pelaPonte(ponte, url, veiculo){
     const r = await fetch(ponte.montar(url), {
       signal: abortar.signal, cache:"no-store", redirect:"follow", referrerPolicy:"no-referrer"
     });
-    if(!r.ok) throw new Error("HTTP " + r.status);
+    if(!r.ok){
+      const erro = new Error(r.status === 429 ? "excesso de requisições" : "HTTP " + r.status);
+      erro.excesso = r.status === 429 || r.status === 503;
+      throw erro;
+    }
 
-    if(ponte.tipo === "pronto"){
+    if(ponte.tipo === "rss2json"){
       const j = await r.json();
       if(j.status !== "ok" || !Array.isArray(j.items)) throw new Error("resposta inválida");
-      return lerJson(j.items, veiculo);
+      return lerJson(j.items.map(deRss2json), veiculo);
+    }
+    if(ponte.tipo === "feed2json"){
+      const j = await r.json();
+      if(!Array.isArray(j.items)) throw new Error("resposta inválida");
+      return lerJson(j.items.map(deFeed2json), veiculo);
     }
     if(ponte.tipo === "envelope"){
       const j = await r.json();
@@ -771,13 +969,14 @@ async function pelaPonte(ponte, url, veiculo){
 
 /* Tenta as pontes em ordem de saúde; se o feed do veículo estiver fora
    do ar, cai para a busca de reserva no Google Notícias. */
-async function buscarFonte(fonte){
+async function buscarFonte(fonte, indice = 0){
   const enderecos = fonte.reserva ? [fonte.u, fonte.reserva] : [fonte.u];
   let ultimoErro = new Error("sem resposta");
+  let giro = indice;
 
   for(const url of enderecos){
     let tentativas = 0;
-    for(const ponte of pontes.ordem()){
+    for(const ponte of pontes.ordem(giro++)){
       if(tentativas >= CONFIG.TENTATIVAS) break;
       tentativas++;
       try{
@@ -785,11 +984,13 @@ async function buscarFonte(fonte){
         pontes.registrar(ponte.id, true);
         return itens;
       }catch(erro){
-        // Erro de rede/tempo limite é culpa da ponte; XML inválido é do feed
+        // Erro de rede, tempo limite ou recusa é da ponte; XML inválido é do feed
         const daPonte = !/inválido|sem itens|aproveitável|curta demais|não é XML/.test(erro.message || "");
-        pontes.registrar(ponte.id, !daPonte);
+        const motivo = erro.name === "AbortError" ? "tempo esgotado" : (erro.message || "falhou");
+        pontes.registrar(ponte.id, !daPonte, daPonte ? motivo : null);
         ultimoErro = erro;
-        if(!daPonte) break;   // a ponte entregou: o problema é o feed, vai para o endereço reserva
+        if(!daPonte) break;              // a ponte entregou: o problema é o feed, vai para a reserva
+        if(erro.excesso) await esperar(CONFIG.ESPERA_LIMITE);
       }
     }
   }
@@ -827,12 +1028,20 @@ async function carregarTudo(){
   el("btnAtualizar").disabled = true;
   renderizar();
 
+  // A seção aberta entra na frente da fila: é a que o leitor está olhando
+  const ordemDasSecoes = [
+    ...SECOES.filter(s => s.id === estado.secao),
+    ...SECOES.filter(s => s.id !== estado.secao)
+  ];
+
   const tarefas = [];
-  for(const secao of SECOES){
+  let indice = 0;
+  for(const secao of ordemDasSecoes){
     for(const fonte of secao.fontes){
+      const meu = indice++;
       tarefas.push(enfileirar(async () => {
         try{
-          estado.brutos[secao.id][fonte.v] = await buscarFonte(fonte);
+          estado.brutos[secao.id][fonte.v] = await buscarFonte(fonte, meu);
         }catch{
           // Sem resposta agora: preserva o que essa fonte já tinha, marcada no rodapé
           estado.falhas[secao.id].push(fonte.v);
@@ -970,6 +1179,74 @@ function realcar(texto, termo){
   catch{ return seguro; }
 }
 
+/* ------------------------------------------------------------
+   Resumo do dia
+   ------------------------------------------------------------
+   Sem IA: a nota de cada manchete vem de quantos assuntos mais
+   citados do dia ela contém, com um empurrão para as mais recentes.
+   Assunto repetido por vários veículos é o que costuma importar. */
+function itensDoResumo(secaoId, quantos, peso){
+  const agora = Date.now();
+  return (estado.itens[secaoId] || [])
+    .map(it => {
+      const titulo = it.titulo.toLowerCase();
+      let nota = 0;
+      peso.forEach((p, chave) => { if(titulo.includes(chave)) nota += p; });
+      const horas = it.ts ? (agora - it.ts) / 3600000 : 48;
+      return { it, nota: nota * 2 + Math.max(0, 30 - horas) / 5 };
+    })
+    .sort((a, b) => b.nota - a.nota || b.it.ts - a.it.ts)
+    .slice(0, quantos)
+    .map(o => o.it);
+}
+
+function montarResumo(){
+  const assuntos = calcularAssuntos();
+  const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
+  const agora = new Date();
+  const hora = estado.ultimaAtualizacao
+    ? new Date(estado.ultimaAtualizacao).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" })
+    : agora.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+
+  const blocos = SECOES.map(secao => {
+    const itens = itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso);
+    const total = (estado.itens[secao.id] || []).length;
+    if(!itens.length) return "";
+    return `<section class="resumo-bloco">
+      <div class="resumo-cabeca">
+        <span class="resumo-secao">${escapar(secao.nome)}</span>
+        <span class="resumo-qtd">${itens.length} de ${total}</span>
+      </div>
+      <div class="resumo-lista">
+        ${itens.map(i => `
+        <a class="resumo-item" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
+          <div class="resumo-item-t">${escapar(i.titulo)}</div>
+          <div class="resumo-item-m">${escapar(i.veiculo)}${
+            i.origem && i.origem !== i.veiculo ? " · " + escapar(i.origem) : ""}${
+            i.ts ? " · " + escapar(tempoRelativo(i.ts)) : ""}</div>
+        </a>`).join("")}
+      </div>
+    </section>`;
+  }).join("");
+
+  if(!blocos){
+    return `<div class="estado">
+      <div class="estado-t">Ainda não há notícias para resumir</div>
+      <div class="estado-d">Use o botão Atualizar e volte ao resumo em seguida.</div>
+    </div>`;
+  }
+
+  return `<div class="resumo">
+    <div class="resumo-abertura">
+      <div class="resumo-titulo">Resumo do dia</div>
+      <div class="resumo-linha">${escapar(dataExtenso(agora))} · fechado às ${escapar(hora)}</div>
+      ${assuntos.length ? `<div class="resumo-termos"><b>Mais citados:</b> ${
+        assuntos.slice(0, 8).map(a => escapar(a.rotulo) + " (" + a.n + ")").join(" · ")}</div>` : ""}
+    </div>
+    ${blocos}
+  </div>`;
+}
+
 function renderizarAbas(){
   el("abas").innerHTML = SECOES.map(s => {
     const n = (estado.itens[s.id] || []).length;
@@ -997,6 +1274,13 @@ function renderizarGrade(){
     return;
   }
 
+  if(estado.resumo){
+    grade.innerHTML = montarResumo();
+    const total = SECOES.reduce((n, sec) => n + (estado.itens[sec.id] || []).length, 0);
+    el("contagem").textContent = total ? `resumo de ${total} notícias` : "";
+    return;
+  }
+
   const itens = itensFiltrados();
   const termo = (estado.assuntoAtivo || estado.busca).trim();
   const falhas = estado.falhas[estado.secao] || [];
@@ -1012,7 +1296,8 @@ function renderizarGrade(){
         ? `<b>Nenhuma fonte respondeu nesta atualização</b>
            As pontes públicas que trazem os feeds até o navegador podem estar fora do ar ou o aparelho está sem
            conexão. Toque em Atualizar em alguns minutos. Se persistir, publique um Apps Script próprio e informe
-           a URL em <code>CONFIG.PROXY_PROPRIO</code> no <code>index.html</code>.`
+           a URL em <code>CONFIG.PROXY_PROPRIO</code> no <code>index.html</code>.
+           ${pontes.resumo() ? `<div class="aviso-detalhe">${escapar(pontes.resumo())}</div>` : ""}`
         : `<b>${falhas.length} fonte${falhas.length > 1 ? "s" : ""} sem resposta nesta atualização</b>
            ${escapar(falhas.join(", "))} — o restante do painel está completo. Tente atualizar em alguns minutos.`}
       </div>
@@ -1072,6 +1357,10 @@ function renderizarRodape(){
     : "";
 
   el("subtitulo").textContent = "Patrimar Móveis · " + dataExtenso(new Date());
+  el("folhaData").textContent = dataExtenso(new Date()) +
+    (estado.ultimaAtualizacao
+      ? " · atualizado às " + new Date(estado.ultimaAtualizacao).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" })
+      : "");
 }
 
 function renderizar(){
@@ -1098,6 +1387,7 @@ el("abas").addEventListener("click", e => {
   const aba = e.target.closest("[data-secao]");
   if(!aba) return;
   estado.secao = aba.dataset.secao;
+  if(estado.resumo){ estado.resumo = false; aplicarModoResumo(); }
   montarFiltroVeiculos();
   renderizar();
   window.scrollTo({ top:0, behavior:"smooth" });
@@ -1131,6 +1421,21 @@ el("btnLimpar").addEventListener("click", () => {
   el("busca").focus();
 });
 
+el("btnResumo").addEventListener("click", () => {
+  estado.resumo = !estado.resumo;
+  aplicarModoResumo();
+  renderizar();
+  window.scrollTo({ top:0, behavior:"smooth" });
+});
+
+el("btnImprimir").addEventListener("click", () => window.print());
+
+// No resumo os filtros não valem: ficam desligados para não enganar
+function aplicarModoResumo(){
+  el("btnResumo").setAttribute("aria-pressed", String(estado.resumo));
+  ["busca", "filtroVeiculo", "filtroPeriodo"].forEach(id => { el(id).disabled = estado.resumo; });
+}
+
 el("filtroVeiculo").addEventListener("change", e => { estado.veiculo = e.target.value; renderizar(); });
 el("filtroPeriodo").addEventListener("change", e => { estado.periodo = Number(e.target.value); renderizar(); });
 el("btnAtualizar").addEventListener("click", () => carregarTudo());
@@ -1140,6 +1445,59 @@ el("btnTema").addEventListener("click", () => {
   aplicarTema(novo);
   guardar.gravar("radar_tema", novo);
 });
+
+/* ------------------------------------------------------------
+   Instalação como aplicativo
+   ------------------------------------------------------------ */
+let promptInstalacao = null;
+
+const emAplicativo = () =>
+  window.matchMedia?.("(display-mode: standalone)").matches ||
+  window.matchMedia?.("(display-mode: minimal-ui)").matches ||
+  navigator.standalone === true;
+
+// Chrome e Edge avisam quando o app pode ser instalado; só então o botão aparece
+window.addEventListener("beforeinstallprompt", evento => {
+  evento.preventDefault();
+  promptInstalacao = evento;
+  el("btnInstalar").classList.remove("oculto");
+});
+
+el("btnInstalar").addEventListener("click", async () => {
+  if(!promptInstalacao) return;
+  promptInstalacao.prompt();
+  const escolha = await promptInstalacao.userChoice;
+  promptInstalacao = null;
+  if(escolha?.outcome === "accepted") el("btnInstalar").classList.add("oculto");
+});
+
+window.addEventListener("appinstalled", () => {
+  promptInstalacao = null;
+  el("btnInstalar").classList.add("oculto");
+  el("dicaInstalar").hidden = true;
+  guardar.gravar("radar_dica_instalar", 1);
+});
+
+el("btnDicaFechar").addEventListener("click", () => {
+  el("dicaInstalar").hidden = true;
+  guardar.gravar("radar_dica_instalar", 1);
+});
+
+// O Safari não oferece o convite automático: no iPhone a dica explica o caminho
+/* A barra de seções gruda logo abaixo do cabeçalho. Como a altura muda com
+   o tamanho da tela, ela é medida em vez de chutada. */
+function medirCabecalho(){
+  const alt = document.querySelector(".topo")?.offsetHeight;
+  if(alt) document.documentElement.style.setProperty("--h-topo", alt + "px");
+}
+
+function avaliarDicaInstalar(){
+  if(emAplicativo() || guardar.ler("radar_dica_instalar")) return;
+  const ua = navigator.userAgent;
+  const ios = /iphone|ipad|ipod/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if(ios && !/crios|fxios|edgios|opios/i.test(ua)) el("dicaInstalar").hidden = false;
+}
 
 function aplicarTema(tema){
   document.documentElement.dataset.tema = tema;
@@ -1186,6 +1544,12 @@ document.addEventListener("visibilitychange", () => {
     montarFiltroVeiculos();
   }
   renderizar();
+
+  avaliarDicaInstalar();
+  medirCabecalho();
+  window.addEventListener("resize", medirCabecalho);
+  if(window.ResizeObserver) new ResizeObserver(medirCabecalho).observe(document.querySelector(".topo"));
+  document.fonts?.ready.then(medirCabecalho).catch(() => {});
 
   carregarTudo();
   setInterval(() => { if(document.visibilityState === "visible") carregarTudo(); }, CONFIG.INTERVALO_MS);

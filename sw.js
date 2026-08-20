@@ -3,14 +3,16 @@
    As notícias NUNCA são cacheadas aqui — sempre vão à rede, para não
    correr o risco de a tela abrir com manchete velha achando que é a do dia. */
 
-const CACHE = "radar-casco-v2";
+const CACHE = "radar-casco-v3";
 const CASCO = [
   "./",
   "./index.html",
   "./manifest.json",
   "./logo-patrimar.png",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./icon-maskable-512.png",
+  "./apple-touch-icon.png"
 ];
 
 self.addEventListener("install", evento => {
@@ -36,8 +38,10 @@ self.addEventListener("fetch", evento => {
 
   const url = new URL(req.url);
 
-  // Feeds e pontes: sempre rede, nunca cache.
+  // Feeds e pontes: sempre rede, nunca cache. Isso inclui a ponte própria
+  // em /api, que é do mesmo domínio mas devolve notícia, não casco.
   if(url.origin !== self.location.origin) return;
+  if(url.pathname.startsWith("/api/")) return;
 
   // Casco: rede primeiro, cache como reserva quando estiver offline.
   evento.respondWith(
