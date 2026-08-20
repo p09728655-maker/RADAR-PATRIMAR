@@ -18,6 +18,8 @@ consultas fechadas no assunto.
 |---|---|
 | `index.html` | O painel inteiro: estrutura, estilo e lógica |
 | `api/feed.js` | Ponte própria: busca os feeds pelo mesmo domínio, sem CORS |
+| `api/resumir.js` | Escreve a leitura do dia com o Claude, guardando a chave no servidor |
+| `package.json` | Só a dependência das funções; o painel continua sem etapa de compilação |
 | `manifest.json` | Permite instalar como aplicativo no celular e no PC |
 | `sw.js` | Service worker: guarda o casco do app, nunca as notícias |
 | `logo-patrimar.png` | Logotipo do cabeçalho |
@@ -140,6 +142,34 @@ descartada e o total de descartadas aparece quando a busca fica vazia. Para
 voltar ao radar, escolher *Qualquer período*. Quantos anos aparecem na lista é
 `CONFIG.ARQUIVO_ANOS`.
 
+## Leitura do dia escrita por IA
+
+Dentro do **Resumo do dia** há o botão **Escrever a leitura do dia**. Ele
+manda as manchetes já selecionadas para `api/resumir.js`, que chama o Claude
+e devolve um parágrafo de abertura, uma linha por seção e um "De olho:" com o
+que merece acompanhamento.
+
+É sob demanda, nunca automático: sem clique, não há chamada nem custo. O
+modelo é instruído a usar apenas as manchetes recebidas, sem completar com
+conhecimento próprio nem estimar número. Ainda assim, é texto de máquina —
+o rodapé do bloco lembra de conferir antes de repassar.
+
+### Onde vai a chave da API
+
+Na Vercel: **Settings → Environment Variables → `ANTHROPIC_API_KEY`**, com a
+chave da Anthropic, e publicar de novo.
+
+A chave fica no servidor e nunca chega ao navegador. Colocá-la no
+`index.html` seria entregá-la a qualquer visitante que abrisse o código-fonte
+da página. Sem a variável, a função responde 503 e o botão explica o que
+falta — o resto do painel funciona igual, sem IA nenhuma.
+
+O modelo é `claude-opus-5`, com esforço baixo, resposta limitada a 2000
+tokens e no máximo 80 manchetes por chamada. Na tabela da Anthropic isso dá
+alguns centavos de dólar por clique. Está ligado também o desvio automático
+de recusa (`fallbacks`), para o botão não morrer numa manchete que o modelo
+prefira não comentar.
+
 ## Instalação
 
 No Chrome e no Edge o painel mostra o botão **Instalar** assim que o navegador
@@ -162,7 +192,8 @@ aumentar a versão do `sw.js`.
 
 ## Observações
 
-- Não há chamada de IA em nenhum ponto. Custo de operação é zero.
+- A única chamada de IA é o botão da leitura do dia, e só quando alguém
+  clica. Sem isso, o custo de operação é zero.
 - As notícias nunca são guardadas em cache pelo service worker, para não
   correr o risco de a tela abrir com manchete velha parecendo atual.
 - O vermelho `#DB2126` é reservado para marca e ação principal. Falha de
