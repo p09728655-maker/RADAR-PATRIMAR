@@ -107,6 +107,22 @@ em PDF. O papel sai sem cabeçalho, filtros nem rodapé: só o logotipo, a data 
 as notícias em duas colunas. Vale para as duas telas — no resumo sai o resumo,
 na lista sai a seção aberta.
 
+## Buscar no arquivo
+
+O filtro de período tem dois grupos. Em **Notícias do dia** ficam os recortes
+de hora do radar. Em **Arquivo** ficam os últimos anos.
+
+Ao escolher um ano, o campo de busca muda de função: em vez de filtrar a lista
+na tela, ele consulta o arquivo do Google Notícias com recorte de data ao
+teclar **Enter**. É assim que se alcança matéria de 2024 — o RSS dos veículos
+só carrega o que saiu nos últimos dias.
+
+A consulta enviada é `termo after:ANO-01-01 before:ANO+1-01-01`. O resultado
+ainda passa por uma conferência de data no navegador: matéria de outro ano é
+descartada e o total de descartadas aparece quando a busca fica vazia. Para
+voltar ao radar, escolher *Qualquer período*. Quantos anos aparecem na lista é
+`CONFIG.ARQUIVO_ANOS`.
+
 ## Instalação
 
 No Chrome e no Edge o painel mostra o botão **Instalar** assim que o navegador
