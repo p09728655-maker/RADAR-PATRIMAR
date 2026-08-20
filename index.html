@@ -101,12 +101,12 @@ button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;backgrou
   display:flex; align-items:center; gap:var(--s4);
 }
 .marca{display:flex;align-items:center;gap:var(--s3);min-width:0}
-.marca-selo{
-  width:34px;height:34px;flex:0 0 34px;border-radius:var(--r-md);
-  background:var(--marca-vermelho);
-  display:grid;place-items:center;
-  font-weight:700;font-size:15px;letter-spacing:.5px;color:#fff;
+.marca-logo{
+  height:38px;width:auto;flex:0 0 auto;display:block;
+  background:#fff;padding:5px 10px;border-radius:var(--r-md);
+  box-shadow:0 1px 2px rgba(0,0,0,.28);
 }
+.marca-risco{width:1px;height:28px;flex:0 0 1px;background:rgba(255,255,255,.18)}
 .marca-txt{min-width:0}
 .marca-titulo{font-size:var(--fs-display);font-weight:700;line-height:1.15;letter-spacing:-.2px}
 .marca-sub{font-size:var(--fs-caption);color:#A9B2BC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -255,6 +255,7 @@ main{max-width:var(--max);margin:0 auto;padding:var(--s4) var(--s5) var(--s7)}
   text-transform:uppercase;letter-spacing:.4px;font-size:var(--fs-label);
 }
 html[data-tema="escuro"] .n-veiculo{color:#F2727A}
+.n-origem{color:var(--text-2);font-weight:600}
 .n-ponto{color:var(--border-forte)}
 .n-hora{color:var(--muted)}
 .n-novo{
@@ -345,6 +346,8 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
   .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape{padding-left:var(--s4);padding-right:var(--s4)}
   .marca-titulo{font-size:18px}
   .marca-sub{display:none}
+  .marca-logo{height:32px;padding:4px 8px}
+  .marca{gap:var(--s2)}
   .btn-rotulo{display:none}
   .btn{padding:var(--s2)}
   .grade{grid-template-columns:1fr;gap:var(--s2)}
@@ -356,6 +359,7 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
 }
 @media print{
   .topo-acoes,.controles,.nav,.assuntos,.rodape{display:none}
+  .marca-logo{box-shadow:none;padding:0}
   .noticia{break-inside:avoid;border-color:#ccc}
 }
 </style>
@@ -365,7 +369,8 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
 <header class="topo">
   <div class="topo-in">
     <div class="marca">
-      <div class="marca-selo" aria-hidden="true">P</div>
+      <img class="marca-logo" src="logo-patrimar.png" width="760" height="246" alt="Patrimar Móveis">
+      <div class="marca-risco" aria-hidden="true"></div>
       <div class="marca-txt">
         <div class="marca-titulo">Radar Diário</div>
         <div class="marca-sub" id="subtitulo">Patrimar Móveis · carregando…</div>
@@ -435,14 +440,11 @@ html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
    ============================================================ */
 const CONFIG = {
   PROXY_PROPRIO: "",                 // ex.: "https://script.google.com/macros/s/XXXX/exec?url="
-  PROXIES: [
-    u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u),
-    u => "https://corsproxy.io/?url=" + encodeURIComponent(u)
-  ],
   MAX_POR_FONTE: 14,
   INTERVALO_MS: 10 * 60 * 1000,      // atualização automática: 10 min
-  TIMEOUT_MS: 12000,
-  CONCORRENCIA: 5
+  TIMEOUT_MS: 13000,                 // por tentativa de ponte
+  TENTATIVAS: 3,                     // pontes testadas por endereço
+  CONCORRENCIA: 6                    // requisições simultâneas no painel inteiro
 };
 
 const gn = q => "https://news.google.com/rss/search?q=" +
@@ -450,24 +452,24 @@ const gn = q => "https://news.google.com/rss/search?q=" +
 
 const SECOES = [
   { id:"brasil", nome:"Brasil", fontes:[
-    { v:"G1",             u:"https://g1.globo.com/rss/g1/" },
-    { v:"Folha",          u:"https://feeds.folha.uol.com.br/emcimadahora/rss091.xml" },
-    { v:"Agência Brasil", u:"https://agenciabrasil.ebc.com.br/rss/geral/feed.xml" },
-    { v:"Poder360",       u:"https://www.poder360.com.br/feed/" },
-    { v:"CNN Brasil",     u:"https://www.cnnbrasil.com.br/feed/" }
+    { v:"G1",             u:"https://g1.globo.com/rss/g1/", reserva:gn("site:g1.globo.com") },
+    { v:"Folha",          u:"https://feeds.folha.uol.com.br/emcimadahora/rss091.xml", reserva:gn("site:folha.uol.com.br") },
+    { v:"Agência Brasil", u:"https://agenciabrasil.ebc.com.br/rss/geral/feed.xml", reserva:gn("site:agenciabrasil.ebc.com.br") },
+    { v:"Poder360",       u:"https://www.poder360.com.br/feed/", reserva:gn("site:poder360.com.br") },
+    { v:"CNN Brasil",     u:"https://www.cnnbrasil.com.br/feed/", reserva:gn("site:cnnbrasil.com.br") }
   ]},
   { id:"mundo", nome:"Mundo", fontes:[
-    { v:"BBC Brasil",     u:"https://feeds.bbci.co.uk/portuguese/rss.xml" },
-    { v:"DW Brasil",      u:"https://rss.dw.com/rdf/rss-br-all" },
-    { v:"France 24",      u:"https://www.france24.com/pt/rss" },
-    { v:"G1 Mundo",       u:"https://g1.globo.com/rss/g1/mundo/" },
-    { v:"ONU News",       u:"https://news.un.org/feed/subscribe/pt/news/all/rss.xml" }
+    { v:"BBC Brasil",     u:"https://feeds.bbci.co.uk/portuguese/rss.xml", reserva:gn("site:bbc.com/portuguese") },
+    { v:"DW Brasil",      u:"https://rss.dw.com/rdf/rss-br-all", reserva:gn("site:dw.com notícias Brasil") },
+    { v:"France 24",      u:"https://www.france24.com/pt/rss", reserva:gn("site:france24.com/pt") },
+    { v:"G1 Mundo",       u:"https://g1.globo.com/rss/g1/mundo/", reserva:gn("site:g1.globo.com/mundo") },
+    { v:"ONU News",       u:"https://news.un.org/feed/subscribe/pt/news/all/rss.xml", reserva:gn("ONU News Nações Unidas") }
   ]},
   { id:"ia", nome:"Inteligência Artificial", fontes:[
-    { v:"MIT Tech Review",u:"https://www.technologyreview.com/topic/artificial-intelligence/feed" },
-    { v:"Ars Technica",   u:"https://arstechnica.com/ai/feed/" },
-    { v:"The Verge",      u:"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml" },
-    { v:"TechCrunch",     u:"https://techcrunch.com/category/artificial-intelligence/feed/" },
+    { v:"MIT Tech Review",u:"https://www.technologyreview.com/topic/artificial-intelligence/feed", reserva:gn("site:technologyreview.com artificial intelligence") },
+    { v:"Ars Technica",   u:"https://arstechnica.com/ai/feed/", reserva:gn("site:arstechnica.com AI") },
+    { v:"The Verge",      u:"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", reserva:gn("site:theverge.com artificial intelligence") },
+    { v:"TechCrunch",     u:"https://techcrunch.com/category/artificial-intelligence/feed/", reserva:gn("site:techcrunch.com artificial intelligence") },
     { v:"IA no Brasil",   u:gn("inteligência artificial empresas Brasil") },
     { v:"IA na indústria",u:gn("inteligência artificial indústria manufatura") }
   ]},
@@ -492,9 +494,12 @@ const SECOES = [
    ============================================================ */
 const estado = {
   secao: "brasil",
-  itens: {},                 // { secaoId: [item, ...] }
+  brutos: {},                // { secaoId: { veiculo: [item, ...] } }
+  itens: {},                 // { secaoId: [item, ...] } — já deduplicado e ordenado
   falhas: {},                // { secaoId: [veiculo, ...] }
-  carregando: true,
+  carregando: true,          // primeira pintura: mostra esqueleto
+  emCarga: false,            // trava contra duas atualizações ao mesmo tempo
+  progresso: { feitas:0, total:0 },
   busca: "",
   veiculo: "",
   periodo: 0,
@@ -502,7 +507,7 @@ const estado = {
   ultimaVisita: 0,
   ultimaAtualizacao: null
 };
-SECOES.forEach(s => { estado.itens[s.id] = []; estado.falhas[s.id] = []; });
+SECOES.forEach(s => { estado.brutos[s.id] = {}; estado.itens[s.id] = []; estado.falhas[s.id] = []; });
 
 /* Armazenamento local tolerante a falha (modo restrito / navegação privada) */
 const guardar = {
@@ -544,122 +549,313 @@ function dataExtenso(d){
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-async function comLimite(tarefas, limite){
-  const resultado = [];
-  let i = 0;
-  const trabalhador = async () => {
-    while(i < tarefas.length){
-      const meu = i++;
-      resultado[meu] = await tarefas[meu]();
+/* ============================================================
+   4. PONTES DE ACESSO AOS FEEDS
+   ============================================================
+   O navegador não lê RSS de outro domínio sem um intermediário.
+   O painel tenta várias pontes públicas em sequência, guarda qual
+   delas respondeu e começa por ela na próxima vez. Uma ponte que
+   falha seguidamente vai para o fim da fila sozinha.
+   ============================================================ */
+const PONTES = [
+  { id:"allorigins", tipo:"texto",
+    montar:u => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u) },
+  { id:"codetabs", tipo:"texto",
+    montar:u => "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u) },
+  { id:"corsproxy", tipo:"texto",
+    montar:u => "https://corsproxy.io/?url=" + encodeURIComponent(u) },
+  { id:"allorigins-json", tipo:"envelope",
+    montar:u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u) },
+  { id:"rss2json", tipo:"pronto",
+    montar:u => "https://api.rss2json.com/v1/api.json?count=20&rss_url=" + encodeURIComponent(u) }
+];
+
+const pontes = {
+  falhas: new Map(),                       // id -> falhas seguidas
+  preferida: guardar.ler("radar_ponte"),
+
+  todas(){
+    return CONFIG.PROXY_PROPRIO
+      ? [{ id:"proprio", tipo:"texto", montar:u => CONFIG.PROXY_PROPRIO + encodeURIComponent(u) }, ...PONTES]
+      : PONTES;
+  },
+
+  // Menos falhas primeiro; entre iguais, a que respondeu por último.
+  // Quatro tropeços seguidos tiram a ponte do resto da rodada.
+  ordem(){
+    const postas = this.todas()
+      .map((p, i) => ({ p, i, f: this.falhas.get(p.id) || 0, pref: p.id === this.preferida ? 0 : 1 }))
+      .sort((a, b) => a.f - b.f || a.pref - b.pref || a.i - b.i);
+    const vivas = postas.filter(o => o.f < 4);
+    return (vivas.length ? vivas : postas).map(o => o.p);
+  },
+
+  // Cada atualização começa com o placar limpo: ponte que voltou volta a ser tentada
+  zerar(){ this.falhas.clear(); },
+
+  registrar(id, ok){
+    if(ok){
+      this.falhas.set(id, 0);
+      if(this.preferida !== id){ this.preferida = id; guardar.gravar("radar_ponte", id); }
+    }else{
+      this.falhas.set(id, (this.falhas.get(id) || 0) + 1);
     }
-  };
-  await Promise.all(Array.from({ length: Math.min(limite, tarefas.length) }, trabalhador));
-  return resultado;
+  }
+};
+
+/* Fila única para o painel inteiro. Sem ela, as 26 fontes disparam de
+   uma vez, o navegador segura a maioria na fila de conexões e o
+   cronômetro de tempo limite estoura antes de a requisição sair. */
+const fila = { ativas: 0, espera: [] };
+
+function enfileirar(tarefa){
+  return new Promise(resolver => {
+    fila.espera.push(() => tarefa().then(resolver, resolver));
+    bombear();
+  });
+}
+
+function bombear(){
+  while(fila.ativas < CONFIG.CONCORRENCIA && fila.espera.length){
+    const proxima = fila.espera.shift();
+    fila.ativas++;
+    proxima().finally(() => { fila.ativas--; bombear(); });
+  }
 }
 
 /* ============================================================
-   4. BUSCA E LEITURA DE FEEDS
+   5. LEITURA DOS FEEDS
    ============================================================ */
-async function buscarTexto(url){
-  const proxies = CONFIG.PROXY_PROPRIO
-    ? [u => CONFIG.PROXY_PROPRIO + encodeURIComponent(u), ...CONFIG.PROXIES]
-    : CONFIG.PROXIES;
+function decodificarConteudo(s){
+  const texto = String(s ?? "");
+  const marca = texto.match(/^data:[^,]*?(;base64)?,/i);
+  if(!marca) return texto;
+  const corpo = texto.slice(marca[0].length);
+  if(!marca[1]) return decodeURIComponent(corpo);
+  try{
+    const bruto = atob(corpo);
+    const bytes = Uint8Array.from(bruto, c => c.charCodeAt(0));
+    return new TextDecoder("utf-8").decode(bytes);
+  }catch{ return corpo; }
+}
 
-  for(const montar of proxies){
-    const abortar = new AbortController();
-    const tempo = setTimeout(() => abortar.abort(), CONFIG.TIMEOUT_MS);
-    try{
-      const r = await fetch(montar(url), { signal: abortar.signal, cache:"no-store" });
-      clearTimeout(tempo);
-      if(!r.ok) continue;
-      const t = await r.text();
-      if(t && t.length > 200) return t;
-    }catch{
-      clearTimeout(tempo);
-    }
+/* Feeds usam prefixos (dc:date, content:encoded). Comparar pelo nome
+   local evita depender de namespace declarado. */
+function filhos(no, ...nomes){
+  const alvo = nomes.map(n => n.toLowerCase());
+  return [...no.children].filter(f =>
+    alvo.includes(String(f.localName || f.nodeName).toLowerCase()));
+}
+
+function texto(no, ...nomes){
+  for(const nome of nomes){
+    const f = filhos(no, nome)[0];
+    const t = f && (f.textContent || "").trim();
+    if(t) return t;
   }
-  throw new Error("Nenhum proxy respondeu");
+  return "";
+}
+
+function extrairLink(no){
+  const candidatos = [...filhos(no, "link"), ...filhos(no, "origLink"), ...filhos(no, "guid")];
+  for(const c of candidatos){
+    const href = c.getAttribute?.("href");
+    const rel  = c.getAttribute?.("rel");
+    if(href && (!rel || rel === "alternate")) return href;
+  }
+  for(const c of candidatos){
+    const t = (c.textContent || "").trim();
+    if(/^https?:\/\//i.test(t)) return t;
+  }
+  return "";
+}
+
+function paraTs(bruto){
+  if(!bruto) return 0;
+  let t = Date.parse(bruto);
+  if(!Number.isFinite(t)) t = Date.parse(String(bruto).trim().replace(" ", "T") + "Z");
+  if(!Number.isFinite(t)) return 0;
+  return Math.min(t, Date.now());          // feed com fuso errado não vira "notícia do futuro"
+}
+
+function chaveDe(titulo){
+  return titulo.toLowerCase().replace(/[^a-zà-ú0-9]/gi, "").slice(0, 70);
+}
+
+function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
+  titulo = limparHtml(titulo);
+  if(!titulo || !link) return null;
+
+  // Google News carimba " - Veículo" no fim da manchete; o veículo vai no rótulo
+  origem = limparHtml(origem);
+  if(origem && titulo.toLowerCase().endsWith(" - " + origem.toLowerCase())){
+    titulo = titulo.slice(0, -(origem.length + 3)).trim();
+  }
+
+  resumo = limparHtml(resumo);
+  if(resumo.length > 240) resumo = resumo.slice(0, 240).trim() + "…";
+  if(resumo.startsWith(titulo.slice(0, 30)) || /^<?a href/i.test(resumo)) resumo = "";
+
+  return { titulo, link, resumo, origem, veiculo, ts: paraTs(dataBruta), chave: chaveDe(titulo) };
 }
 
 function lerFeed(xmlTexto, veiculo){
-  const doc = new DOMParser().parseFromString(xmlTexto, "text/xml");
+  const bruto = String(xmlTexto ?? "").replace(/^﻿/, "").trim();
+  if(bruto.length < 80) throw new Error("resposta curta demais");
+
+  const inicio = bruto.indexOf("<");
+  if(inicio < 0) throw new Error("resposta não é XML");
+
+  const doc = new DOMParser().parseFromString(bruto.slice(inicio), "text/xml");
   if(doc.querySelector("parsererror")) throw new Error("XML inválido");
 
   const nos = [...doc.querySelectorAll("item"), ...doc.querySelectorAll("entry")];
+  if(!nos.length) throw new Error("feed sem itens");
+
   const itens = [];
-
   for(const no of nos.slice(0, CONFIG.MAX_POR_FONTE)){
-    const pegar = tag => no.querySelector(tag)?.textContent?.trim() || "";
-
-    const titulo = limparHtml(pegar("title"));
-    if(!titulo) continue;
-
-    // Link: RSS usa <link>texto</link>; Atom usa <link href="...">
-    let link = pegar("link");
-    if(!link){
-      const alt = no.querySelector('link[rel="alternate"]') || no.querySelector("link");
-      link = alt?.getAttribute("href") || "";
-    }
-    if(!link) continue;
-
-    const dataBruta = pegar("pubDate") || pegar("published") || pegar("updated") || pegar("date");
-    const ts = dataBruta ? new Date(dataBruta).getTime() : 0;
-
-    let resumo = limparHtml(pegar("description") || pegar("summary") || pegar("content"));
-    if(resumo.length > 240) resumo = resumo.slice(0, 240).trim() + "…";
-    // Google News repete a manchete no corpo — descartar ruído
-    if(resumo.startsWith(titulo.slice(0, 30)) || /^<?a href/i.test(resumo)) resumo = "";
-
-    itens.push({
-      titulo, link, resumo, veiculo,
-      ts: Number.isFinite(ts) ? ts : 0,
-      chave: titulo.toLowerCase().replace(/[^a-zà-ú0-9]/gi, "").slice(0, 70)
+    const item = montarItem({
+      veiculo,
+      titulo:    texto(no, "title"),
+      link:      extrairLink(no),
+      resumo:    texto(no, "description", "summary", "content", "encoded"),
+      origem:    texto(no, "source", "creator"),
+      dataBruta: texto(no, "pubDate", "published", "updated", "date", "modified")
     });
+    if(item) itens.push(item);
   }
+  if(!itens.length) throw new Error("nenhum item aproveitável");
   return itens;
 }
 
-async function carregarSecao(secao){
-  const tarefas = secao.fontes.map(f => async () => {
-    try{
-      const xml = await buscarTexto(f.u);
-      return { ok:true, veiculo:f.v, itens: lerFeed(xml, f.v) };
-    }catch{
-      return { ok:false, veiculo:f.v, itens: [] };
+function lerJson(lista, veiculo){
+  const itens = [];
+  for(const bruto of lista.slice(0, CONFIG.MAX_POR_FONTE)){
+    const item = montarItem({
+      veiculo,
+      titulo:    bruto.title,
+      link:      bruto.link || bruto.guid || "",
+      resumo:    bruto.description || bruto.content || "",
+      origem:    bruto.author || "",
+      dataBruta: bruto.pubDate || ""
+    });
+    if(item) itens.push(item);
+  }
+  if(!itens.length) throw new Error("nenhum item aproveitável");
+  return itens;
+}
+
+async function pelaPonte(ponte, url, veiculo){
+  const abortar = new AbortController();
+  const relogio = setTimeout(() => abortar.abort(), CONFIG.TIMEOUT_MS);
+  try{
+    const r = await fetch(ponte.montar(url), {
+      signal: abortar.signal, cache:"no-store", redirect:"follow", referrerPolicy:"no-referrer"
+    });
+    if(!r.ok) throw new Error("HTTP " + r.status);
+
+    if(ponte.tipo === "pronto"){
+      const j = await r.json();
+      if(j.status !== "ok" || !Array.isArray(j.items)) throw new Error("resposta inválida");
+      return lerJson(j.items, veiculo);
     }
-  });
+    if(ponte.tipo === "envelope"){
+      const j = await r.json();
+      return lerFeed(decodificarConteudo(j.contents ?? j.body ?? ""), veiculo);
+    }
+    return lerFeed(await r.text(), veiculo);
+  }finally{
+    clearTimeout(relogio);
+  }
+}
 
-  const respostas = await comLimite(tarefas, CONFIG.CONCORRENCIA);
+/* Tenta as pontes em ordem de saúde; se o feed do veículo estiver fora
+   do ar, cai para a busca de reserva no Google Notícias. */
+async function buscarFonte(fonte){
+  const enderecos = fonte.reserva ? [fonte.u, fonte.reserva] : [fonte.u];
+  let ultimoErro = new Error("sem resposta");
 
+  for(const url of enderecos){
+    let tentativas = 0;
+    for(const ponte of pontes.ordem()){
+      if(tentativas >= CONFIG.TENTATIVAS) break;
+      tentativas++;
+      try{
+        const itens = await pelaPonte(ponte, url, fonte.v);
+        pontes.registrar(ponte.id, true);
+        return itens;
+      }catch(erro){
+        // Erro de rede/tempo limite é culpa da ponte; XML inválido é do feed
+        const daPonte = !/inválido|sem itens|aproveitável|curta demais|não é XML/.test(erro.message || "");
+        pontes.registrar(ponte.id, !daPonte);
+        ultimoErro = erro;
+        if(!daPonte) break;   // a ponte entregou: o problema é o feed, vai para o endereço reserva
+      }
+    }
+  }
+  throw ultimoErro;
+}
+
+/* ============================================================
+   6. CARGA DO PAINEL
+   ============================================================ */
+function recompor(secaoId){
+  const secao = SECOES.find(s => s.id === secaoId);
   const vistos = new Set();
   const itens = [];
-  for(const r of respostas){
-    for(const it of r.itens){
-      if(vistos.has(it.chave)) continue;   // deduplicação entre veículos
+
+  for(const fonte of secao.fontes){
+    for(const it of (estado.brutos[secaoId][fonte.v] || [])){
+      if(vistos.has(it.chave)) continue;    // deduplicação entre veículos
       vistos.add(it.chave);
       itens.push(it);
     }
   }
-  itens.sort((a,b) => b.ts - a.ts);
-
-  estado.itens[secao.id]  = itens;
-  estado.falhas[secao.id] = respostas.filter(r => !r.ok).map(r => r.veiculo);
+  itens.sort((a, b) => b.ts - a.ts);
+  estado.itens[secaoId] = itens;
 }
 
 async function carregarTudo(){
+  if(estado.emCarga) return;
+  estado.emCarga = true;
   estado.carregando = true;
+  estado.progresso = { feitas:0, total:SECOES.reduce((n, s) => n + s.fontes.length, 0) };
+  pontes.zerar();
+  SECOES.forEach(s => { estado.falhas[s.id] = []; });
+
   el("iconeAtualizar").classList.add("girando");
   el("btnAtualizar").disabled = true;
   renderizar();
 
-  await Promise.all(SECOES.map(carregarSecao));
+  const tarefas = [];
+  for(const secao of SECOES){
+    for(const fonte of secao.fontes){
+      tarefas.push(enfileirar(async () => {
+        try{
+          estado.brutos[secao.id][fonte.v] = await buscarFonte(fonte);
+        }catch{
+          // Sem resposta agora: preserva o que essa fonte já tinha, marcada no rodapé
+          estado.falhas[secao.id].push(fonte.v);
+        }
+        estado.progresso.feitas++;
+        recompor(secao.id);
+        renderizarAbas();
+        if(secao.id === estado.secao) renderizarGrade();
+      }));
+    }
+  }
+
+  await Promise.all(tarefas);
 
   estado.carregando = false;
+  estado.emCarga = false;
   estado.ultimaAtualizacao = Date.now();
   el("iconeAtualizar").classList.remove("girando");
   el("btnAtualizar").disabled = false;
 
-  guardar.gravar("radar_cache", { itens: estado.itens, falhas: estado.falhas, quando: estado.ultimaAtualizacao });
+  guardar.gravar("radar_cache2", {
+    brutos: estado.brutos, falhas: estado.falhas, quando: estado.ultimaAtualizacao
+  });
   guardar.gravar("radar_visita", Date.now());
 
   montarFiltroVeiculos();
@@ -667,7 +863,7 @@ async function carregarTudo(){
 }
 
 /* ============================================================
-   5. ASSUNTOS DO DIA (frequência de termos nas manchetes)
+   7. ASSUNTOS DO DIA (frequência de termos nas manchetes)
    ============================================================ */
 const VAZIAS = new Set(("a as o os um uma uns umas de do da dos das em no na nos nas por para com sem sob sobre " +
   "e ou mas que quem qual quais quando onde como porque pois se já ainda mais menos muito pouco todo toda todos " +
@@ -746,7 +942,7 @@ function renderizarAssuntos(){
 }
 
 /* ============================================================
-   6. FILTRAGEM E RENDERIZAÇÃO
+   8. FILTRAGEM E RENDERIZAÇÃO
    ============================================================ */
 function itensFiltrados(){
   let itens = estado.itens[estado.secao] || [];
@@ -795,7 +991,9 @@ function renderizarGrade(){
         <div class="esq-linha" style="width:72%"></div>
         <div class="esq-linha" style="width:52%;height:9px;margin-top:12px"></div>
       </div>`).join("");
-    el("contagem").textContent = "Buscando fontes…";
+    el("contagem").textContent = estado.progresso.total
+      ? `Buscando fontes… ${estado.progresso.feitas}/${estado.progresso.total}`
+      : "Buscando fontes…";
     return;
   }
 
@@ -805,11 +1003,19 @@ function renderizarGrade(){
 
   let html = "";
 
-  if(falhas.length){
+  if(falhas.length && !estado.carregando){
+    const secaoAtual = SECOES.find(s => s.id === estado.secao);
+    const tudoFora = falhas.length === secaoAtual.fontes.length;
     html += `<div class="aviso" role="status">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
-      <div><b>${falhas.length} fonte${falhas.length > 1 ? "s" : ""} sem resposta nesta atualização</b>
-      ${escapar(falhas.join(", "))} — o restante do painel está completo. Tente atualizar em alguns minutos.</div>
+      <div>${tudoFora
+        ? `<b>Nenhuma fonte respondeu nesta atualização</b>
+           As pontes públicas que trazem os feeds até o navegador podem estar fora do ar ou o aparelho está sem
+           conexão. Toque em Atualizar em alguns minutos. Se persistir, publique um Apps Script próprio e informe
+           a URL em <code>CONFIG.PROXY_PROPRIO</code> no <code>index.html</code>.`
+        : `<b>${falhas.length} fonte${falhas.length > 1 ? "s" : ""} sem resposta nesta atualização</b>
+           ${escapar(falhas.join(", "))} — o restante do painel está completo. Tente atualizar em alguns minutos.`}
+      </div>
     </div>`;
   }
 
@@ -831,6 +1037,7 @@ function renderizarGrade(){
     return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
       <div class="n-meta">
         <span class="n-veiculo">${escapar(i.veiculo)}</span>
+        ${i.origem && i.origem !== i.veiculo ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(i.origem)}</span>` : ""}
         ${i.ts ? `<span class="n-ponto">·</span><span class="n-hora">${escapar(tempoRelativo(i.ts))}</span>` : ""}
         ${novo ? `<span class="n-novo">novo</span>` : ""}
       </div>
@@ -842,9 +1049,10 @@ function renderizarGrade(){
   grade.innerHTML = html;
 
   const total = (estado.itens[estado.secao] || []).length;
+  const plural = n => n === 1 ? "1 notícia" : `${n} notícias`;
   el("contagem").textContent = itens.length === total
-    ? `${total} notícias`
-    : `${itens.length} de ${total} notícias`;
+    ? plural(total)
+    : `${itens.length} de ${plural(total)}`;
 }
 
 function renderizarRodape(){
@@ -884,7 +1092,7 @@ function montarFiltroVeiculos(){
 }
 
 /* ============================================================
-   7. EVENTOS
+   9. EVENTOS
    ============================================================ */
 el("abas").addEventListener("click", e => {
   const aba = e.target.closest("[data-secao]");
@@ -925,7 +1133,7 @@ el("btnLimpar").addEventListener("click", () => {
 
 el("filtroVeiculo").addEventListener("change", e => { estado.veiculo = e.target.value; renderizar(); });
 el("filtroPeriodo").addEventListener("change", e => { estado.periodo = Number(e.target.value); renderizar(); });
-el("btnAtualizar").addEventListener("click", () => { if(!estado.carregando) carregarTudo(); });
+el("btnAtualizar").addEventListener("click", () => carregarTudo());
 
 el("btnTema").addEventListener("click", () => {
   const novo = document.documentElement.dataset.tema === "escuro" ? "claro" : "escuro";
@@ -951,13 +1159,13 @@ document.addEventListener("keydown", e => {
 // Reatualiza ao voltar para a aba, se estiver defasado
 document.addEventListener("visibilitychange", () => {
   if(document.visibilityState === "visible" && estado.ultimaAtualizacao &&
-     Date.now() - estado.ultimaAtualizacao > CONFIG.INTERVALO_MS && !estado.carregando){
+     Date.now() - estado.ultimaAtualizacao > CONFIG.INTERVALO_MS){
     carregarTudo();
   }
 });
 
 /* ============================================================
-   8. INICIALIZAÇÃO
+  10. INICIALIZAÇÃO
    ============================================================ */
 (function iniciar(){
   aplicarTema(guardar.ler("radar_tema") ||
@@ -966,20 +1174,21 @@ document.addEventListener("visibilitychange", () => {
   estado.ultimaVisita = guardar.ler("radar_visita") || 0;
 
   // Exibe o cache imediatamente para a tela não abrir vazia
-  const cache = guardar.ler("radar_cache");
-  if(cache?.itens){
-    estado.itens = cache.itens;
+  const cache = guardar.ler("radar_cache2");
+  if(cache?.brutos){
+    SECOES.forEach(s => {
+      estado.brutos[s.id] = cache.brutos[s.id] || {};
+      recompor(s.id);
+    });
     estado.falhas = cache.falhas || estado.falhas;
     estado.ultimaAtualizacao = cache.quando;
     estado.carregando = false;
     montarFiltroVeiculos();
-    renderizar();
-  }else{
-    renderizar();
   }
+  renderizar();
 
   carregarTudo();
-  setInterval(() => { if(!estado.carregando && document.visibilityState === "visible") carregarTudo(); }, CONFIG.INTERVALO_MS);
+  setInterval(() => { if(document.visibilityState === "visible") carregarTudo(); }, CONFIG.INTERVALO_MS);
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
