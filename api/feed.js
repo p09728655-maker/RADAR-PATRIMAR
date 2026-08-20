@@ -7,28 +7,50 @@
    ponte aberta viraria proxy de qualquer endereço da internet. */
 
 const DOMINIOS = [
-  "g1.globo.com",
-  "feeds.folha.uol.com.br",
-  "agenciabrasil.ebc.com.br",
-  "poder360.com.br",
-  "cnnbrasil.com.br",
-  "feeds.bbci.co.uk",
-  "bbc.com",
-  "rss.dw.com",
-  "dw.com",
-  "france24.com",
-  "news.un.org",
+  "news.google.com",
+  "rss.nytimes.com",
+  "nytimes.com",
   "technologyreview.com",
   "arstechnica.com",
   "theverge.com",
-  "techcrunch.com",
-  "news.google.com",
-  "rss.nytimes.com",
-  "nytimes.com"
+  "techcrunch.com"
 ];
 
 const permitido = host =>
   DOMINIOS.some(d => host === d || host.endsWith("." + d));
+
+/* Nem todo feed é UTF-8. O da Folha, por exemplo, vem em ISO-8859-1 e, lido
+   como UTF-8, transforma "vigário" em "vig?rio". A codificação certa é
+   procurada em ordem: cabeçalho HTTP, declaração do próprio XML e, por fim,
+   os dois palpites comuns. Vence a primeira leitura sem caractere perdido. */
+function decodificar(bytes, tipoHttp) {
+  const espiada = new TextDecoder("windows-1252").decode(bytes.slice(0, 400));
+
+  const candidatas = [
+    (tipoHttp.match(/charset=["']?([\w-]+)/i) || [])[1],
+    (espiada.match(/encoding=["']([\w-]+)["']/i) || [])[1],
+    "utf-8",
+    "windows-1252"
+  ].filter(Boolean).map(c => c.toLowerCase());
+
+  let primeira = null;
+  for (const nome of new Set(candidatas)) {
+    let texto;
+    try {
+      texto = new TextDecoder(nome).decode(bytes);
+    } catch {
+      continue;                       // rótulo de codificação desconhecido
+    }
+    if (primeira === null) primeira = texto;
+    if (!texto.includes("\uFFFD")) return texto;
+  }
+  return primeira ?? new TextDecoder("utf-8").decode(bytes);
+}
+
+// A declaração passa a dizer UTF-8, que é como o conteúdo sai daqui
+const marcarUtf8 = texto =>
+  texto.replace(/^\s*<\?xml[^>]*\?>/, decl =>
+    decl.replace(/encoding=["'][\w-]+["']/i, 'encoding="UTF-8"'));
 
 const NAVEGADOR =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
@@ -71,13 +93,14 @@ export default async function handler(req, res) {
       return res.status(502).json({ erro: "fonte respondeu " + resposta.status });
     }
 
-    const corpo = await resposta.text();
     const tipo = resposta.headers.get("content-type") || "";
+    const bytes = new Uint8Array(await resposta.arrayBuffer());
+    const corpo = marcarUtf8(decodificar(bytes, tipo));
 
     // Cinco minutos na borda: o intervalo do painel é de dez, então ninguém
     // vê manchete velha, e as fontes recebem uma visita em vez de dezenas.
     res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=900");
-    res.setHeader("Content-Type", /xml|json/i.test(tipo) ? tipo : "application/xml; charset=utf-8");
+    res.setHeader("Content-Type", /json/i.test(tipo) ? "application/json; charset=utf-8" : "application/xml; charset=utf-8");
     res.setHeader("Access-Control-Allow-Origin", "*");
     return res.status(200).send(corpo);
   } catch (erro) {

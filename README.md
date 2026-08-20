@@ -1,8 +1,16 @@
 # Radar Diário — Patrimar
 
 Painel de notícias em arquivo único, sem etapa de compilação. Lê feeds RSS
-públicos direto no navegador e organiza em cinco seções: Brasil, Mundo,
-Inteligência Artificial, Moveleiro, PPCP e Indústria.
+públicos direto no navegador e organiza em quatro seções, todas voltadas ao
+ramo: **Patrimar**, **PPCP e Indústria**, **Moveleiro** e **Inteligência
+Artificial**.
+
+A aba Patrimar é a da casa: abre o painel, fica marcada com a estrela da
+marca e reúne menções à empresa, o mercado de planejados e a concorrência.
+
+Não há seção de notícia geral. Feed de jornal aberto trazia terremoto,
+estreia de série e emoji junto com o que interessa; as fontes de hoje são
+consultas fechadas no assunto.
 
 ## Arquivos
 
@@ -43,6 +51,15 @@ Abrir o endereço publicado e escolher a opção de instalar:
 O atalho abre em janela própria, com o ícone vermelho da Patrimar.
 
 ## Manutenção
+
+### Acentuação dos feeds
+
+Nem todo feed é UTF-8. Lido como se fosse, "vigário" vira "vig?rio". A
+codificação certa é procurada em ordem — cabeçalho HTTP, declaração do
+próprio XML, e por fim UTF-8 e windows-1252 — e vence a primeira leitura sem
+caractere perdido. A conferência existe nos dois lados: no `api/feed.js`,
+que já devolve tudo em UTF-8, e no navegador, para o caso de a notícia ter
+vindo por uma ponte pública.
 
 ### Trocar ou acrescentar fontes
 
