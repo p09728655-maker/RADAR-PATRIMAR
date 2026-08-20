@@ -307,15 +307,23 @@ html[data-tema="escuro"] .mural-selo{background:#2B2718;color:#E4DCC0}
 .mural-tirar{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 var(--s2);border-radius:var(--r-sm)}
 .mural-tirar:hover{color:var(--atencao);background:var(--surface-2)}
 .mural-vazio{font-size:var(--fs-small);color:var(--muted)}
+.mural-instrucao{
+  display:flex;gap:var(--s3);align-items:flex-start;
+  background:var(--marca-areia);color:#5C4B12;
+  border-radius:var(--r-md);padding:var(--s3);margin-bottom:var(--s3);
+  font-size:var(--fs-small);
+}
+html[data-tema="escuro"] .mural-instrucao{background:#2B2718;color:#E4DCC0}
+.mural-instrucao svg{width:18px;height:18px;flex:0 0 18px;margin-top:1px}
 
 /* Alfinete no cartão, só no modo de publicação */
 .n-fixar{
   position:absolute;top:6px;right:6px;
-  width:28px;height:28px;border-radius:var(--r-sm);
+  width:30px;height:30px;border-radius:var(--r-sm);
   display:grid;place-items:center;
-  background:var(--surface-2);border:1px solid var(--border);color:var(--muted);
+  background:var(--surface);border:1px solid var(--marca-vermelho);color:var(--marca-vermelho);
 }
-.n-fixar:hover{color:var(--marca-vermelho);border-color:var(--marca-vermelho)}
+.n-fixar:hover{background:var(--marca-vermelho);color:#fff}
 .n-fixar svg{width:15px;height:15px}
 
 /* Caixa de publicação */
@@ -586,7 +594,7 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
   .resumo{gap:14pt}
   .mural{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none;margin-bottom:10pt}
-  .mural-acoes,.mural-tirar,.n-fixar{display:none}
+  .mural-acoes,.mural-tirar,.n-fixar,.mural-instrucao{display:none}
   .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
   .leitura-espera,.leitura-pe .btn,.leitura-erro{display:none}
   .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
@@ -1388,7 +1396,7 @@ function montarMural(){
       </button>` : ""}
       ${podePublicar ? `<button class="btn btn-secundario" id="btnFixarModo" aria-pressed="${estado.publicando}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
-        <span class="btn-rotulo">${estado.publicando ? "Sair de fixar" : "Fixar notícia"}</span>
+        <span class="btn-rotulo">${estado.publicando ? "Cancelar" : "Fixar notícia"}</span>
       </button>` : ""}
     </div>`;
 
@@ -1415,12 +1423,23 @@ function montarMural(){
     }).join("")}</div>`;
   }
 
+  /* O alfinete aparece em todos os cartões porque é assim que se escolhe um.
+     Sem esta linha, a tela parece dizer que fixou tudo de uma vez. */
+  const instrucao = estado.publicando
+    ? `<div class="mural-instrucao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
+        <div><b>Escolha a notícia.</b> O alfinete apareceu em todas as manchetes abaixo — nenhuma foi
+        fixada ainda. Clique no alfinete da que você quer e confirme na caixa. Para desistir, use Cancelar.</div>
+      </div>`
+    : "";
+
   return `<section class="mural">
     <div class="mural-topo">
       <span class="mural-nome">Mural interno</span>
       ${itens.length ? `<span class="mural-conta">${itens.length}</span>` : ""}
       ${acoes}
     </div>
+    ${instrucao}
     ${miolo}
   </section>`;
 }
@@ -1466,6 +1485,7 @@ async function publicarNoMural(){
     estado.mural.itens.unshift(dados.aviso);
     caixa.close();
     renderizar();
+    carregarMural();                           // reconcilia com o que o banco guardou
   }catch(e){
     mostrarErroPublicacao(e?.message || "não foi possível publicar");
   }finally{

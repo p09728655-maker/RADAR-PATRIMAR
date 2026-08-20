@@ -115,7 +115,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
       const lista = await lerMural();
-      res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=120");
+      // Sem cache: recado publicado tem que aparecer na hora. Cache de borda
+      // aqui devolvia a lista antiga para quem recarregasse logo depois.
+      res.setHeader("Cache-Control", "no-store");
       return res.status(200).json({ avisos: lista });
     }
 
