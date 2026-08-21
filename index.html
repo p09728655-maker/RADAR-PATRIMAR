@@ -887,7 +887,7 @@ const gn = q => "https://news.google.com/rss/search?q=" +
 const SECOES = [
   { id:"patrimar", nome:"Patrimar", destaque:true, fontes:[
     { v:"Patrimar Móveis",    u:gn('"Patrimar Móveis"') },
-    { v:"Menções à marca",    u:gn('"Patrimar" móveis OR planejados OR moveleira') },
+    { v:"Menções à marca",    u:gn('"Patrimar" móveis OR planejados OR moveleira -engenharia -construtora -incorporadora -imobiliário') },
     { v:"Móveis planejados",  u:gn('"móveis planejados" mercado OR fábrica OR lançamento') },
     { v:"Concorrência",       u:gn('Todeschini OR "Dell Anno" OR Italínea OR Bontempo OR "SCA Móveis" planejados') },
     { v:"Varejo e franquias", u:gn('franquia de móveis planejados OR loja de móveis planejados expansão') }
@@ -957,6 +957,25 @@ const TEMAS = {
 /* Manchete que nunca vai interessar ao PCP. Sai da lista em vez de
    disputar espaço com o que importa. */
 const RUIDO = /(horoscopo|signo|\bbbb\b|novela|celebridad|apostas|loteria|mega ?sena|receita de|dieta|emagrec|futebol|escalacao|libertadores|brasileirao|sorteio|promocao relampago)/;
+
+/* ------------------------------------------------------------
+   Homônimo
+   ------------------------------------------------------------
+   Existe a Patrimar Engenharia, construtora e incorporadora de Minas,
+   sem relação nenhuma com a Patrimar Móveis. Buscar por "Patrimar"
+   traz as duas, e a aba da casa enchia de lançamento imobiliário.
+
+   A consulta já pede para excluir, mas a linguagem de busca do Google
+   é frouxa e deixa passar. A trava aqui é a que decide: manchete da
+   construtora sai da aba — a menos que também fale de móvel, caso raro
+   em que pode ser notícia das duas. Sair só desta seção, nunca do
+   painel: obra e imobiliário interessam nas outras abas. */
+const CONSTRUTORA = /(\bengenharia\b|construtor|incorporador|imobiliari|\bimoveis\b|empreendiment|apartament|condominio|\bvgv\b|\bpati3\b)/;
+const MOVEL = /(\bmovel\b|\bmoveis\b|planejad|marcenari|movelei|\bmdf\b|\bmdp\b|cozinha|dormitorio|estofad)/;
+
+const EXCLUIR = {
+  patrimar: t => CONSTRUTORA.test(t) && !MOVEL.test(t)
+};
 
 /* Chamada de engajamento, não notícia. Não elimina, mas perde posição. */
 const CHAMARIZ = /\b(veja|confira|saiba|assista|descubra|entenda|fotos|video|galeria|ranking|dicas|passo a passo|voce precisa)\b/;
@@ -1271,11 +1290,25 @@ function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
 }
 
 /* Nem todo feed é UTF-8. O da Folha vem em ISO-8859-1 e, lido como UTF-8,
-   transforma "vigário" em "vig?rio". A codificação certa é procurada em
-   ordem: cabeçalho HTTP, declaração do próprio XML e os dois palpites
-   comuns. Vence a primeira leitura sem caractere perdido. */
+   transforma "vigário" em "vig?rio". Mas o erro contrário é mais comum e
+   mais silencioso, e é o que se resolve abaixo. */
 async function lerTexto(r){
   const bytes = new Uint8Array(await r.arrayBuffer());
+
+  /* UTF-8 primeiro, e em modo estrito. Texto latin-1 com acento quase nunca
+     forma sequência UTF-8 válida: "á" isolado é o byte 0xE1 seguido de um
+     espaço, e o decodificador estrito recusa. Então quem passa no estrito é
+     UTF-8 de verdade.
+
+     A ordem importa e antes estava invertida. O cabeçalho HTTP vinha
+     primeiro, e feed que declara ISO-8859-1 mas entrega bytes UTF-8 vencia
+     de saída — porque ler UTF-8 como windows-1252 nunca produz caractere
+     perdido, então o teste de "leitura sem perda" aprovava a leitura errada
+     e "persistência" chegava na tela como "persistÃªncia". */
+  try{
+    return new TextDecoder("utf-8", { fatal:true }).decode(bytes);
+  }catch{ /* não é UTF-8: o que o feed declarar decide */ }
+
   const tipo = r.headers.get("content-type") || "";
   const espiada = new TextDecoder("windows-1252").decode(bytes.slice(0, 400));
 
@@ -1462,7 +1495,9 @@ function recompor(secaoId){
 
   for(const fonte of secao.fontes){
     for(const it of (estado.brutos[secaoId][fonte.v] || [])){
-      if(RUIDO.test(simples(it.titulo))) continue;
+      const limpo = simples(it.titulo + " " + (it.resumo || ""));
+      if(RUIDO.test(limpo)) continue;
+      if(EXCLUIR[secaoId]?.(limpo)) continue;
 
       const igual = porChave.get(it.chave);
       if(igual){ juntar(igual, it); continue; }
@@ -1555,6 +1590,12 @@ const VAZIAS = new Set(("a as o os um uma uns umas de do da dos das em no na nos
   "entre até desde contra durante antes depois ano anos dia dias mês meses hoje ontem diz dizem após novo nova " +
   "novos novas grande grandes maior menor primeiro segunda terceiro contra the and for with from that this what " +
   "how why says said new news video veja saiba entenda leia confira " +
+  // Os feeds de IA são em inglês e enchiam os chips de "users" e "data".
+  // Substantivo genérico não é assunto do dia.
+  "users user data model models company companies business market report " +
+  "study people world time year years week best most other others their " +
+  "there these those into over also could would should make makes made " +
+  "using used more here your our its it's out now top big " +
   "milhões bilhões mil cerca apenas também ainda agora nesta neste").split(" "));
 
 function calcularAssuntos(){

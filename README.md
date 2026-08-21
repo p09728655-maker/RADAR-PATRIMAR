@@ -56,6 +56,22 @@ duas medidas, porque uma só erra:
 O que sobrevive guarda a lista de quem publicou, e é esse número que aparece
 no cartão e vai junto para a leitura do dia.
 
+### A outra Patrimar
+
+Existe a **Patrimar Engenharia**, construtora e incorporadora de Minas, sem
+relação nenhuma com a Patrimar Móveis. Buscar por "Patrimar" traz as duas, e
+a aba da casa enchia de lançamento imobiliário e VGV.
+
+A consulta do Google Notícias já pede para excluir `-engenharia`,
+`-construtora`, `-incorporadora` e `-imobiliário`, mas a linguagem de busca é
+frouxa e deixa passar. Quem decide é a trava no `index.html`, na constante
+`EXCLUIR`: manchete com marca de construtora sai da aba **a menos que também
+fale de móvel** — caso raro em que pode ser notícia das duas, como uma
+incorporadora fechando parceria com fábrica de planejados.
+
+A exclusão vale só nesta seção. Obra e mercado imobiliário continuam
+aparecendo nas outras abas, onde são assunto legítimo.
+
 ## Cartões ou lista
 
 O botão ao lado dos filtros alterna a densidade. **Cartões** para explorar,
@@ -111,12 +127,28 @@ O atalho abre em janela própria, com o ícone vermelho da Patrimar.
 
 ### Acentuação dos feeds
 
-Nem todo feed é UTF-8. Lido como se fosse, "vigário" vira "vig?rio". A
-codificação certa é procurada em ordem — cabeçalho HTTP, declaração do
-próprio XML, e por fim UTF-8 e windows-1252 — e vence a primeira leitura sem
-caractere perdido. A conferência existe nos dois lados: no `api/feed.js`,
-que já devolve tudo em UTF-8, e no navegador, para o caso de a notícia ter
-vindo por uma ponte pública.
+Nem todo feed é UTF-8, e o erro acontece nos dois sentidos:
+
+- Feed em ISO-8859-1 lido como UTF-8 transforma "vigário" em "vig?rio".
+- Feed em UTF-8 lido como ISO-8859-1 transforma "persistência" em
+  "persistÃªncia".
+
+O segundo é mais comum e muito mais silencioso. A regra antiga procurava a
+codificação em ordem — cabeçalho HTTP, declaração do XML, depois os palpites
+— e aceitava a primeira leitura sem caractere perdido. Só que **ler UTF-8
+como windows-1252 nunca produz caractere perdido**: windows-1252 tem símbolo
+para quase todo byte. Feed que declarava ISO-8859-1 no cabeçalho mas entregava
+bytes UTF-8 vencia de saída, e o teste aprovava a leitura errada.
+
+Agora a primeira tentativa é UTF-8 em **modo estrito**, antes de olhar
+qualquer declaração. Texto latin-1 com acento quase nunca forma sequência
+UTF-8 válida — "á" isolado é o byte `0xE1` seguido de um espaço, que o
+decodificador estrito recusa. Quem passa no estrito é UTF-8 de verdade; quem
+não passa cai para o que o feed declarar, e windows-1252 no fim da fila.
+
+A conferência existe nos dois lados: no `api/feed.js`, que já devolve tudo em
+UTF-8, e no navegador, para o caso de a notícia ter vindo por uma ponte
+pública.
 
 ### Trocar ou acrescentar fontes
 
