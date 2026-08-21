@@ -283,15 +283,6 @@ html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--m
 /* ============================================================
    RESUMO DO DIA
    ============================================================ */
-.resumo{grid-column:1/-1;display:flex;flex-direction:column;gap:var(--s5)}
-.resumo-abertura{
-  border-left:3px solid var(--marca-vermelho);
-  padding-left:var(--s4);
-}
-.resumo-titulo{font-size:var(--fs-h1);font-weight:700;line-height:1.2}
-.resumo-linha{font-size:var(--fs-small);color:var(--muted);margin-top:2px}
-.resumo-termos{margin-top:var(--s3);font-size:var(--fs-small);color:var(--text-2)}
-.resumo-termos b{color:var(--text)}
 
 /* ============================================================
    MURAL INTERNO
@@ -373,7 +364,7 @@ html[data-tema="escuro"] .mural-instrucao{background:#2B2718;color:#E4DCC0}
 
 @media (max-width:640px){ .dlg-dupla{grid-template-columns:1fr} }
 
-/* Leitura escrita pela IA, no topo do resumo */
+/* Leitura escrita pela IA: é o editorial do jornal */
 .leitura{
   border:1px solid var(--border);border-left:3px solid var(--marca-grafite);
   border-radius:var(--r-md);background:var(--surface);
@@ -409,6 +400,17 @@ html[data-tema="escuro"] .leitura{border-left-color:var(--marca-areia)}
 html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
 .leitura-fecho b{font-weight:700}
 .fonte-falha{font-weight:700;color:var(--atencao)}
+
+/* Nota explicativa dentro do diálogo de configurações */
+.dlg-nota{
+  display:flex;gap:var(--s3);align-items:flex-start;
+  background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:var(--s3);
+  font-size:var(--fs-small);color:var(--text-2);line-height:1.45;
+}
+.dlg-nota svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;color:var(--muted)}
+.dlg-nota-x{margin-top:var(--s2);font-size:var(--fs-caption);color:var(--muted)}
+.dlg-campo select{width:100%}
 @media (max-width:560px){
   .leitura-linha{grid-template-columns:1fr;gap:var(--s1)}
 }
@@ -421,22 +423,6 @@ html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
 .leitura-erro{margin-top:var(--s3);font-size:var(--fs-small);color:var(--atencao)}
 .leitura-ajuda{margin-top:var(--s1);font-size:var(--fs-caption);color:var(--text-2)}
 
-.resumo-bloco{break-inside:avoid}
-.resumo-cabeca{
-  display:flex;align-items:baseline;gap:var(--s2);
-  border-bottom:1px solid var(--border);padding-bottom:var(--s2);margin-bottom:var(--s3);
-}
-.resumo-secao{font-size:var(--fs-h2);font-weight:700}
-.resumo-qtd{font-size:var(--fs-label);color:var(--muted);font-weight:600}
-.resumo-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr));gap:var(--s3) var(--s5)}
-.resumo-item{
-  display:block;break-inside:avoid;
-  padding-left:var(--s3);border-left:2px solid var(--border);
-}
-.resumo-item:hover{border-left-color:var(--marca-vermelho)}
-.resumo-item-t{font-weight:600;line-height:1.35}
-.resumo-item:hover .resumo-item-t{color:var(--marca-bordeaux)}
-.resumo-item-m{font-size:var(--fs-caption);color:var(--muted);margin-top:2px}
 
 /* Cabeçalho impresso: só existe no papel */
 .folha-topo{display:none}
@@ -639,12 +625,12 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
    ============================================================ */
 /* Tablet: respiro menor nas laterais e cartão que ainda cabe em duas colunas */
 @media (max-width:1100px){
-  .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape,.dica{padding-left:var(--s4);padding-right:var(--s4)}
+  .topo-in,.nav-in,.controles,main,.assuntos,.rodape,.dica{padding-left:var(--s4);padding-right:var(--s4)}
   .grade{grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
   .campo{max-width:none}
 }
 @media (max-width:860px){
-  .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape{padding-left:var(--s4);padding-right:var(--s4)}
+  .topo-in,.nav-in,.controles,main,.assuntos,.rodape{padding-left:var(--s4);padding-right:var(--s4)}
   .marca-titulo{font-size:18px}
   .marca-sub{display:none}
   .marca-logo{height:32px;padding:4px 8px}
@@ -662,13 +648,99 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
 /* Celular: uma notícia por vez */
 @media (max-width:640px){
   .grade{grid-template-columns:1fr;gap:var(--s2)}
-  .resumo-lista{grid-template-columns:1fr}
-  .resumo{gap:var(--s4)}
+  .jn-nome{font-size:28px}
+  .jn-principal-t{font-size:24px}
+  .jn-caderno-lista{grid-template-columns:1fr}
 }
 @media (min-width:1500px){
   .grade{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
-  .topo-in,.nav-in,.controles,main,.assuntos-in,.rodape,.dica{padding-left:var(--s6);padding-right:var(--s6)}
+  .topo-in,.nav-in,.controles,main,.assuntos,.rodape,.dica{padding-left:var(--s6);padding-right:var(--s6)}
 }
+/* ============================================================
+   JORNAL PATRIMAR
+   ============================================================ */
+.jornal{grid-column:1/-1;max-width:1100px;margin:0 auto;width:100%}
+
+.jn-cabeca{
+  text-align:center;
+  border-bottom:3px double var(--marca-grafite);
+  padding-bottom:var(--s4);margin-bottom:var(--s5);
+}
+html[data-tema="escuro"] .jn-cabeca{border-bottom-color:var(--border-forte)}
+.jn-logo{height:30px;width:auto;margin-bottom:var(--s3)}
+.jn-nome{
+  font-size:38px;font-weight:700;line-height:1;letter-spacing:-1px;
+  color:var(--marca-grafite);
+}
+html[data-tema="escuro"] .jn-nome{color:var(--text)}
+.jn-linha{
+  font-size:var(--fs-small);color:var(--muted);margin-top:var(--s2);
+  text-transform:uppercase;letter-spacing:1px;font-weight:600;
+}
+.jn-assuntos{font-size:var(--fs-caption);color:var(--text-2);margin-top:var(--s2)}
+
+/* A abertura: manchete larga à esquerda, chamadas em coluna à direita */
+.jn-abertura{display:grid;grid-template-columns:1fr;gap:var(--s5)}
+@media (min-width:860px){
+  .jn-abertura{grid-template-columns:1.9fr 1fr;gap:var(--s6)}
+  .jn-tambem{border-left:1px solid var(--border);padding-left:var(--s5)}
+}
+
+.jn-tarja{
+  display:inline-block;
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--marca-vermelho);margin-bottom:var(--s2);
+}
+html[data-tema="escuro"] .jn-tarja{color:#F2727A}
+.jn-principal{display:block}
+.jn-principal-t{
+  font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.5px;
+  color:var(--text);
+}
+.jn-principal:hover .jn-principal-t{color:var(--marca-bordeaux)}
+html[data-tema="escuro"] .jn-principal:hover .jn-principal-t{color:#F2727A}
+.jn-principal-r{
+  font-size:var(--fs-h2);color:var(--text-2);line-height:1.5;margin-top:var(--s3);
+}
+.jn-creditos{
+  font-size:var(--fs-caption);color:var(--muted);margin-top:var(--s2);
+  text-transform:uppercase;letter-spacing:.4px;font-weight:600;
+}
+
+.jn-rotulo{
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--muted);padding-bottom:var(--s2);margin-bottom:var(--s3);
+  border-bottom:2px solid var(--marca-grafite);
+}
+html[data-tema="escuro"] .jn-rotulo{border-bottom-color:var(--border-forte)}
+.jn-chamada{display:block;padding:var(--s3) 0;border-bottom:1px solid var(--border)}
+.jn-chamada:last-child{border-bottom:0}
+.jn-chamada-t{font-size:var(--fs-body);font-weight:600;line-height:1.35}
+.jn-chamada:hover .jn-chamada-t{color:var(--marca-bordeaux)}
+html[data-tema="escuro"] .jn-chamada:hover .jn-chamada-t{color:#F2727A}
+
+.jn-editorial{margin-top:var(--s6)}
+
+.jn-caderno{margin-top:var(--s6);break-inside:avoid}
+.jn-caderno-topo{
+  display:flex;align-items:baseline;gap:var(--s3);
+  border-bottom:2px solid var(--marca-grafite);
+  padding-bottom:var(--s2);margin-bottom:var(--s4);
+}
+html[data-tema="escuro"] .jn-caderno-topo{border-bottom-color:var(--border-forte)}
+.jn-caderno-nome{
+  font-size:var(--fs-h1);font-weight:700;letter-spacing:-.2px;
+}
+.jn-caderno-qtd{font-size:var(--fs-label);color:var(--muted);font-weight:600;margin-left:auto}
+.jn-caderno-lista{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));
+  gap:var(--s4) var(--s5);
+}
+.jn-nota{display:block;break-inside:avoid}
+.jn-nota-t{font-size:var(--fs-md);font-weight:600;line-height:1.4}
+.jn-nota:hover .jn-nota-t{color:var(--marca-bordeaux)}
+html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
+
 @media print{
   @page{ margin:14mm; }
 
@@ -698,8 +770,30 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   .n-cobertura{background:none;color:#555;padding:0;font-weight:600}
   .aviso{border-color:#999;color:#333;background:none}
 
-  /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
-  .resumo{gap:14pt}
+  /* O jornal é o formato pensado para o papel — é para isso que ele existe */
+  .jornal{max-width:none}
+  /* O cabeçalho de impressão da grade duplicaria o cabeçalho do jornal */
+  main:has(.jornal) .folha-topo{display:none}
+  .jn-cabeca{border-bottom:3px double #000;padding-bottom:8pt;margin-bottom:12pt}
+  .jn-logo{height:26px}
+  .jn-nome{font-size:30pt;color:#000}
+  .jn-linha{font-size:8pt;color:#444}
+  .jn-assuntos{font-size:8pt;color:#555}
+  .jn-abertura{grid-template-columns:1.9fr 1fr;gap:16pt;break-inside:avoid}
+  .jn-tambem{border-left:1px solid #bbb;padding-left:12pt}
+  .jn-tarja{color:#DB2126;font-size:8pt}
+  .jn-principal-t{font-size:20pt}
+  .jn-principal-r{font-size:10.5pt;color:#333}
+  .jn-creditos{font-size:7.5pt;color:#555}
+  .jn-rotulo{border-bottom-color:#000;font-size:8pt}
+  .jn-chamada{padding:5pt 0;border-bottom-color:#ddd}
+  .jn-chamada-t{font-size:10pt}
+  .jn-editorial{margin-top:14pt;break-inside:avoid}
+  .jn-caderno{margin-top:14pt;break-inside:avoid-page}
+  .jn-caderno-topo{border-bottom-color:#000;margin-bottom:8pt}
+  .jn-caderno-nome{font-size:13pt}
+  .jn-caderno-lista{grid-template-columns:1fr 1fr 1fr;gap:8pt 14pt}
+  .jn-nota-t{font-size:9.5pt}
   .mural{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none;margin-bottom:10pt}
   .mural-acoes,.mural-tirar,.n-fixar,.mural-instrucao{display:none}
   .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
@@ -710,12 +804,6 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   .leitura-secao{color:#555}
   .leitura-fecho{background:none;color:#000;padding:6pt 0 0;border-top:1px solid #ddd;border-radius:0}
   .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
-  .resumo-abertura{border-left-color:#DB2126}
-  .resumo-lista{grid-template-columns:1fr 1fr;gap:8pt 16pt}
-  .resumo-item{border-left-color:#ccc}
-  .resumo-item-t{font-size:10pt}
-  .resumo-item-m{color:#555}
-  .resumo-bloco{break-inside:avoid-page}
 
   a{color:#000}
 }
@@ -737,6 +825,9 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
       <button class="btn btn-instalar oculto" id="btnInstalar" title="Instalar como aplicativo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></svg>
         <span class="btn-rotulo">Instalar</span>
+      </button>
+      <button class="btn btn-topo" id="btnConfig" title="Configurações" aria-label="Configurações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 008 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H2a2 2 0 110-4h.1A1.6 1.6 0 004.6 8a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V2a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H22a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg>
       </button>
       <button class="btn btn-topo" id="btnTema" title="Alternar tema claro/escuro" aria-label="Alternar tema">
         <svg id="iconeTema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
@@ -792,9 +883,9 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
     <optgroup label="Arquivo" id="grupoArquivo"></optgroup>
   </select>
   </div>
-  <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Resumo do dia: as principais de cada seção">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
-    <span class="btn-rotulo">Resumo do dia</span>
+  <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Jornal Patrimar: a edição do dia, pronta para imprimir">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/><path d="M19 8h1a2 2 0 012 2v8a2 2 0 01-2 2"/><path d="M7 9h7M7 13h7M7 17h4"/></svg>
+    <span class="btn-rotulo">Jornal</span>
   </button>
   <button class="btn btn-secundario btn-so-icone" id="btnDensidade" title="Alternar entre cartões e lista" aria-label="Alternar entre cartões e lista">
     <svg id="iconeDensidade" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -811,6 +902,51 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   <span class="assuntos-rot">Assuntos do dia</span>
   <div class="assuntos-lista" id="listaAssuntos"></div>
 </div>
+
+<dialog id="dlgConfig">
+  <form method="dialog" class="dlg">
+    <div class="dlg-topo">
+      <b>Configurações</b>
+      <button class="dica-x" value="cancelar" aria-label="Fechar">✕</button>
+    </div>
+
+    <label class="dlg-campo"><span>Chave da API da Anthropic <i>(opcional)</i></span>
+      <input id="cfgChave" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+    </label>
+    <div class="dlg-nota">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16v-4M12 8h.01"/><circle cx="12" cy="12" r="9"/></svg>
+      <div>Serve só para escrever a leitura do dia. Fica guardada <b>neste navegador</b>,
+        nunca no código nem no repositório — quem abrir o painel em outro aparelho não a
+        enxerga. Deixando em branco, vale a chave que estiver configurada na Vercel.
+        <div class="dlg-nota-x">Chave colada no código-fonte do site seria legível para
+          qualquer visitante e o GitHub a revogaria. Por isso ela mora aqui.</div>
+      </div>
+    </div>
+
+    <label class="dlg-campo"><span>Buscar notícias dos últimos</span>
+      <select id="cfgJanela">
+        <option value="when:1d">1 dia</option>
+        <option value="when:3d">3 dias</option>
+        <option value="when:7d">7 dias</option>
+        <option value="when:14d">14 dias</option>
+        <option value="">sem recorte de data</option>
+      </select>
+    </label>
+
+    <label class="dlg-campo"><span>Régua de relevância</span>
+      <select id="cfgPiso">
+        <option value="4">Frouxa — mostra quase tudo que chega</option>
+        <option value="9">Média — corta o que não pontua</option>
+        <option value="14">Apertada — só o que tem tema forte</option>
+      </select>
+    </label>
+
+    <div class="dlg-pe">
+      <button class="btn btn-secundario" id="btnCfgLimpar" value="cancelar" type="button">Apagar a chave</button>
+      <button class="btn btn-primario" id="btnCfgSalvar" value="salvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="dlgPublicar">
   <form method="dialog" class="dlg">
@@ -871,6 +1007,9 @@ const CONFIG = {
   // lugar; as pontes públicas seguem como reserva se ela não existir.
   PROXY_PROPRIO: "/api/feed?url=",
   MAX_POR_FONTE: 14,
+  JANELA: "when:7d",                 // recorte de data pedido ao Google Notícias
+  PISO_RELEVANCIA: 9,                // nota mínima para a manchete aparecer
+  MINIMO_SECAO: 12,                  // ...mas seção nenhuma fica quase vazia
   RESUMO_POR_SECAO: 6,               // manchetes por seção no resumo do dia
   ARQUIVO_ANOS: 4,                   // quantos anos entram na busca de arquivo
   INTERVALO_MS: 10 * 60 * 1000,      // atualização automática: 10 min
@@ -881,43 +1020,57 @@ const CONFIG = {
   ESPERA_LIMITE: 900                 // pausa depois de um "excesso de requisições"
 };
 
-const gn = q => "https://news.google.com/rss/search?q=" +
-  encodeURIComponent(q) + "&hl=pt-BR&gl=BR&ceid=BR:pt-419";
+/* O Google Notícias ordena por relevância, não por data: sem recorte ele
+   devolve matéria de abril junto com a de hoje, e o painel enchia de coisa
+   velha. "when:" corta na origem — o que não vem não precisa ser filtrado
+   depois.
+
+   Devolve uma função, não uma string, e a diferença importa: SECOES é
+   montada uma única vez na carga. Se a URL fosse fixada ali, trocar a
+   janela nas configurações só teria efeito depois de recarregar a página.
+   Montando na hora da busca, vale a janela que estiver valendo.
+
+   Quem passa janela explícita manda nela — é o caso da busca no arquivo,
+   que tem recorte próprio e passa "". */
+const gn = (q, janela) => () => {
+  const recorte = janela === undefined ? CONFIG.JANELA : janela;
+  return "https://news.google.com/rss/search?q=" +
+    encodeURIComponent(recorte ? q + " " + recorte : q) +
+    "&hl=pt-BR&gl=BR&ceid=BR:pt-419";
+};
 
 const SECOES = [
   { id:"patrimar", nome:"Patrimar", destaque:true, fontes:[
     { v:"Patrimar Móveis",    u:gn('"Patrimar Móveis"') },
-    { v:"Menções à marca",    u:gn('"Patrimar" móveis OR planejados OR moveleira -engenharia -construtora -incorporadora -imobiliário') },
-    { v:"Móveis planejados",  u:gn('"móveis planejados" mercado OR fábrica OR lançamento') },
-    { v:"Concorrência",       u:gn('Todeschini OR "Dell Anno" OR Italínea OR Bontempo OR "SCA Móveis" planejados') },
-    { v:"Varejo e franquias", u:gn('franquia de móveis planejados OR loja de móveis planejados expansão') }
+    { v:"Menções à marca",    u:gn('"Patrimar" (móveis OR planejados OR moveleira OR marcenaria) -engenharia -construtora -incorporadora -imobiliário -VGV') },
+    { v:"Móveis planejados",  u:gn('"móveis planejados" (indústria OR fábrica OR mercado OR produção OR franquia)') },
+    { v:"Concorrência",       u:gn('(Todeschini OR "Dell Anno" OR Italínea OR Bontempo OR "SCA Móveis" OR Florense OR Criare) (planejados OR móveis OR fábrica)') },
+    { v:"Varejo e franquias", u:gn('"móveis planejados" (franquia OR rede OR loja) (expansão OR inauguração OR abertura)') }
   ]},
   { id:"ppcp", nome:"PPCP e Indústria", fontes:[
-    { v:"Produção industrial", u:gn('produção industrial IBGE PIM indústria brasileira') },
-    { v:"PCP e Lean",          u:gn('"planejamento e controle da produção" OR "lean manufacturing" OR PCP indústria') },
-    { v:"Manufatura 4.0",      u:gn('"indústria 4.0" automação manufatura fábrica') },
-    { v:"Supply chain",        u:gn('"cadeia de suprimentos" OR "supply chain" logística indústria Brasil') },
-    { v:"CNI / Indústria",     u:gn('CNI confiança do empresário industrial capacidade instalada') },
-    { v:"Custos e insumos",    u:gn('custo de produção indústria OR preço do aço OR insumos industriais Brasil') },
+    { v:"Produção industrial", u:gn('"produção industrial" (IBGE OR PIM OR "capacidade instalada")') },
+    { v:"PCP e Lean",          u:gn('("planejamento e controle da produção" OR "lean manufacturing" OR "PCP industrial" OR "lead time" OR "gestão da produção")') },
+    { v:"Manufatura 4.0",      u:gn('("indústria 4.0" OR "manufatura avançada" OR "automação industrial") (fábrica OR produção OR produtividade)') },
+    { v:"Supply chain",        u:gn('("cadeia de suprimentos" OR "supply chain") (indústria OR fábrica OR estoque OR logística) Brasil') },
+    { v:"CNI / Indústria",     u:gn('CNI ("confiança do empresário" OR "capacidade instalada" OR "sondagem industrial" OR "atividade industrial")') },
+    { v:"Custos e insumos",    u:gn('indústria ("custo de produção" OR "preço do aço" OR "preço dos insumos" OR "reajuste de preço") Brasil') },
     { v:"New York Times",      u:"https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
                                reserva:gn('site:nytimes.com manufacturing OR supply chain') }
   ]},
   { id:"moveleiro", nome:"Moveleiro", fontes:[
-    { v:"Setor moveleiro",   u:gn('"indústria moveleira" OR "setor moveleiro"') },
-    { v:"Móveis Brasil",     u:gn('fábrica de móveis produção exportação') },
-    { v:"Madeira e MDF",     u:gn('MDF OR MDP OR "painéis de madeira" preço mercado') },
-    { v:"Polos moveleiros",  u:gn('Votuporanga OR Mirassol OR "Bento Gonçalves" OR Arapongas móveis') },
-    { v:"Movelaria/varejo",  u:gn('varejo de móveis vendas mercado moveleiro') },
-    { v:"Entidades e feiras",u:gn('Movergs OR Sindmóveis OR Abimóvel OR Movelsul OR FIMMA móveis') }
+    { v:"Setor moveleiro",   u:gn('("indústria moveleira" OR "setor moveleiro" OR "polo moveleiro")') },
+    { v:"Móveis Brasil",     u:gn('"fábrica de móveis" (produção OR exportação OR investimento OR ampliação OR contratação)') },
+    { v:"Madeira e MDF",     u:gn('(MDF OR MDP OR "painéis de madeira") (preço OR mercado OR produção OR indústria)') },
+    { v:"Polos moveleiros",  u:gn('(Votuporanga OR Mirassol OR "Bento Gonçalves" OR Arapongas OR "Ubá") (móveis OR moveleiro OR moveleira)') },
+    { v:"Movelaria/varejo",  u:gn('"varejo de móveis" (vendas OR mercado OR faturamento OR demanda)') },
+    { v:"Entidades e feiras",u:gn('(Movergs OR Sindmóveis OR Abimóvel OR Movelsul OR FIMMA OR "Salão Design") (móveis OR moveleiro OR moveleira)') }
   ]},
   { id:"ia", nome:"Inteligência Artificial", fontes:[
-    { v:"IA na indústria",  u:gn('inteligência artificial indústria manufatura') },
-    { v:"IA em produção",   u:gn('inteligência artificial "chão de fábrica" OR "planejamento da produção" OR "previsão de demanda"') },
-    { v:"IA no Brasil",     u:gn('inteligência artificial empresas Brasil') },
+    { v:"IA na indústria",  u:gn('"inteligência artificial" (indústria OR manufatura OR fábrica) -entretenimento -celular') },
+    { v:"IA em produção",   u:gn('"inteligência artificial" ("chão de fábrica" OR "planejamento da produção" OR "previsão de demanda" OR "manutenção preditiva")') },
+    { v:"IA e suprimentos", u:gn('"inteligência artificial" ("cadeia de suprimentos" OR logística OR estoque OR compras) empresa') },
     { v:"MIT Tech Review",  u:"https://www.technologyreview.com/topic/artificial-intelligence/feed", reserva:gn('site:technologyreview.com artificial intelligence') },
-    { v:"Ars Technica",     u:"https://arstechnica.com/ai/feed/", reserva:gn('site:arstechnica.com AI') },
-    { v:"The Verge",        u:"https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", reserva:gn('site:theverge.com artificial intelligence') },
-    { v:"TechCrunch",       u:"https://techcrunch.com/category/artificial-intelligence/feed/", reserva:gn('site:techcrunch.com artificial intelligence') }
+    { v:"Ars Technica",     u:"https://arstechnica.com/ai/feed/", reserva:gn('site:arstechnica.com AI') }
   ]}
 ];
 
@@ -1007,6 +1160,7 @@ const estado = {
   busca: "",
   veiculo: "",
   periodo: 0,
+  chaveIA: "",               // digitada nas configurações, vive só neste navegador
   ordem: "relevancia",       // relevância primeiro; a fila por horário fica a um clique
   densidade: "cartoes",      // cartões para explorar, lista para escanear
   assuntoAtivo: null,
@@ -1416,7 +1570,9 @@ async function pelaPonte(ponte, url, veiculo){
 /* Tenta as pontes em ordem de saúde; se o feed do veículo estiver fora
    do ar, cai para a busca de reserva no Google Notícias. */
 async function buscarFonte(fonte, indice = 0){
-  const enderecos = fonte.reserva ? [fonte.u, fonte.reserva] : [fonte.u];
+  // Fonte do Google Notícias guarda uma função; feed direto guarda a URL.
+  const montar = e => typeof e === "function" ? e() : e;
+  const enderecos = (fonte.reserva ? [fonte.u, fonte.reserva] : [fonte.u]).map(montar);
   let ultimoErro = new Error("sem resposta");
   let giro = indice;
 
@@ -1458,9 +1614,12 @@ function relevancia(item, secaoId){
   // Assunto que saiu em vários veículos costuma ser o que importa.
   nota += Math.min(item.cobertura, 4) * 3;
 
-  // Recência conta, mas não decide sozinha: o de ontem não zera.
+  /* Recência conta e agora também desconta. Antes o velho apenas deixava
+     de ganhar bônus, então manchete de abril com tema forte subia igual.
+     A partir de três dias começa a perder posição de verdade. */
   const horas = item.ts ? (Date.now() - item.ts) / 3600000 : 30;
   nota += Math.max(0, 36 - horas) / 5;
+  if(horas > 72) nota -= Math.min(12, (horas - 72) / 24 * 3);
 
   if(CHAMARIZ.test(t)) nota -= 5;          // chamariz de clique desce
   if(!item.ts) nota -= 3;                  // sem data, não dá para confiar na fila
@@ -1515,8 +1674,21 @@ function recompor(secaoId){
   }
 
   for(const g of grupos) g.nota = relevancia(g, secaoId);
-  grupos.sort((ORDENS[estado.ordem] || ORDENS.relevancia).comparar);
-  estado.itens[secaoId] = grupos;
+
+  /* Régua. Mostrar noventa manchetes por aba não é completude: é empurrar
+     para quem lê o trabalho de separar o que presta. O que não pontua sai.
+
+     O piso cede em dia fraco — se sobrar pouca coisa acima dele, entram as
+     melhores até MINIMO_SECAO. Seção vazia seria pior do que seção fraca,
+     e esconderia que o dia foi fraco. */
+  const porNota = [...grupos].sort((a, b) => b.nota - a.nota);
+  const aprovados = porNota.filter(g => g.nota >= CONFIG.PISO_RELEVANCIA);
+  const escolhidos = aprovados.length >= CONFIG.MINIMO_SECAO
+    ? aprovados
+    : porNota.slice(0, CONFIG.MINIMO_SECAO);
+
+  escolhidos.sort((ORDENS[estado.ordem] || ORDENS.relevancia).comparar);
+  estado.itens[secaoId] = escolhidos;
 }
 
 /* Trocar a ordenação não busca nada de novo: só reordena o que já veio. */
@@ -1596,7 +1768,12 @@ const VAZIAS = new Set(("a as o os um uma uns umas de do da dos das em no na nos
   "study people world time year years week best most other others their " +
   "there these those into over also could would should make makes made " +
   "using used more here your our its it's out now top big " +
-  "milhões bilhões mil cerca apenas também ainda agora nesta neste").split(" "));
+  "milhões bilhões mil cerca apenas também ainda agora nesta neste " +
+  // Verbo de manchete aparece em tudo e não diz sobre o que é o dia
+  "amplia ampliar cresce crescer projeta projetar anuncia anunciar lanca " +
+  "lançar lança abre abrir investe investir registra registrar aponta " +
+  "apontar avalia prevê preve espera busca segue passa chega deve pode " +
+  "fecha fechar sobe subir cair caem queda alta baixa aumenta reduz").split(" "));
 
 function calcularAssuntos(){
   const contagem = new Map();
@@ -1879,7 +2056,7 @@ async function buscarNoArquivo(){
   const consulta = `${termo} after:${ano}-01-01 before:${ano + 1}-01-01`;
   let achados = null, erro = "";
   try{
-    achados = await buscarFonte({ v:"Arquivo " + ano, u:gn(consulta) }, 0);
+    achados = await buscarFonte({ v:"Arquivo " + ano, u:gn(consulta, "") }, 0);
   }catch(e){
     erro = e?.message || "não foi possível consultar o arquivo";
   }
@@ -2002,7 +2179,11 @@ async function pedirLeitura(){
     const r = await fetch("/api/resumir", {
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ itens: manchetes })
+      // A chave só sai daqui se a pessoa tiver digitado uma nas configurações.
+      // Sem ela, a função usa a variável de ambiente da Vercel.
+      body: JSON.stringify(estado.chaveIA
+        ? { itens: manchetes, chave: estado.chaveIA }
+        : { itens: manchetes })
     });
     const dados = await r.json().catch(() => ({}));
 
@@ -2073,51 +2254,115 @@ function blocoLeitura(){
   return `<div class="leitura leitura-espera">${botao}<span>Um parágrafo com o fio do dia, escrito na hora.</span></div>`;
 }
 
-function montarResumo(){
+/* ------------------------------------------------------------
+   Jornal Patrimar
+   ------------------------------------------------------------
+   A grade responde "o que saiu hoje". O jornal responde outra
+   pergunta: "o que eu conto na reunião". Por isso não é a mesma
+   lista com outra roupa — é uma edição, com uma manchete que
+   assume o dia, o editorial escrito pela IA e cadernos por seção.
+
+   Pensado para sair no papel: é assim que circula na fábrica,
+   onde nem todo mundo abre o painel.
+
+   A seção da casa tem preferência na escolha da manchete. Se a
+   melhor notícia do dia é sobre a Patrimar, é ela que abre. */
+const PESO_DA_CASA = 6;
+
+function montarJornal(){
   const assuntos = calcularAssuntos();
   const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
   const agora = new Date();
-  const hora = estado.ultimaAtualizacao
-    ? new Date(estado.ultimaAtualizacao).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" })
-    : agora.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+  const hora = new Date(estado.ultimaAtualizacao || agora)
+    .toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
 
-  const blocos = SECOES.map(secao => {
-    const itens = itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso);
-    const total = (estado.itens[secao.id] || []).length;
-    if(!itens.length) return "";
-    return `<section class="resumo-bloco">
-      <div class="resumo-cabeca">
-        <span class="resumo-secao">${escapar(secao.nome)}</span>
-        <span class="resumo-qtd">${itens.length} de ${total}</span>
+  // Cada seção entrega suas melhores; a manchete sai do conjunto todo.
+  const porSecao = SECOES.map(secao => ({
+    secao,
+    itens: itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso),
+    total: (estado.itens[secao.id] || []).length
+  })).filter(b => b.itens.length);
+
+  if(!porSecao.length){
+    return `<div class="estado">
+      <div class="estado-t">A edição de hoje ainda está vazia</div>
+      <div class="estado-d">Nenhuma manchete chegou. Use o botão Atualizar e volte ao jornal em seguida.</div>
+    </div>`;
+  }
+
+  /* Manchete sem linha fina é capa fraca: o leitor lê seis palavras e
+     tem de decidir sozinho se importa. Além disso deixa meia página em
+     branco ao lado das chamadas. Quem tem resumo larga na frente. */
+  const candidatos = porSecao.flatMap(b => b.itens.map(it => ({
+    it, secao: b.secao,
+    nota: (it.nota || 0)
+      + (b.secao.destaque ? PESO_DA_CASA : 0)
+      + (it.resumo ? 4 : 0)
+  })));
+  candidatos.sort((a, b) => b.nota - a.nota);
+
+  const principal = candidatos[0];
+  const chamadas = candidatos.slice(1, 5);
+  const usados = new Set([principal, ...chamadas].map(c => c.it.chave));
+
+  const creditos = i => [
+    i.origem || i.veiculo,
+    i.ts ? tempoRelativo(i.ts) : "",
+    i.cobertura > 1 ? i.cobertura + " veículos" : ""
+  ].filter(Boolean).map(escapar).join(" · ");
+
+  const manchete = `<a class="jn-principal" href="${escapar(principal.it.link)}" target="_blank" rel="noopener noreferrer">
+    <span class="jn-tarja">${escapar(principal.secao.nome)}</span>
+    <h2 class="jn-principal-t">${escapar(principal.it.titulo)}</h2>
+    ${principal.it.resumo ? `<p class="jn-principal-r">${escapar(principal.it.resumo)}</p>` : ""}
+    <div class="jn-creditos">${creditos(principal.it)}</div>
+  </a>`;
+
+  const tambem = chamadas.length ? `<div class="jn-tambem">
+    <div class="jn-rotulo">Também nesta edição</div>
+    ${chamadas.map(c => `<a class="jn-chamada" href="${escapar(c.it.link)}" target="_blank" rel="noopener noreferrer">
+      <div class="jn-chamada-t">${escapar(c.it.titulo)}</div>
+      <div class="jn-creditos">${escapar(c.secao.nome)} · ${creditos(c.it)}</div>
+    </a>`).join("")}
+  </div>` : "";
+
+  const cadernos = porSecao.map(b => {
+    const restantes = b.itens.filter(i => !usados.has(i.chave));
+    if(!restantes.length) return "";
+    return `<section class="jn-caderno">
+      <div class="jn-caderno-topo">
+        <h3 class="jn-caderno-nome">${escapar(b.secao.nome)}</h3>
+        <span class="jn-caderno-qtd">${restantes.length} de ${b.total}</span>
       </div>
-      <div class="resumo-lista">
-        ${itens.map(i => `
-        <a class="resumo-item" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
-          <div class="resumo-item-t">${escapar(i.titulo)}</div>
-          <div class="resumo-item-m">${escapar(i.veiculo)}${
-            i.origem && i.origem !== i.veiculo ? " · " + escapar(i.origem) : ""}${
-            i.ts ? " · " + escapar(tempoRelativo(i.ts)) : ""}</div>
+      <div class="jn-caderno-lista">
+        ${restantes.map(i => `<a class="jn-nota" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
+          <div class="jn-nota-t">${escapar(i.titulo)}</div>
+          <div class="jn-creditos">${creditos(i)}</div>
         </a>`).join("")}
       </div>
     </section>`;
   }).join("");
 
-  if(!blocos){
-    return `<div class="estado">
-      <div class="estado-t">Ainda não há notícias para resumir</div>
-      <div class="estado-d">Use o botão Atualizar e volte ao resumo em seguida.</div>
-    </div>`;
-  }
+  return `<div class="jornal">
+    <header class="jn-cabeca">
+      <img class="jn-logo" src="logo-patrimar.png" width="760" height="246" alt="">
+      <div class="jn-nome">Jornal Patrimar</div>
+      <div class="jn-linha">Edição de ${escapar(dataExtenso(agora))} · fechada às ${escapar(hora)}</div>
+      ${assuntos.length ? `<div class="jn-assuntos">${
+        assuntos.slice(0, 6).map(a => escapar(a.rotulo)).join(" · ")}</div>` : ""}
+    </header>
 
-  return `<div class="resumo">
-    <div class="resumo-abertura">
-      <div class="resumo-titulo">Resumo do dia</div>
-      <div class="resumo-linha">${escapar(dataExtenso(agora))} · fechado às ${escapar(hora)}</div>
-      ${assuntos.length ? `<div class="resumo-termos"><b>Mais citados:</b> ${
-        assuntos.slice(0, 8).map(a => escapar(a.rotulo) + " (" + a.n + ")").join(" · ")}</div>` : ""}
+    <div class="jn-abertura">
+      ${manchete}
+      ${tambem}
     </div>
-    ${blocoLeitura()}
-    ${blocos}
+
+    <div class="jn-editorial">
+      <div class="jn-rotulo">Editorial do dia</div>
+      ${blocoLeitura()}
+    </div>
+
+    ${cadernos}
   </div>`;
 }
 
@@ -2194,9 +2439,9 @@ function renderizarGrade(){
   }
 
   if(estado.resumo){
-    grade.innerHTML = montarResumo();
+    grade.innerHTML = montarJornal();
     const total = SECOES.reduce((n, sec) => n + (estado.itens[sec.id] || []).length, 0);
-    el("contagem").textContent = total ? `resumo de ${total} notícias` : "";
+    el("contagem").textContent = total ? `edição de ${total} notícias` : "";
     return;
   }
 
@@ -2428,6 +2673,42 @@ el("filtroOrdem").addEventListener("change", e => {
   guardar.gravar("radar_ordem", estado.ordem);
   reordenar();
 });
+/* ------------------------------------------------------------
+   Configurações
+   ------------------------------------------------------------
+   A chave da API mora no localStorage deste navegador e em mais
+   lugar nenhum: não no código, não no repositório, não visível
+   para quem abrir o painel de outro aparelho. Colada no
+   index.html ela seria legível por qualquer visitante do site e
+   o GitHub a revogaria ao detectar o commit. */
+function abrirConfig(){
+  el("cfgChave").value = estado.chaveIA;
+  el("cfgJanela").value = CONFIG.JANELA;
+  el("cfgPiso").value = String(CONFIG.PISO_RELEVANCIA);
+  el("dlgConfig").showModal();
+}
+
+function salvarConfig(){
+  estado.chaveIA = el("cfgChave").value.trim();
+  CONFIG.JANELA = el("cfgJanela").value;
+  CONFIG.PISO_RELEVANCIA = Number(el("cfgPiso").value) || 9;
+
+  guardar.gravar("radar_chave", estado.chaveIA);
+  guardar.gravar("radar_janela", CONFIG.JANELA);
+  guardar.gravar("radar_piso", CONFIG.PISO_RELEVANCIA);
+
+  // A régua muda o que aparece sem rebuscar; a janela só vale na próxima busca.
+  reordenar();
+}
+
+el("btnConfig").addEventListener("click", abrirConfig);
+el("btnCfgSalvar").addEventListener("click", e => { e.preventDefault(); salvarConfig(); el("dlgConfig").close(); });
+el("btnCfgLimpar").addEventListener("click", () => {
+  el("cfgChave").value = "";
+  estado.chaveIA = "";
+  guardar.gravar("radar_chave", "");
+});
+
 el("btnFiltros").addEventListener("click", () => {
   const aberto = el("controlesMais").classList.toggle("aberto");
   el("btnFiltros").setAttribute("aria-expanded", String(aberto));
@@ -2563,6 +2844,12 @@ document.addEventListener("visibilitychange", () => {
     (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "escuro" : "claro"));
 
   estado.ultimaVisita = guardar.ler("radar_visita") || 0;
+
+  estado.chaveIA = guardar.ler("radar_chave") || "";
+  const janela = guardar.ler("radar_janela");
+  if(typeof janela === "string") CONFIG.JANELA = janela;
+  const piso = guardar.ler("radar_piso");
+  if(Number.isFinite(piso)) CONFIG.PISO_RELEVANCIA = piso;
 
   // Ordenação e densidade são preferência de leitura: ficam gravadas.
   if(ORDENS[guardar.ler("radar_ordem")]) estado.ordem = guardar.ler("radar_ordem");

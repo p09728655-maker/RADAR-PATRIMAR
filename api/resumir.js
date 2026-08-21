@@ -4,10 +4,12 @@
    o navegador só vê o texto pronto. Colocar a chave no index.html seria
    entregá-la a qualquer visitante que abrisse o código-fonte da página.
 
-   Para ligar: no painel da Vercel, Settings → Environment Variables,
-   criar ANTHROPIC_API_KEY com a chave e publicar de novo. Sem a variável,
-   a função responde 503 e o botão explica o que falta — o resto do painel
-   continua funcionando sem IA nenhuma. */
+   Para ligar de vez, valendo para a equipe: no painel da Vercel,
+   Settings → Environment Variables, criar ANTHROPIC_API_KEY e publicar de
+   novo. Para uso individual, a pessoa cola a própria chave nas
+   configurações do painel; ela viaja no corpo do pedido e fica guardada só
+   no navegador dela. Sem nenhuma das duas, a função responde 503 e o botão
+   explica o que falta — o resto do painel funciona sem IA nenhuma. */
 
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -67,11 +69,33 @@ export default async function handler(req, res) {
     return res.status(405).json({ erro: "use POST" });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  /* Duas origens possíveis para a chave, nesta ordem:
+
+     1. A que a pessoa digitou nas configurações do painel, que viaja no
+        corpo do pedido. Mora no localStorage do navegador dela e em mais
+        lugar nenhum — nunca no código, nunca no repositório.
+     2. A variável de ambiente da Vercel, que é o padrão da equipe.
+
+     A chave do pedido nunca é gravada, registrada em log nem devolvida.
+     Aceitar chave do cliente significa que quem alcança este endereço pode
+     mandar a própria chave e gastar a própria conta; não expõe a chave de
+     ninguém, mas é bom saber que o caminho existe. */
+  const doPedido = typeof req.body?.chave === "string" ? req.body.chave.trim() : "";
+  const chave = doPedido || process.env.ANTHROPIC_API_KEY;
+
+  if (!chave) {
     return res.status(503).json({
       erro: "sem chave",
       comoResolver:
-        "Na Vercel: Settings → Environment Variables → ANTHROPIC_API_KEY. Depois publique de novo."
+        "Abra as configurações do painel (engrenagem no topo) e cole a sua chave da " +
+        "Anthropic — ela fica só neste navegador. Para valer para a equipe inteira, " +
+        "na Vercel: Settings → Environment Variables → ANTHROPIC_API_KEY."
+    });
+  }
+
+  if (!/^sk-ant-[\w-]{20,}$/.test(chave)) {
+    return res.status(400).json({
+      erro: "a chave não tem o formato esperado (começa com sk-ant-)"
     });
   }
 
@@ -110,7 +134,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const cliente = new Anthropic();
+    const cliente = new Anthropic({ apiKey: chave });
 
     const resposta = await cliente.beta.messages.create({
       model: MODELO,
@@ -159,7 +183,13 @@ export default async function handler(req, res) {
     });
   } catch (erro) {
     const status = erro?.status;
-    if (status === 401) return res.status(503).json({ erro: "a chave da API foi recusada" });
+    if (status === 401) {
+      return res.status(503).json({
+        erro: doPedido
+          ? "a chave digitada nas configurações foi recusada"
+          : "a chave da API foi recusada"
+      });
+    }
     if (status === 429) return res.status(429).json({ erro: "limite de uso atingido, tente em instantes" });
     return res.status(502).json({ erro: erro?.message || "falha ao gerar a leitura" });
   }

@@ -23,12 +23,33 @@ de três veículos. Agora cada manchete recebe uma nota:
 - **Cobertura** — em quantos veículos diferentes o mesmo assunto apareceu.
   Assunto que saiu em quatro lugares costuma ser o que importa; o cartão
   mostra isso como *"4 veículos"*.
-- **Recência** — conta, mas não decide sozinha: o de ontem não zera.
+- **Recência** — conta e também desconta. A partir de três dias a manchete
+  perde posição de verdade; antes ela apenas deixava de ganhar bônus, então
+  matéria de abril com tema forte subia igual à de hoje.
 - **Descontos** — chamada de clique ("veja", "confira", "10 fotos") perde
   posição; manchete sem data também.
 
 Assunto que nunca vai interessar ao PCP — horóscopo, futebol, sorteio — sai
 antes de disputar espaço, pela constante `RUIDO`.
+
+### O que nem chega e o que não passa
+
+Dois cortes antes da nota decidir a fila:
+
+- **Recorte de data na origem.** O Google Notícias ordena por relevância, não
+  por data: sem recorte devolve matéria de abril junto com a de hoje. As
+  consultas levam `when:` (7 dias por padrão, ajustável nas configurações), e
+  o que não vem não precisa ser filtrado depois. A busca no arquivo não leva
+  recorte, porque lá ele é outro.
+- **Régua de relevância.** O que fica abaixo de `CONFIG.PISO_RELEVANCIA` sai.
+  Mostrar noventa manchetes por aba não é completude, é empurrar para quem lê
+  o trabalho de separar o que presta. Em dia fraco o piso cede: entram as
+  melhores até `CONFIG.MINIMO_SECAO`, porque seção vazia seria pior e
+  esconderia que o dia foi fraco.
+
+As URLs das fontes são montadas **na hora da busca**, não na carga: sem isso,
+trocar a janela nas configurações só teria efeito depois de recarregar a
+página.
 
 O primeiro colocado vira **destaque**: ocupa a largura de dois cartões, com
 título maior e o filete vermelho da marca. Só ele usa o vermelho, que assim
@@ -160,6 +181,17 @@ Para acompanhar um assunto sem depender de um veículo específico, usar a
 função auxiliar `gn("termos de busca")`, que monta uma consulta no Google
 Notícias em português.
 
+**Cuidado com a precedência.** No Google, `OR` liga mais forte que o E
+implícito: `A OR B C` é lido como `(A OR B) E C`, não como `A OU (B E C)`.
+Várias consultas estavam escritas supondo o contrário. Use parênteses
+explícitos — `(Movergs OR Abimóvel) (móveis OR moveleiro)` — e `-termo` para
+excluir.
+
+Os feeds do The Verge e do TechCrunch saíram: eram tecnologia de consumo, e
+quase nada passava na régua. No lugar entrou uma consulta sobre IA em cadeia
+de suprimentos. Para trazer os dois de volta, recolocar em `SECOES` e incluir
+os domínios em `DOMINIOS`, no `api/feed.js`.
+
 ### Como o painel chega até os feeds
 
 O navegador não consegue ler RSS de outro domínio sem um intermediário.
@@ -183,7 +215,7 @@ Como reserva, o painel mantém sete pontes públicas gratuitas na constante
 - se o feed do veículo estiver fora do ar, a fonte cai para o endereço
   `reserva` — uma busca no Google Notícias restrita àquele site.
 
-As requisições passam por uma fila única de seis simultâneas. Sem ela as 26
+As requisições passam por uma fila única de seis simultâneas. Sem ela as 24
 fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
@@ -202,19 +234,67 @@ que fazer.
 
 O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
-quem não respondeu. Listar as 26 fontes com bolinha verde não informava nada.
+quem não respondeu. Listar as 24 fontes com bolinha verde não informava nada.
 
-## Resumo do dia e impressão
+## Jornal Patrimar
 
-O botão **Resumo do dia**, na barra de filtros, troca a lista pelas principais
-manchetes de cada seção. A escolha não usa IA: parte da mesma nota da grade
-(tema, cobertura, recência) e soma o peso dos assuntos mais citados do dia.
-Quantas entram por seção é `CONFIG.RESUMO_POR_SECAO`.
+O botão **Jornal**, na barra de filtros, troca a grade pela edição do dia.
+Não é a mesma lista com outra roupa: a grade responde "o que saiu hoje", o
+jornal responde "o que eu conto na reunião".
+
+A edição tem:
+
+- **Manchete** — a melhor notícia do dia, ocupando a capa. A seção Patrimar
+  tem preferência (`PESO_DA_CASA`), e manchete com linha fina larga na
+  frente: capa sem linha fina obriga o leitor a decidir sozinho se importa,
+  e ainda deixa meia página em branco.
+- **Também nesta edição** — as quatro seguintes, em coluna ao lado.
+- **Editorial do dia** — a leitura escrita pela IA, quando pedida.
+- **Cadernos** — o resto de cada seção, sem repetir o que já saiu na capa.
+
+A escolha das manchetes não usa IA: parte da mesma nota da grade (tema,
+cobertura, recência) e soma o peso dos assuntos mais citados do dia. Quantas
+entram por seção é `CONFIG.RESUMO_POR_SECAO`.
 
 O botão **Imprimir** abre a caixa de impressão do navegador, que também salva
-em PDF. O papel sai sem cabeçalho, filtros nem rodapé: só o logotipo, a data e
-as notícias em duas colunas. Vale para as duas telas — no resumo sai o resumo,
-na lista sai a seção aberta.
+em PDF. É para isso que o jornal existe: circular na fábrica, onde nem todo
+mundo abre o painel. No papel saem só o logotipo, a data e a edição — sem
+cabeçalho do app, filtros ou rodapé. Imprimir fora do jornal sai a seção
+aberta, em lista.
+
+## Configurações
+
+A engrenagem no topo abre as configurações. Tudo ali fica gravado **neste
+navegador** e em mais lugar nenhum.
+
+### Chave da API
+
+Serve só para escrever a leitura do dia. São duas origens possíveis, nesta
+ordem:
+
+1. A chave digitada aqui, que viaja no corpo do pedido para `api/resumir.js`.
+   Mora no `localStorage` do navegador de quem digitou.
+2. A variável `ANTHROPIC_API_KEY` da Vercel, que é o padrão da equipe.
+
+Sem nenhuma das duas, o botão da leitura explica o que falta e o resto do
+painel funciona igual.
+
+**Por que não uma constante no `index.html`.** O `index.html` é servido para
+qualquer visitante: chave colada ali é legível por quem abrir o código-fonte
+da página. E como o arquivo vai para o GitHub, a chave seria commitada — o
+GitHub detecta e a Anthropic revoga. Até isso acontecer, qualquer um gasta na
+conta. Por isso ela mora no navegador.
+
+Vale saber: como a função aceita chave vinda do pedido, quem alcança
+`/api/resumir` pode mandar a própria chave e gastar a própria conta. Não
+expõe a chave de ninguém, mas o caminho existe.
+
+### Janela e régua
+
+- **Buscar notícias dos últimos** — o recorte `when:` pedido ao Google
+  Notícias. Vale a partir da próxima atualização.
+- **Régua de relevância** — o piso de nota. Frouxa mostra quase tudo,
+  apertada só o que tem tema forte. Vale na hora, sem rebuscar.
 
 ## Buscar no arquivo
 
