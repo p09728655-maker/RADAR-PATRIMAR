@@ -52,8 +52,8 @@
 
   /* Tipografia */
   --font:'Calibri','Carlito','Segoe UI',system-ui,-apple-system,sans-serif;
-  --fs-display:22px; --fs-h1:19px; --fs-h2:16px; --fs-body:15px;
-  --fs-small:13px; --fs-caption:12px; --fs-label:11px;
+  --fs-display:22px; --fs-h1:19px; --fs-h2:17px; --fs-body:15px;
+  --fs-md:14px; --fs-small:13px; --fs-caption:12px; --fs-label:11px;
 
   --max:1560px;
   --h-topo:64px;             /* medida em tempo real: a barra de seções encosta logo abaixo */
@@ -142,42 +142,39 @@ button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;backgrou
    ASSUNTOS DO DIA
    ============================================================ */
 .assuntos{
-  background:var(--marca-areia);
-  border-bottom:1px solid #E3D5A4;
-}
-html[data-tema="escuro"] .assuntos{background:#2B2718;border-bottom-color:#3B3520}
-.assuntos-in{
-  max-width:var(--max);margin:0 auto;
-  padding:var(--s3) var(--s5);
+  width:100%;max-width:var(--max);margin:0 auto;
+  padding:var(--s3) var(--s5) 0;
   display:flex;align-items:center;gap:var(--s3);
 }
+/* display:flex acima vence o atributo hidden; sem esta linha a faixa
+   vazia apareceria mesmo escondida */
+.assuntos[hidden]{display:none}
 .assuntos-rot{
   font-size:var(--fs-label);font-weight:700;text-transform:uppercase;
-  letter-spacing:.7px;color:#6B5A16;white-space:nowrap;flex:0 0 auto;
+  letter-spacing:.7px;color:var(--muted);white-space:nowrap;flex:0 0 auto;
 }
-html[data-tema="escuro"] .assuntos-rot{color:#C9B978}
 .assuntos-lista{
   display:flex;gap:var(--s2);overflow-x:auto;padding-bottom:2px;
   scrollbar-width:thin;
 }
 .assuntos-lista::-webkit-scrollbar{height:4px}
-.assuntos-lista::-webkit-scrollbar-thumb{background:#C9B978;border-radius:2px}
+.assuntos-lista::-webkit-scrollbar-thumb{background:var(--border-forte);border-radius:2px}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
   padding:5px var(--s3);border-radius:100px;
-  background:rgba(255,255,255,.75);
-  border:1px solid #DFCE94;
-  font-size:var(--fs-small);font-weight:600;color:#4A3F10;
-  white-space:nowrap;transition:background .15s;
+  background:var(--surface);
+  border:1px solid var(--border-forte);
+  font-size:var(--fs-small);font-weight:600;color:var(--text-2);
+  white-space:nowrap;transition:border-color .15s, color .15s;
 }
-.chip:hover{background:#fff}
+.chip:hover{border-color:var(--muted);color:var(--text)}
 .chip[aria-pressed="true"]{background:var(--marca-grafite);border-color:var(--marca-grafite);color:#fff}
-html[data-tema="escuro"] .chip{background:#3A3520;border-color:#4C4529;color:#E4D9A8}
-html[data-tema="escuro"] .chip[aria-pressed="true"]{background:var(--marca-areia);color:#2B2718}
+html[data-tema="escuro"] .chip[aria-pressed="true"]{background:var(--marca-areia);color:#2B2718;border-color:var(--marca-areia)}
 .chip-n{
   font-size:var(--fs-label);font-weight:700;
-  background:rgba(0,0,0,.1);border-radius:100px;padding:1px 6px;
+  background:var(--bg);border-radius:100px;padding:1px 6px;
 }
+html[data-tema="escuro"] .chip-n{background:rgba(0,0,0,.28)}
 .chip[aria-pressed="true"] .chip-n{background:rgba(255,255,255,.22)}
 
 /* ============================================================
@@ -251,12 +248,37 @@ select{
   background:var(--surface);color:var(--text-2);
   border-color:var(--border-forte);min-height:38px;
 }
+.btn-so-icone{padding:var(--s2);min-width:38px;justify-content:center}
 .btn-secundario:hover{background:var(--surface-2);color:var(--text)}
 .btn-secundario[aria-pressed="true"]{
   background:var(--marca-grafite);border-color:var(--marca-grafite);color:#fff;
 }
 html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--marca-areia);color:#2B2718;border-color:var(--marca-areia)}
 .contagem{font-size:var(--fs-small);color:var(--muted);margin-left:auto}
+
+/* No computador o grupo não existe visualmente: os selects entram na
+   mesma linha dos demais controles. */
+.controles-mais{display:contents}
+.btn-filtros{display:none}
+@media (max-width:760px){
+  .btn-filtros{display:inline-flex}
+  .btn-filtros[aria-expanded="true"]{
+    background:var(--marca-grafite);border-color:var(--marca-grafite);color:#fff;
+  }
+  html[data-tema="escuro"] .btn-filtros[aria-expanded="true"]{
+    background:var(--marca-areia);color:#2B2718;border-color:var(--marca-areia);
+  }
+  .controles-mais{display:none}
+  .controles-mais.aberto{
+    display:flex;flex-basis:100%;flex-wrap:wrap;gap:var(--s2);
+  }
+  .controles-mais select{flex:1 1 150px}
+}
+/* Impressão a partir do telefone não é o caso de uso: o botão sai da
+   frente para sobrar linha para as notícias. */
+@media (max-width:560px){
+  #btnImprimir{display:none}
+}
 
 /* ============================================================
    RESUMO DO DIA
@@ -318,7 +340,7 @@ html[data-tema="escuro"] .mural-instrucao{background:#2B2718;color:#E4DCC0}
 
 /* Alfinete no cartão, só no modo de publicação */
 .n-fixar{
-  position:absolute;top:6px;right:6px;
+  position:absolute;top:6px;right:6px;z-index:2;
   width:30px;height:30px;border-radius:var(--r-sm);
   display:grid;place-items:center;
   background:var(--surface);border:1px solid var(--marca-vermelho);color:var(--marca-vermelho);
@@ -365,6 +387,31 @@ html[data-tema="escuro"] .leitura{border-left-color:var(--marca-areia)}
 }
 .leitura-texto p{margin-bottom:var(--s2);line-height:1.55}
 .leitura-texto p:last-child{margin-bottom:0}
+/* Um bloco cinza de texto corrido é o que fazia a leitura parecer rasa
+   mesmo quando não era. As três partes têm papéis diferentes e agora
+   se distinguem na tela. */
+.leitura-fio{font-size:var(--fs-h2);line-height:1.45;color:var(--text);font-weight:500}
+.leitura-linhas{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s4)}
+.leitura-linha{
+  display:grid;grid-template-columns:minmax(0,150px) 1fr;gap:var(--s3);
+  align-items:baseline;font-size:var(--fs-md);line-height:1.5;
+  padding-top:var(--s2);border-top:1px solid var(--border);
+}
+.leitura-secao{
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);
+}
+.leitura-fecho{
+  margin-top:var(--s4);padding:var(--s3);border-radius:var(--r-md);
+  background:var(--marca-areia);color:#5C4B12;
+  font-size:var(--fs-md);line-height:1.5;
+}
+html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
+.leitura-fecho b{font-weight:700}
+.fonte-falha{font-weight:700;color:var(--atencao)}
+@media (max-width:560px){
+  .leitura-linha{grid-template-columns:1fr;gap:var(--s1)}
+}
 .leitura-pe{
   display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
   margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--border);
@@ -410,15 +457,22 @@ main{max-width:var(--max);margin:0 auto;padding:var(--s4) var(--s5) var(--s7);wi
   transition:border-color .15s, box-shadow .15s, transform .15s;
 }
 .noticia:hover{border-color:var(--border-forte);box-shadow:var(--sombra);transform:translateY(-1px)}
-.noticia:focus-visible{outline:2px solid var(--info);outline-offset:2px}
+/* O cartão inteiro é clicável, mas quem carrega o link é o título:
+   assim o alfinete do mural pode ser um botão de verdade ao lado,
+   em vez de um botão dentro de um link. */
+.n-link{position:static}
+.n-link::after{content:"";position:absolute;inset:0;border-radius:var(--r-lg)}
+.n-link:focus-visible{outline:none}
+.n-link:focus-visible::after{outline:2px solid var(--info);outline-offset:2px}
 
 .n-meta{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;font-size:var(--fs-caption)}
+/* Quem publicou é o que o leitor reconhece — vem primeiro e forte.
+   O rótulo da busca interna ("Menções à marca") é bastidor: fica fraco. */
 .n-veiculo{
-  font-weight:700;color:var(--marca-bordeaux);
+  font-weight:700;color:var(--text);
   text-transform:uppercase;letter-spacing:.4px;font-size:var(--fs-label);
 }
-html[data-tema="escuro"] .n-veiculo{color:#F2727A}
-.n-origem{color:var(--text-2);font-weight:600}
+.n-origem{color:var(--muted);font-weight:500}
 .n-ponto{color:var(--border-forte)}
 .n-hora{color:var(--muted)}
 .n-novo{
@@ -427,6 +481,14 @@ html[data-tema="escuro"] .n-veiculo{color:#F2727A}
   padding:1px 7px;border-radius:100px;
   text-transform:uppercase;letter-spacing:.4px;
 }
+/* Mesma notícia em vários veículos é o sinal mais honesto de que o
+   assunto pegou. Vale mais na tela do que um horário exato. */
+.n-cobertura{
+  background:var(--marca-areia);color:#5C4B12;
+  font-size:var(--fs-label);font-weight:700;
+  padding:1px 7px;border-radius:100px;
+}
+html[data-tema="escuro"] .n-cobertura{background:#3A3520;color:#E4D9A8}
 .n-titulo{
   font-size:var(--fs-h2);font-weight:600;line-height:1.35;
   color:var(--text);
@@ -434,8 +496,48 @@ html[data-tema="escuro"] .n-veiculo{color:#F2727A}
 .noticia:hover .n-titulo{color:var(--marca-bordeaux)}
 html[data-tema="escuro"] .noticia:hover .n-titulo{color:#F2727A}
 .n-resumo{
-  font-size:var(--fs-small);color:var(--text-2);line-height:1.5;
+  font-size:var(--fs-md);color:var(--text-2);line-height:1.5;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* ------------------------------------------------------------
+   Destaque da seção
+   ------------------------------------------------------------
+   Sessenta cartões iguais não dizem por onde começar. O primeiro
+   colocado da ordenação por relevância ganha o dobro de largura e
+   um título maior — e só ele usa o vermelho da marca, que volta a
+   ser âncora em vez de enfeite repetido em toda a grade. */
+.noticia-destaque{border-top:3px solid var(--marca-vermelho)}
+.noticia-destaque .n-veiculo{color:var(--marca-bordeaux)}
+html[data-tema="escuro"] .noticia-destaque .n-veiculo{color:#F2727A}
+.noticia-destaque .n-titulo{font-size:var(--fs-h1);line-height:1.28;font-weight:700}
+.noticia-destaque .n-resumo{-webkit-line-clamp:4}
+@media (min-width:900px){
+  .noticia-destaque{grid-column:span 2}
+}
+
+/* ------------------------------------------------------------
+   Densidade em lista
+   ------------------------------------------------------------
+   Para escanear sessenta manchetes, cartão é desperdício de tela:
+   uma linha por notícia cabe três vezes mais. */
+.grade.lista{display:block}
+.grade.lista .noticia{
+  background:none;border:0;border-radius:0;
+  border-bottom:1px solid var(--border);
+  padding:var(--s3) var(--s2);
+  flex-direction:row;align-items:baseline;gap:var(--s3);
+  transform:none;box-shadow:none;
+}
+.grade.lista .noticia:hover{background:var(--surface);box-shadow:none;transform:none}
+.grade.lista .noticia-destaque{border-top:0;border-left:3px solid var(--marca-vermelho);padding-left:var(--s3)}
+.grade.lista .n-titulo{order:1;flex:1 1 auto;font-size:var(--fs-body)}
+.grade.lista .noticia-destaque .n-titulo{font-size:var(--fs-h2)}
+.grade.lista .n-meta{order:2;flex:0 0 auto;margin-left:auto}
+.grade.lista .n-resumo{display:none}
+@media (max-width:640px){
+  .grade.lista .noticia{flex-direction:column;align-items:flex-start;gap:var(--s1)}
+  .grade.lista .n-meta{margin-left:0}
 }
 mark{background:var(--marca-areia);color:inherit;padding:0 2px;border-radius:2px}
 html[data-tema="escuro"] mark{background:#4A431F;color:#F3E7B6}
@@ -589,6 +691,11 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   }
   .n-resumo{color:#333}
   .n-novo{display:none}
+  /* No papel o destaque troca o filete vermelho do topo pelo da lateral,
+     que é a marcação que o resto da folha já usa. */
+  .noticia-destaque{border-left-color:#DB2126}
+  .noticia-destaque .n-titulo{font-size:12pt}
+  .n-cobertura{background:none;color:#555;padding:0;font-weight:600}
   .aviso{border-color:#999;color:#333;background:none}
 
   /* O resumo do dia é o formato pensado para o papel: duas colunas, sem cartão */
@@ -597,6 +704,11 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   .mural-acoes,.mural-tirar,.n-fixar,.mural-instrucao{display:none}
   .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
   .leitura-espera,.leitura-pe .btn,.leitura-erro{display:none}
+  .leitura-fio{font-size:11.5pt;font-weight:600}
+  .leitura-linhas{gap:4pt;margin-top:8pt}
+  .leitura-linha{border-top-color:#ddd;padding-top:4pt;font-size:10pt}
+  .leitura-secao{color:#555}
+  .leitura-fecho{background:none;color:#000;padding:6pt 0 0;border-top:1px solid #ddd;border-radius:0}
   .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
   .resumo-abertura{border-left-color:#DB2126}
   .resumo-lista{grid-template-columns:1fr 1fr;gap:8pt 16pt}
@@ -645,13 +757,6 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
   </div>
 </div>
 
-<section class="assuntos" id="faixaAssuntos" hidden>
-  <div class="assuntos-in">
-    <span class="assuntos-rot">Assuntos do dia</span>
-    <div class="assuntos-lista" id="listaAssuntos"></div>
-  </div>
-</section>
-
 <nav class="nav">
   <div class="nav-in" role="tablist" id="abas"></div>
 </nav>
@@ -664,6 +769,18 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
       <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
   </div>
+  <button class="btn btn-secundario btn-filtros" id="btnFiltros" aria-expanded="false" aria-controls="controlesMais">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+    <span class="btn-rotulo">Filtros</span>
+  </button>
+
+  <!-- No computador estes três seguem em linha (display:contents); no
+       celular somem atrás do botão acima, que é onde eles pesam. -->
+  <div class="controles-mais" id="controlesMais">
+  <select id="filtroOrdem" aria-label="Ordenar as notícias">
+    <option value="relevancia">Mais relevantes</option>
+    <option value="recentes">Mais recentes</option>
+  </select>
   <select id="filtroVeiculo" aria-label="Filtrar por veículo"><option value="">Todos os veículos</option></select>
   <select id="filtroPeriodo" aria-label="Filtrar por período">
     <optgroup label="Notícias do dia">
@@ -674,15 +791,25 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
     </optgroup>
     <optgroup label="Arquivo" id="grupoArquivo"></optgroup>
   </select>
+  </div>
   <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Resumo do dia: as principais de cada seção">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
     <span class="btn-rotulo">Resumo do dia</span>
   </button>
-  <button class="btn btn-secundario" id="btnImprimir" title="Imprimir ou salvar em PDF">
+  <button class="btn btn-secundario btn-so-icone" id="btnDensidade" title="Alternar entre cartões e lista" aria-label="Alternar entre cartões e lista">
+    <svg id="iconeDensidade" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <button class="btn btn-secundario btn-so-icone" id="btnImprimir" title="Imprimir ou salvar em PDF" aria-label="Imprimir">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a1 1 0 01-1-1v-5a2 2 0 012-2h14a2 2 0 012 2v5a1 1 0 01-1 1h-2"/><path d="M6 14h12v7H6z"/></svg>
-    <span class="btn-rotulo">Imprimir</span>
   </button>
   <span class="contagem" id="contagem"></span>
+</div>
+
+<!-- Os assuntos do dia são filtros: ficam junto dos outros, não numa faixa
+     solta acima das abas, longe de tudo com que se parecem. -->
+<div class="assuntos" id="faixaAssuntos" hidden>
+  <span class="assuntos-rot">Assuntos do dia</span>
+  <div class="assuntos-lista" id="listaAssuntos"></div>
 </div>
 
 <dialog id="dlgPublicar">
@@ -794,6 +921,52 @@ const SECOES = [
   ]}
 ];
 
+/* ------------------------------------------------------------
+   O que faz uma manchete valer a primeira tela
+   ------------------------------------------------------------
+   Ordenar só por horário põe o irrelevante recém-publicado acima
+   do que interessa. Aqui cada seção diz quais palavras pesam, e a
+   nota final soma tema + quantos veículos publicaram o assunto +
+   recência. Os padrões são escritos sem acento porque o título é
+   comparado depois de passar por simples(). */
+const TEMAS = {
+  patrimar: [
+    [/\bpatrimar\b/, 12],
+    [/\b(planejad|marcenaria|movelaria|dormitorio|cozinha)/, 4],
+    [/(todeschini|dell ?anno|italinea|bontempo|sca moveis|favorita|kitchens)/, 4],
+    [/\b(franqui|expansao|nova fabrica|investimento|inaugur|contrata)/, 3]
+  ],
+  ppcp: [
+    [/(producao industrial|capacidade instalada|\bpim\b|\bcni\b)/, 6],
+    [/(planejamento (e controle )?da producao|\bpcp\b|lean|cadeia de suprimentos|supply chain|estoque|lead time)/, 5],
+    [/\b(custo|preco|insumo|aco|frete|energia|cambio|dolar|tarifa|importacao)/, 4],
+    [/(industria 4|automacao|manufatura|produtividade|eficiencia)/, 3]
+  ],
+  moveleiro: [
+    [/(movelei|industria de moveis|fabrica de moveis|\bmdf\b|\bmdp\b|paineis de madeira)/, 6],
+    [/(movergs|abimovel|sindmoveis|movelsul|fimma|bento goncalves|arapongas|votuporanga|mirassol|uba\b)/, 4],
+    [/\b(exportac|importac|vendas|varejo|demanda|faturamento|producao)/, 3]
+  ],
+  ia: [
+    [/(industria|fabrica|manufatura|producao|logistica|previsao de demanda|chao de fabrica)/, 7],
+    [/(automac|robo|visao computacional|manutencao preditiva|gemeo digital|planejamento)/, 4],
+    [/(claude|anthropic|openai|copilot|gemini|\bllm\b|modelo de linguagem|agente)/, 2]
+  ]
+};
+
+/* Manchete que nunca vai interessar ao PCP. Sai da lista em vez de
+   disputar espaço com o que importa. */
+const RUIDO = /(horoscopo|signo|\bbbb\b|novela|celebridad|apostas|loteria|mega ?sena|receita de|dieta|emagrec|futebol|escalacao|libertadores|brasileirao|sorteio|promocao relampago)/;
+
+/* Chamada de engajamento, não notícia. Não elimina, mas perde posição. */
+const CHAMARIZ = /\b(veja|confira|saiba|assista|descubra|entenda|fotos|video|galeria|ranking|dicas|passo a passo|voce precisa)\b/;
+
+/* Ordenações oferecidas na barra de controle. */
+const ORDENS = {
+  relevancia: { rotulo:"Mais relevantes", comparar:(a, b) => b.nota - a.nota || b.ts - a.ts },
+  recentes:   { rotulo:"Mais recentes",   comparar:(a, b) => b.ts - a.ts || b.nota - a.nota }
+};
+
 
 /* ============================================================
    2. ESTADO
@@ -815,6 +988,8 @@ const estado = {
   busca: "",
   veiculo: "",
   periodo: 0,
+  ordem: "relevancia",       // relevância primeiro; a fila por horário fica a um clique
+  densidade: "cartoes",      // cartões para explorar, lista para escanear
   assuntoAtivo: null,
   ultimaVisita: 0,
   ultimaAtualizacao: null
@@ -1026,6 +1201,57 @@ function chaveDe(titulo){
   return titulo.toLowerCase().replace(/[^a-zà-ú0-9]/gi, "").slice(0, 70);
 }
 
+/* Sem acento e em caixa baixa: é assim que manchete é comparada e
+   pesada daqui para baixo, para "produção" e "producao" não virarem
+   duas coisas diferentes. */
+function simples(s){
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/* ------------------------------------------------------------
+   Assinatura de assunto
+   ------------------------------------------------------------
+   "Patrimar anuncia expansão em Minas" e "Patrimar Móveis anuncia
+   expansão" são a mesma notícia com dois títulos. Comparar o texto
+   inteiro não pega isso; comparar as palavras que carregam sentido,
+   pega. Vale duas vezes: a notícia repetida deixa de ocupar dois
+   lugares na tela, e o número de veículos que a publicaram vira
+   sinal de que ela importa.
+
+   Guardado como lista, não como Set: o bruto vai para o
+   localStorage e Set não sobrevive ao JSON. */
+function palavrasDe(titulo){
+  return [...new Set(simples(titulo)
+    .split(/[^a-z0-9]+/)
+    .filter(p => p.length >= 4 && !VAZIAS.has(p)))];
+}
+
+/* Duas medidas, porque uma só erra:
+
+   Jaccard (comuns sobre o total) compara títulos de tamanho parecido,
+   mas pune o título curto — "Patrimar anuncia expansão da fábrica em MG"
+   contra "Patrimar Móveis anuncia expansão da fábrica em Minas Gerais"
+   dá 0,57 e escapa, embora o curto esteja inteiro dentro do longo.
+
+   Contenção (comuns sobre o menor dos dois) pega esse caso, mas sozinha
+   é frouxa: dois títulos de três palavras se parecem por acidente. Vale
+   só quando o menor já tem corpo suficiente para não ser coincidência. */
+const PARECIDO = 0.62;                     // sobreposição mínima pelo Jaccard
+const MENOR_CONFIAVEL = 4;                 // palavras no título curto
+const CONTIDO = 0.85;
+
+function mesmaHistoria(a, b){
+  if(!a.size || !b.size) return false;
+  let comuns = 0;
+  for(const p of a) if(b.has(p)) comuns++;
+
+  const jaccard = comuns / (a.size + b.size - comuns);
+  if(jaccard >= PARECIDO) return true;
+
+  const menor = Math.min(a.size, b.size);
+  return menor >= MENOR_CONFIAVEL && comuns / menor >= CONTIDO;
+}
+
 function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
   titulo = limparHtml(titulo);
   if(!titulo || !link) return null;
@@ -1040,7 +1266,8 @@ function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
   if(resumo.length > 240) resumo = resumo.slice(0, 240).trim() + "…";
   if(resumo.startsWith(titulo.slice(0, 30)) || /^<?a href/i.test(resumo)) resumo = "";
 
-  return { titulo, link, resumo, origem, veiculo, ts: paraTs(dataBruta), chave: chaveDe(titulo) };
+  return { titulo, link, resumo, origem, veiculo, ts: paraTs(dataBruta),
+           chave: chaveDe(titulo), palavras: palavrasDe(titulo) };
 }
 
 /* Nem todo feed é UTF-8. O da Folha vem em ISO-8859-1 e, lido como UTF-8,
@@ -1186,20 +1413,81 @@ async function buscarFonte(fonte, indice = 0){
 /* ============================================================
    6. CARGA DO PAINEL
    ============================================================ */
+/* Nota de relevância de uma manchete dentro da sua seção. */
+function relevancia(item, secaoId){
+  const t = simples(item.titulo);
+  let nota = 0;
+
+  for(const [padrao, peso] of (TEMAS[secaoId] || [])){
+    if(padrao.test(t)) nota += peso;
+  }
+
+  // Assunto que saiu em vários veículos costuma ser o que importa.
+  nota += Math.min(item.cobertura, 4) * 3;
+
+  // Recência conta, mas não decide sozinha: o de ontem não zera.
+  const horas = item.ts ? (Date.now() - item.ts) / 3600000 : 30;
+  nota += Math.max(0, 36 - horas) / 5;
+
+  if(CHAMARIZ.test(t)) nota -= 5;          // chamariz de clique desce
+  if(!item.ts) nota -= 3;                  // sem data, não dá para confiar na fila
+  if(item.resumo) nota += 1;               // linha fina ajuda a decidir se vale abrir
+
+  return nota;
+}
+
+/* ------------------------------------------------------------
+   Junta as fontes da seção em uma lista só
+   ------------------------------------------------------------
+   Duas passagens de deduplicação: primeiro o título idêntico,
+   depois o assunto parecido (mesmo fato, títulos diferentes). O
+   que sobrevive guarda quantos veículos publicaram aquilo, e é
+   esse número que ajuda a decidir quem fica no alto. */
 function recompor(secaoId){
   const secao = SECOES.find(s => s.id === secaoId);
-  const vistos = new Set();
-  const itens = [];
+  const grupos = [];
+  const porChave = new Map();
+
+  const juntar = (grupo, it) => {
+    const veiculo = it.origem || it.veiculo;
+    if(veiculo && !grupo.veiculos.includes(veiculo)){
+      grupo.veiculos.push(veiculo);
+      grupo.cobertura = grupo.veiculos.length;
+    }
+    // Fica a versão mais completa: a que tem linha fina e data.
+    if(!grupo.resumo && it.resumo) grupo.resumo = it.resumo;
+    if(!grupo.ts && it.ts) grupo.ts = it.ts;
+    else if(it.ts && it.ts > grupo.ts) grupo.ts = it.ts;
+  };
 
   for(const fonte of secao.fontes){
     for(const it of (estado.brutos[secaoId][fonte.v] || [])){
-      if(vistos.has(it.chave)) continue;    // deduplicação entre veículos
-      vistos.add(it.chave);
-      itens.push(it);
+      if(RUIDO.test(simples(it.titulo))) continue;
+
+      const igual = porChave.get(it.chave);
+      if(igual){ juntar(igual, it); continue; }
+
+      // Cache antigo do navegador pode não ter as palavras gravadas.
+      const conjunto = new Set(it.palavras || palavrasDe(it.titulo));
+      const parecido = grupos.find(g => mesmaHistoria(g.conjunto, conjunto));
+      if(parecido){ juntar(parecido, it); continue; }
+
+      const grupo = { ...it, conjunto, cobertura:1, veiculos:[it.origem || it.veiculo].filter(Boolean) };
+      grupo.cobertura = Math.max(1, grupo.veiculos.length);
+      grupos.push(grupo);
+      porChave.set(it.chave, grupo);
     }
   }
-  itens.sort((a, b) => b.ts - a.ts);
-  estado.itens[secaoId] = itens;
+
+  for(const g of grupos) g.nota = relevancia(g, secaoId);
+  grupos.sort((ORDENS[estado.ordem] || ORDENS.relevancia).comparar);
+  estado.itens[secaoId] = grupos;
+}
+
+/* Trocar a ordenação não busca nada de novo: só reordena o que já veio. */
+function reordenar(){
+  SECOES.forEach(s => recompor(s.id));
+  renderizar();
 }
 
 async function carregarTudo(){
@@ -1620,18 +1908,16 @@ function montarArquivo(){
 /* ------------------------------------------------------------
    Resumo do dia
    ------------------------------------------------------------
-   Sem IA: a nota de cada manchete vem de quantos assuntos mais
-   citados do dia ela contém, com um empurrão para as mais recentes.
-   Assunto repetido por vários veículos é o que costuma importar. */
+   Parte da nota que a grade já calculou (tema, cobertura, recência)
+   e soma o peso dos assuntos mais citados do dia. Assunto que
+   apareceu em vários lugares é o que costuma importar. */
 function itensDoResumo(secaoId, quantos, peso){
-  const agora = Date.now();
   return (estado.itens[secaoId] || [])
     .map(it => {
-      const titulo = it.titulo.toLowerCase();
-      let nota = 0;
-      peso.forEach((p, chave) => { if(titulo.includes(chave)) nota += p; });
-      const horas = it.ts ? (agora - it.ts) / 3600000 : 48;
-      return { it, nota: nota * 2 + Math.max(0, 30 - horas) / 5 };
+      const titulo = simples(it.titulo);
+      let extra = 0;
+      peso.forEach((p, chave) => { if(titulo.includes(simples(chave))) extra += p; });
+      return { it, nota: (it.nota || 0) + extra * 2 };
     })
     .sort((a, b) => b.nota - a.nota || b.it.ts - a.it.ts)
     .slice(0, quantos)
@@ -1646,9 +1932,19 @@ async function pedirLeitura(){
   const assuntos = calcularAssuntos();
   const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
 
+  /* O que vai junto do título muda a qualidade do texto que volta.
+     Sem a hora, o modelo não sabe o que é de hoje; sem a cobertura,
+     não sabe o que repercutiu; sem a linha fina, escreve no escuro. */
   for(const secao of SECOES){
     for(const i of itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso)){
-      manchetes.push({ secao: secao.nome, titulo: i.titulo, veiculo: i.origem || i.veiculo });
+      manchetes.push({
+        secao: secao.nome,
+        titulo: i.titulo,
+        veiculo: i.origem || i.veiculo,
+        cobertura: i.cobertura || 1,
+        horas: i.ts ? Math.round((Date.now() - i.ts) / 3600000) : null,
+        resumo: i.resumo || ""
+      });
     }
   }
 
@@ -1684,6 +1980,33 @@ async function pedirLeitura(){
   renderizar();
 }
 
+/* A leitura volta em três partes: o fio do dia, uma linha por seção no
+   formato "Seção — o que muda" e o fecho começando por "De olho:". Sai
+   como texto porque texto é o que o modelo escreve bem; a hierarquia é
+   trabalho daqui. Se vier em formato diferente, cai no parágrafo comum
+   em vez de sumir da tela. */
+function montarLeitura(texto){
+  const linhas = texto.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  const fio = [];
+  const destaques = [];
+  let fecho = "";
+
+  for(const linha of linhas){
+    if(/^de olho\s*:/i.test(linha)){ fecho = linha.replace(/^de olho\s*:\s*/i, ""); continue; }
+    const corte = linha.match(/^(.{2,40}?)\s+[—–-]\s+(.+)$/);
+    if(corte && destaques.length < 8){ destaques.push([corte[1], corte[2]]); continue; }
+    fio.push(linha);
+  }
+
+  return (fio.length ? `<p class="leitura-fio">${escapar(fio.join(" "))}</p>` : "") +
+    (destaques.length ? `<div class="leitura-linhas">${destaques.map(([secao, texto]) => `
+      <div class="leitura-linha">
+        <span class="leitura-secao">${escapar(secao)}</span>
+        <span>${escapar(texto)}</span>
+      </div>`).join("")}</div>` : "") +
+    (fecho ? `<div class="leitura-fecho"><b>De olho:</b> ${escapar(fecho)}</div>` : "");
+}
+
 function blocoLeitura(){
   const l = estado.leitura;
   const botao = `<button class="btn btn-secundario" id="btnLeitura" ${l?.carregando ? "disabled" : ""}>
@@ -1702,7 +2025,7 @@ function blocoLeitura(){
   }
   if(l?.texto){
     return `<div class="leitura">
-      <div class="leitura-texto">${l.texto.split(/\n+/).map(p => `<p>${escapar(p)}</p>`).join("")}</div>
+      <div class="leitura-texto">${montarLeitura(l.texto)}</div>
       <div class="leitura-pe">Escrito por IA a partir das manchetes acima · confira antes de repassar ${botao}</div>
     </div>`;
   }
@@ -1757,23 +2080,36 @@ function montarResumo(){
   </div>`;
 }
 
-function cartaoNoticia(i, termo){
-  const novo = i.ts && i.ts > estado.ultimaVisita && (Date.now() - i.ts) < 24*3600*1000;
+function cartaoNoticia(i, termo, destaque){
+  // Na primeira visita não há "desde a última vez": sem esta guarda,
+  // ultimaVisita vale 0 e o selo aparecia em todos os cartões — um selo
+  // que marca tudo não marca nada.
+  const novo = estado.ultimaVisita > 0 && i.ts &&
+    i.ts > estado.ultimaVisita && (Date.now() - i.ts) < 24*3600*1000;
   const alfinete = estado.publicando
     ? `<button class="n-fixar" data-fixar="${escapar(i.chave)}" title="Fixar no mural" aria-label="Fixar no mural">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
        </button>`
     : "";
-  return `<a class="noticia" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">${alfinete}
+
+  // Quem publicou vem primeiro; o rótulo da busca interna é bastidor.
+  const publicou = i.origem || i.veiculo;
+  const bastidor = i.origem && i.origem !== i.veiculo ? i.veiculo : "";
+  const cobertura = i.cobertura > 1
+    ? `<span class="n-cobertura" title="Também em: ${escapar(i.veiculos.slice(1).join(", "))}">${i.cobertura} veículos</span>`
+    : "";
+
+  return `<article class="noticia${destaque ? " noticia-destaque" : ""}">${alfinete}
     <div class="n-meta">
-      <span class="n-veiculo">${escapar(i.veiculo)}</span>
-      ${i.origem && i.origem !== i.veiculo ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(i.origem)}</span>` : ""}
+      <span class="n-veiculo">${escapar(publicou)}</span>
       ${i.ts ? `<span class="n-ponto">·</span><span class="n-hora">${escapar(tempoRelativo(i.ts))}</span>` : ""}
+      ${bastidor ? `<span class="n-ponto">·</span><span class="n-origem">${escapar(bastidor)}</span>` : ""}
       ${novo ? `<span class="n-novo">novo</span>` : ""}
+      ${cobertura}
     </div>
-    <div class="n-titulo">${realcar(i.titulo, termo)}</div>
-    ${i.resumo ? `<div class="n-resumo">${realcar(i.resumo, termo)}</div>` : ""}
-  </a>`;
+    <h3 class="n-titulo"><a class="n-link" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">${realcar(i.titulo, termo)}</a></h3>
+    ${i.resumo ? `<p class="n-resumo">${realcar(i.resumo, termo)}</p>` : ""}
+  </article>`;
 }
 
 function renderizarAbas(){
@@ -1789,6 +2125,9 @@ function renderizarAbas(){
 
 function renderizarGrade(){
   const grade = el("grade");
+  // Resumo e arquivo têm layout próprio: a densidade só vale na grade.
+  grade.classList.toggle("lista",
+    estado.densidade === "lista" && !estado.resumo && !estado.arquivo);
 
   if(!estado.arquivo && estado.carregando && !(estado.itens[estado.secao] || []).length){
     grade.innerHTML = Array.from({ length:6 }, () => `
@@ -1859,7 +2198,12 @@ function renderizarGrade(){
     return;
   }
 
-  html += itens.map(i => cartaoNoticia(i, termo)).join("");
+  /* O destaque só faz sentido com a fila por relevância e sem filtro:
+     fora disso, o "primeiro colocado" seria acidente de ordenação. */
+  const comDestaque = estado.ordem === "relevancia"
+    && !termo && !estado.veiculo && !estado.periodo && itens.length >= 4;
+
+  html += itens.map((i, n) => cartaoNoticia(i, termo, comDestaque && n === 0)).join("");
 
   grade.innerHTML = html;
 
@@ -1877,10 +2221,15 @@ function renderizarRodape(){
   const veiculos = new Set();
   SECOES.forEach(s => s.fontes.forEach(f => veiculos.add(f.v)));
 
-  el("statusFontes").innerHTML = [...veiculos].map(v => `
-    <span class="fonte-tag" title="${falhas.has(v) ? "Sem resposta na última atualização" : "Respondendo normalmente"}">
-      <span class="bolinha ${falhas.has(v) ? "falha" : "ok"}"></span>${escapar(v)}
-    </span>`).join("");
+  /* Listar as 23 fontes com bolinha verde não informava nada: quando
+     está tudo bem, o que o leitor precisa é de uma linha dizendo isso.
+     O que merece espaço na tela é quem não respondeu. */
+  el("statusFontes").innerHTML = falhas.size
+    ? `<span class="fonte-tag fonte-falha"><span class="bolinha falha"></span>${
+        falhas.size} de ${veiculos.size} fontes sem resposta</span>` +
+      [...falhas].map(v => `<span class="fonte-tag">${escapar(v)}</span>`).join("")
+    : `<span class="fonte-tag"><span class="bolinha ok"></span>${
+        veiculos.size} fontes respondendo</span>`;
 
   el("rodapeInfo").textContent = estado.ultimaAtualizacao
     ? "Atualizado às " + new Date(estado.ultimaAtualizacao).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" })
@@ -1893,9 +2242,24 @@ function renderizarRodape(){
       : "");
 }
 
+/* O botão de densidade mostra o ícone do que ele faz, não o do estado
+   atual: em cartões oferece a lista, em lista oferece os cartões. */
+const ICONE_LISTA = '<path d="M4 6h16M4 12h16M4 18h16"/>';
+const ICONE_CARTOES = '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>';
+
+function renderizarDensidade(){
+  const lista = estado.densidade === "lista";
+  const botao = el("btnDensidade");
+  el("iconeDensidade").innerHTML = lista ? ICONE_CARTOES : ICONE_LISTA;
+  botao.title = lista ? "Ver em cartões" : "Ver em lista compacta";
+  botao.setAttribute("aria-label", botao.title);
+  botao.setAttribute("aria-pressed", String(lista));
+}
+
 function renderizar(){
   renderizarAbas();
   renderizarAssuntos();
+  renderizarDensidade();
   renderizarGrade();
   renderizarRodape();
 }
@@ -1985,7 +2349,7 @@ el("grade").addEventListener("click", e => {
   const tirar = e.target.closest("[data-tirar]");
   if(tirar){ tirarDoMural(tirar.dataset.tirar); return; }
 
-  // O alfinete mora dentro do cartão, que é um link: segurar o clique
+  // O alfinete fica sobre a área clicável do cartão: segurar o clique
   const fixar = e.target.closest("[data-fixar]");
   if(fixar){
     e.preventDefault();
@@ -2013,10 +2377,25 @@ el("btnPublicar").addEventListener("click", e => {
 // No resumo os filtros não valem: ficam desligados para não enganar
 function aplicarModoResumo(){
   el("btnResumo").setAttribute("aria-pressed", String(estado.resumo));
-  ["busca", "filtroVeiculo", "filtroPeriodo"].forEach(id => { el(id).disabled = estado.resumo; });
+  ["busca", "filtroVeiculo", "filtroPeriodo", "filtroOrdem", "btnDensidade", "btnFiltros"]
+    .forEach(id => { el(id).disabled = estado.resumo; });
 }
 
 el("filtroVeiculo").addEventListener("change", e => { estado.veiculo = e.target.value; renderizar(); });
+el("filtroOrdem").addEventListener("change", e => {
+  estado.ordem = ORDENS[e.target.value] ? e.target.value : "relevancia";
+  guardar.gravar("radar_ordem", estado.ordem);
+  reordenar();
+});
+el("btnFiltros").addEventListener("click", () => {
+  const aberto = el("controlesMais").classList.toggle("aberto");
+  el("btnFiltros").setAttribute("aria-expanded", String(aberto));
+});
+el("btnDensidade").addEventListener("click", () => {
+  estado.densidade = estado.densidade === "lista" ? "cartoes" : "lista";
+  guardar.gravar("radar_densidade", estado.densidade);
+  renderizar();
+});
 el("filtroPeriodo").addEventListener("change", e => {
   const valor = e.target.value;
 
@@ -2143,6 +2522,11 @@ document.addEventListener("visibilitychange", () => {
     (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "escuro" : "claro"));
 
   estado.ultimaVisita = guardar.ler("radar_visita") || 0;
+
+  // Ordenação e densidade são preferência de leitura: ficam gravadas.
+  if(ORDENS[guardar.ler("radar_ordem")]) estado.ordem = guardar.ler("radar_ordem");
+  if(guardar.ler("radar_densidade") === "lista") estado.densidade = "lista";
+  el("filtroOrdem").value = estado.ordem;
 
   // Exibe o cache imediatamente para a tela não abrir vazia
   const cache = guardar.ler("radar_cache2");
