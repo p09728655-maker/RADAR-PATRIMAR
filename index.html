@@ -1993,11 +1993,12 @@ function montarMural(){
   </section>`;
 }
 
-function abrirPublicacao({ tipo, titulo = "", texto = "", link = "" }){
+function abrirPublicacao({ tipo, titulo = "", texto = "", link = "", autor = "" }){
   el("dlgTitulo").textContent = tipo === "noticia" ? "Fixar notícia no mural" : "Novo recado no mural";
   el("pubTitulo").value = titulo;
   el("pubTexto").value = texto;
   el("pubLink").value = link;
+  if(autor) el("pubAutor").value = autor;
   el("pubSenha").value = estado.senhaMural;
   el("pubErro").classList.add("oculto");
   el("dlgPublicar").dataset.tipo = tipo;
@@ -2270,6 +2271,62 @@ function montarLeitura(texto){
         <span>${escapar(texto)}</span>
       </div>`).join("")}</div>` : "") +
     (fecho ? `<div class="leitura-fecho"><b>De olho:</b> ${escapar(fecho)}</div>` : "");
+}
+
+/* ------------------------------------------------------------
+   Recado vindo de outro app da casa
+   ------------------------------------------------------------
+   RitmoProd, Controle de Faltas e o que vier depois precisam
+   mandar um resumo para o mural. O caminho óbvio seria cada um
+   chamar /api/mural direto — e é justamente o que não se faz
+   aqui: obrigaria a abrir a API para outros domínios e a senha
+   do mural teria de viajar entre apps, ficando guardada em
+   quantos lugares houver app.
+
+   Em vez disso o app externo só monta o texto e abre o Radar
+   com ele na URL. A caixa de publicação abre preenchida, uma
+   pessoa lê o que vai ser publicado e confirma com a senha —
+   que nunca sai daqui.
+
+   Contrato, para quem for ligar um app novo:
+     https://<radar>/?mural=1&titulo=…&texto=…&autor=…&link=…
+
+   Tudo opcional menos o mural=1. Os limites são os mesmos que o
+   api/mural.js aceita; o que passar disso é cortado aqui para a
+   caixa não abrir com texto que o servidor vai recusar.
+
+   Vale lembrar que esse texto é de fora: ele só preenche um
+   formulário que alguém confere, e publicar continua exigindo a
+   senha. Por isso não há filtro de conteúdo aqui — há revisão
+   humana, que é mais confiável. */
+const LIMITES_MURAL = { titulo:140, texto:1200, link:600, autor:60 };
+
+function recadoDaURL(){
+  let params;
+  try{ params = new URL(location.href).searchParams; }catch{ return; }
+  if(!params.get("mural")) return;
+
+  const corta = (chave, max) => (params.get(chave) || "").trim().slice(0, max);
+  const link = corta("link", LIMITES_MURAL.link);
+
+  const recado = {
+    tipo: "recado",
+    titulo: corta("titulo", LIMITES_MURAL.titulo),
+    texto:  corta("texto",  LIMITES_MURAL.texto),
+    autor:  corta("autor",  LIMITES_MURAL.autor),
+    // O servidor só aceita http(s); um javascript: aqui abriria a caixa com
+    // um link que seria recusado na hora de publicar, sem explicar por quê.
+    link: /^https?:\/\//i.test(link) ? link : ""
+  };
+  if(!recado.titulo && !recado.texto) return;
+
+  // Tira os parâmetros da barra: recarregar a página não pode reabrir a
+  // caixa, nem deixar o texto pendurado no histórico do navegador.
+  try{ history.replaceState(null, "", location.pathname); }catch{}
+
+  estado.secao = "patrimar";                 // o mural mora na aba da casa
+  renderizar();
+  abrirPublicacao(recado);
 }
 
 function blocoLeitura(){
@@ -2921,6 +2978,7 @@ document.addEventListener("visibilitychange", () => {
   document.fonts?.ready.then(medirCabecalho).catch(() => {});
 
   carregarMural();
+  recadoDaURL();
   carregarTudo();
   setInterval(() => { if(document.visibilityState === "visible") carregarTudo(); }, CONFIG.INTERVALO_MS);
 

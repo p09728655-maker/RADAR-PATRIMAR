@@ -370,6 +370,41 @@ quem tem o app vê o mural sem senha nenhuma.
 Link de aviso só é aceito em `http` ou `https`, para ninguém publicar um
 `javascript:` que rodaria no aparelho de quem abrisse.
 
+### Recado vindo de outro app da casa
+
+RitmoProd, Controle de Faltas e o que vier depois publicam no mural sem que a
+senha saia daqui.
+
+O caminho óbvio seria cada app chamar `/api/mural` direto. É justamente o que
+**não** se faz: obrigaria a abrir a API para outros domínios, e a senha do
+mural teria de viajar até cada app — ficaria guardada em quantos lugares
+houver app, em vez de um.
+
+Em vez disso o app externo monta o texto e abre o Radar com ele na URL. A
+caixa de publicação abre preenchida, uma pessoa lê o que vai ser publicado e
+confirma com a senha, no domínio do próprio Radar.
+
+```
+https://<radar>/?mural=1&titulo=…&texto=…&autor=…&link=…
+```
+
+Tudo opcional menos o `mural=1`; sem título nem texto, nada abre. Os limites
+são os mesmos do `api/mural.js` (140 / 1200 / 60 / 600) e o que passar é
+cortado na chegada, para a caixa não abrir com texto que o servidor recusaria.
+Link que não seja `http(s)` é descartado. Os parâmetros somem da barra assim
+que a caixa abre: recarregar não republica nem deixa o texto no histórico.
+
+Para ligar um app novo, são duas linhas:
+
+```js
+const q = new URLSearchParams({ mural:'1', titulo, texto, autor:'PCP' });
+window.open(RADAR_URL + '/?' + q.toString(), '_blank');
+```
+
+O texto chega de fora, mas só preenche um formulário que alguém confere, e
+publicar continua exigindo a senha. Por isso não há filtro de conteúdo na
+chegada — há revisão humana, que é mais confiável do que lista de palavras.
+
 ### O que ligar na Vercel
 
 O painel é estático, então o texto precisa morar em algum lugar. O mural usa
