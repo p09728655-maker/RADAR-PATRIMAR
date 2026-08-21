@@ -334,9 +334,14 @@ categoria colado na primeira notícia e sem botão nenhum.
 
 No telefone ninguém imprime nem salva PDF — abaixo de 560px o botão de
 impressão sai da frente de propósito. O caminho de repassar o radar ali é o
-WhatsApp, e é o que faz o botão **Mandar por WhatsApp**, ao pé do radar: abre a
-conversa com o texto pronto, para escolher o contato ou o grupo. Vale no
-celular e no WhatsApp Web.
+WhatsApp, e é o que faz o botão **Radar no WhatsApp**, no alto do radar, ao
+lado do título: abre a conversa com o texto pronto, para escolher o contato ou
+o grupo. Vale no celular e no WhatsApp Web.
+
+Fica em cima, e não ao pé, para mandar sem antes rolar o relatório inteiro —
+mesmo lugar do botão equivalente no painel de faltas. É pílula de contorno
+verde e não botão sólido: sólido ali brigaria com o vermelho da marca no filete
+logo abaixo. Só aparece com o radar montado; antes disso não há o que mandar.
 
 O texto é montado do zero, não copiado da tela — o WhatsApp não entende HTML e
 mensagem longa demais não chega a abrir. Então vai um **resumo do radar**, com
