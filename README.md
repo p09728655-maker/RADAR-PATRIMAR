@@ -250,7 +250,7 @@ Como reserva, o painel mantém sete pontes públicas gratuitas na constante
 - se o feed do veículo estiver fora do ar, a fonte cai para o endereço
   `reserva` — uma busca no Google Notícias restrita àquele site.
 
-As requisições passam por uma fila única de seis simultâneas. Sem ela as 35
+As requisições passam por uma fila única de seis simultâneas. Sem ela as 37
 fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
@@ -269,7 +269,7 @@ que fazer.
 
 O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
-quem não respondeu. Listar as 35 fontes com bolinha verde não informava nada.
+quem não respondeu. Listar as 37 fontes com bolinha verde não informava nada.
 
 ## Jornal Patrimar
 
@@ -360,7 +360,13 @@ antigo:
   modo de fixar, que faz aparecer um alfinete no canto de cada cartão;
   clicar no alfinete abre a caixa já com o título e o link preenchidos.
 
-No modo de fixar também aparece o ✕ para tirar um aviso do mural.
+Para **tirar** um aviso, o ✕ no canto do próprio aviso. Pede confirmação e a
+senha, conferida no servidor.
+
+Antes o ✕ só existia dentro do modo de fixar: para apagar um recado era preciso
+clicar em *Fixar notícia*, que é sobre outra coisa e ainda enchia todos os
+cartões de alfinete. Ninguém descobria. Mostrar o botão não afrouxa nada — o
+que estava escondido era o caminho, não a proteção.
 
 Publicar e apagar pedem a senha, conferida no servidor — o navegador nunca
 decide isso sozinho. A senha digitada fica só na memória da aba, para não
