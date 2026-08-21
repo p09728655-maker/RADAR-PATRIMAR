@@ -1032,12 +1032,19 @@ const CONFIG = {
 
    Quem passa janela explícita manda nela — é o caso da busca no arquivo,
    que tem recorte próprio e passa "". */
-const gn = (q, janela) => () => {
+const consultaGN = (q, janela, idioma) => () => {
   const recorte = janela === undefined ? CONFIG.JANELA : janela;
   return "https://news.google.com/rss/search?q=" +
-    encodeURIComponent(recorte ? q + " " + recorte : q) +
-    "&hl=pt-BR&gl=BR&ceid=BR:pt-419";
+    encodeURIComponent(recorte ? q + " " + recorte : q) + "&" + idioma;
 };
+
+const gn = (q, janela) => consultaGN(q, janela, "hl=pt-BR&gl=BR&ceid=BR:pt-419");
+
+/* Feira de máquina alemã e italiana quase não sai na imprensa brasileira:
+   LIGNA, Interzum e Xylexpo são cobertas lá fora e chegam aqui pela revista
+   técnica, com semanas de atraso. Para esses assuntos vale perguntar em
+   inglês — a manchete vem em inglês, e é melhor do que não vir. */
+const gnEn = (q, janela) => consultaGN(q, janela, "hl=en-US&gl=US&ceid=US:en");
 
 const SECOES = [
   { id:"patrimar", nome:"Patrimar", destaque:true, fontes:[
@@ -1054,6 +1061,11 @@ const SECOES = [
     { v:"Supply chain",        u:gn('("cadeia de suprimentos" OR "supply chain") (indústria OR fábrica OR estoque OR logística) Brasil') },
     { v:"CNI / Indústria",     u:gn('CNI ("confiança do empresário" OR "capacidade instalada" OR "sondagem industrial" OR "atividade industrial")') },
     { v:"Custos e insumos",    u:gn('indústria ("custo de produção" OR "preço do aço" OR "preço dos insumos" OR "reajuste de preço") Brasil') },
+    { v:"Feiras de máquinas",  u:gn('(LIGNA OR Interzum OR Xylexpo OR "FIMMA Brasil" OR "Holz-Handwerk" OR "IWF Atlanta") (máquina OR madeira OR móveis OR marcenaria)') },
+    { v:"Feiras internacionais",u:gnEn('(LIGNA OR Interzum OR Xylexpo OR "IWF Atlanta" OR "Holz-Handwerk") (woodworking OR furniture OR machinery)') },
+    { v:"Automação moveleira", u:gn('(automação OR automatizar OR robô OR "célula automatizada") (fábrica de móveis OR marcenaria OR indústria moveleira OR moveleiro)') },
+    { v:"Máquinas e usinagem", u:gn('(CNC OR nesting OR seccionadora OR "coladeira de bordas" OR "centro de usinagem") (móveis OR marcenaria OR madeira OR MDF)') },
+    { v:"Fabricantes de máquina",u:gn('(Homag OR Biesse OR "SCM Group" OR Weinig OR Altendorf OR Felder) (móveis OR madeira OR marcenaria OR fábrica)') },
     { v:"New York Times",      u:"https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
                                reserva:gn('site:nytimes.com manufacturing OR supply chain') }
   ]},
@@ -1071,7 +1083,9 @@ const SECOES = [
     { v:"Pantone",               u:gn('Pantone ("cor do ano" OR paleta OR tendência) (design OR decoração OR interiores)') },
     { v:"Design de interiores",  u:gn('"design de interiores" (tendência OR lançamento OR cozinha OR dormitório OR marcenaria)') },
     { v:"Acabamentos e texturas",u:gn('(acabamento OR textura OR revestimento OR laminado OR ripado OR fresado) (móveis OR marcenaria OR planejados)') },
-    { v:"Feiras e mostras",      u:gn('("Salão do Móvel" OR "Salone del Mobile" OR "CASACOR" OR "Expo Revestir" OR "Movelsul") (tendência OR design OR lançamento)') }
+    { v:"Feiras e mostras",      u:gn('("Salão do Móvel" OR "Salone del Mobile" OR CASACOR OR "Expo Revestir" OR Movelsul) (tendência OR design OR lançamento)') },
+    { v:"Feiras internacionais", u:gn('("Salone del Mobile" OR "iMM Cologne" OR "Maison&Objet" OR "High Point Market" OR "Furniture China" OR ICFF) (móveis OR design OR tendência)') },
+    { v:"Feiras lá fora",        u:gnEn('("Salone del Mobile" OR "iMM Cologne" OR "Maison et Objet" OR "High Point Market" OR "Furniture China" OR ICFF) (furniture OR design OR trends)') }
   ]},
   { id:"ia", nome:"Inteligência Artificial", fontes:[
     { v:"IA na indústria",  u:gn('"inteligência artificial" (indústria OR manufatura OR fábrica) -entretenimento -celular') },
@@ -1101,7 +1115,14 @@ const TEMAS = {
     [/(producao industrial|capacidade instalada|\bpim\b|\bcni\b)/, 6],
     [/(planejamento (e controle )?da producao|\bpcp\b|lean|cadeia de suprimentos|supply chain|estoque|lead time)/, 5],
     [/\b(custo|preco|insumo|aco|frete|energia|cambio|dolar|tarifa|importacao)/, 4],
-    [/(industria 4|automacao|manufatura|produtividade|eficiencia)/, 3]
+    [/(industria 4|automacao|automatiz|manufatura|produtividade|eficiencia)/, 4],
+    // Máquina e chão de fábrica moveleiro: é o que muda o processo daqui
+    [/(\bcnc\b|nesting|seccionadora|coladeira|centro de usinagem|usinagem|\brobo\b|robotic|celula automatizada|paletiza)/, 7],
+    [/(homag|biesse|\bscm group\b|weinig|altendorf|felder|schelling|\bima\b)/, 6],
+    [/(ligna|interzum|xylexpo|fimma|holz-handwerk|iwf atlanta)/, 7],
+    [/\b(feira|exposicao|mostra)\b/, 3],
+    // As consultas em inglês trazem manchete em inglês: sem isto, nota zero
+    [/(woodworking|furniture (manufactur|machinery|production)|machinery|factory automation|smart factory)/, 6]
   ],
   moveleiro: [
     [/(movelei|industria de moveis|fabrica de moveis|\bmdf\b|\bmdp\b|paineis de madeira)/, 6],
@@ -1112,7 +1133,10 @@ const TEMAS = {
     [/(tendencia|lancamento|colecao|novidade|inspiracao)/, 6],
     [/(cor do ano|cores|paleta|pantone|tonalidade|acabamento|textura|revestimento|laminado|ripado)/, 6],
     [/(moveis|movel|planejad|marcenaria|mobiliario|interiores|decoracao|cozinha|dormitorio|estofad)/, 5],
-    [/(salone|salao do movel|casacor|casa cor|expo revestir|milao|arquitetura|design)/, 3]
+    [/(salone|salao do movel|casacor|casa cor|expo revestir|milao|arquitetura|design)/, 3],
+    // Feira internacional é onde a tendência aparece um ano antes
+    [/(imm cologne|maison.?objet|high point|furniture china|\bicff\b|index dubai|salone del mobile)/, 7],
+    [/(furniture (fair|trends|design)|design week|trade (fair|show))/, 5]
   ],
   ia: [
     [/(industria|fabrica|manufatura|producao|logistica|previsao de demanda|chao de fabrica)/, 7],

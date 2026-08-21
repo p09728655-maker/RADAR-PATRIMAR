@@ -204,6 +204,18 @@ Para acompanhar um assunto sem depender de um veículo específico, usar a
 função auxiliar `gn("termos de busca")`, que monta uma consulta no Google
 Notícias em português.
 
+### Consulta em inglês
+
+Feira de máquina alemã e italiana quase não sai na imprensa brasileira: LIGNA,
+Interzum e Xylexpo são cobertas lá fora e chegam aqui pela revista técnica,
+com semanas de atraso. Para esses assuntos vale perguntar em inglês, com a
+função `gnEn("termos")` — a manchete vem em inglês, e é melhor do que não vir.
+
+Consequência que não pode ser esquecida: manchete em inglês não casa com
+padrão em português. `TEMAS.ppcp` e `TEMAS.tendencias` têm linhas próprias
+para os termos em inglês (`woodworking`, `machinery`, `furniture fair`), senão
+essas fontes pontuariam zero e a régua as cortaria inteiras.
+
 **Cuidado com a precedência.** No Google, `OR` liga mais forte que o E
 implícito: `A OR B C` é lido como `(A OR B) E C`, não como `A OU (B E C)`.
 Várias consultas estavam escritas supondo o contrário. Use parênteses
@@ -238,7 +250,7 @@ Como reserva, o painel mantém sete pontes públicas gratuitas na constante
 - se o feed do veículo estiver fora do ar, a fonte cai para o endereço
   `reserva` — uma busca no Google Notícias restrita àquele site.
 
-As requisições passam por uma fila única de seis simultâneas. Sem ela as 30
+As requisições passam por uma fila única de seis simultâneas. Sem ela as 35
 fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
@@ -257,7 +269,7 @@ que fazer.
 
 O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
-quem não respondeu. Listar as 30 fontes com bolinha verde não informava nada.
+quem não respondeu. Listar as 35 fontes com bolinha verde não informava nada.
 
 ## Jornal Patrimar
 
