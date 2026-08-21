@@ -11,9 +11,7 @@ const DOMINIOS = [
   "rss.nytimes.com",
   "nytimes.com",
   "technologyreview.com",
-  "arstechnica.com",
-  "theverge.com",
-  "techcrunch.com"
+  "arstechnica.com"
 ];
 
 const permitido = host =>
