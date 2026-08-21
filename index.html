@@ -697,7 +697,11 @@ html[data-tema="escuro"]{
 .radar{grid-column:1/-1;max-width:880px;margin:0 auto;width:100%}
 
 /* ---- cabeçalho ---- */
-.rd-cabeca{border-bottom:2px solid var(--marca-vermelho);padding-bottom:var(--s4);margin-bottom:var(--s7)}
+.rd-cabeca{
+  border-bottom:2px solid var(--marca-vermelho);padding-bottom:var(--s4);margin-bottom:var(--s7);
+  display:flex;align-items:flex-end;gap:var(--s4);flex-wrap:wrap;
+}
+.rd-cabeca-id{flex:1 1 260px;min-width:0}
 .rd-marca{display:flex;align-items:center;gap:var(--s3)}
 .rd-logo{height:26px;width:auto}
 .rd-titulo{
@@ -819,24 +823,24 @@ html[data-tema="escuro"] .rd-n-link:hover{color:#F2727A}
 }
 .rd-pe > .btn{margin-left:auto}
 
-/* Ações do radar: ficam juntas, encostadas à direita. No telefone passam
-   a ocupar a linha inteira — alvo de toque grande vale mais que simetria. */
-.rd-acoes{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-left:auto}
-
-/* O verde é o do WhatsApp, mas fechado: numa folha corporativa o verde
-   berrante brigaria com o vermelho da marca. O ícone diz o resto. */
-.btn-zap{background:#1F8A4C;color:#fff}
-.btn-zap:hover{background:#18703D}
-html[data-tema="escuro"] .btn-zap{background:#25A15C}
-html[data-tema="escuro"] .btn-zap:hover{background:#2CB869}
+/* O verde é o do WhatsApp, mas em pílula de contorno e fechado: o botão
+   fica ao lado do título do radar, e sólido ali brigaria com o vermelho da
+   marca no filete logo abaixo. Quem manda o radar já veio procurar. */
+.btn-zap{
+  background:rgba(31,138,76,.09);border-color:rgba(31,138,76,.45);color:#16713D;
+}
+.btn-zap:hover{background:rgba(31,138,76,.17);border-color:#16713D}
+html[data-tema="escuro"] .btn-zap{
+  background:rgba(37,161,92,.15);border-color:rgba(37,161,92,.5);color:#4FC585;
+}
+html[data-tema="escuro"] .btn-zap:hover{background:rgba(37,161,92,.26);border-color:#4FC585}
 
 @media (max-width:640px){
   .rd-titulo{font-size:21px}
   .rd-alerta-t{font-size:var(--fs-h2)}
   .rd-area,.rd-campo{grid-template-columns:1fr;gap:var(--s1)}
   .rd-area-sub{margin-bottom:var(--s1)}
-  .rd-acoes{width:100%;margin-left:0}
-  .rd-acoes .btn{flex:1 1 auto;justify-content:center}
+  .rd-cabeca .btn-zap{width:100%;justify-content:center}
 }
 
 @media print{
@@ -912,7 +916,7 @@ html[data-tema="escuro"] .btn-zap:hover{background:#2CB869}
   .rd-olho-t{font-size:11pt}
 
   /* Botão e caixas de espera não existem no papel. */
-  .rd-pe .btn,.rd-espera,.rd-erro{display:none}
+  .rd-pe .btn,.rd-cabeca .btn,.rd-espera,.rd-erro{display:none}
   .rd-pe{border-top-color:#ddd;color:#666;font-size:8pt;margin-top:14pt}
   .aviso{border-color:#999;color:#333;background:none}
 
@@ -2773,33 +2777,40 @@ function enviarRadarZap(){
 }
 
 function botaoZap(){
-  return `<button class="btn btn-zap" id="btnZap" title="Mandar o resumo do radar por WhatsApp">
+  return `<button class="btn btn-zap" id="btnZap"
+    title="Abre o WhatsApp já com o resumo do radar de hoje — alertas, o que muda por área e as notícias com link">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.96L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15h-.01a8.23 8.23 0 01-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.21 8.21 0 01-1.26-4.38c0-4.55 3.7-8.25 8.25-8.25a8.24 8.24 0 018.24 8.26c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.83-.85 2.02 0 1.19.87 2.34.99 2.5.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.39.51.58.19 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
-    <span>Mandar por WhatsApp</span>
+    <span>Radar no WhatsApp</span>
   </button>`;
 }
 
 function montarRadar(){
   const r = estado.radar;
   const agora = new Date();
-  const cabeca = `<header class="rd-cabeca">
-    <div class="rd-marca">
-      <img class="rd-logo" src="logo-patrimar.png" width="760" height="246" alt="">
-      <h1 class="rd-titulo">Radar Diário <span>| Patrimar</span></h1>
+  /* O botão de mandar fica no alto, ao lado do título: assim se manda o
+     radar sem antes rolar o relatório inteiro. Só aparece com radar montado
+     — antes disso não há o que mandar. */
+  const cabeca = comAcao => `<header class="rd-cabeca">
+    <div class="rd-cabeca-id">
+      <div class="rd-marca">
+        <img class="rd-logo" src="logo-patrimar.png" width="760" height="246" alt="">
+        <h1 class="rd-titulo">Radar Diário <span>| Patrimar</span></h1>
+      </div>
+      <div class="rd-data">${escapar(dataExtenso(agora))}</div>
+      <div class="rd-eixos">Mercado · Indústria · PPCP · Tecnologia</div>
     </div>
-    <div class="rd-data">${escapar(dataExtenso(agora))}</div>
-    <div class="rd-eixos">Mercado · Indústria · PPCP · Tecnologia</div>
+    ${comAcao ? botaoZap() : ""}
   </header>`;
 
   if(r?.carregando){
-    return `<div class="radar">${cabeca}
+    return `<div class="radar">${cabeca(false)}
       <div class="rd-espera">Lendo as manchetes e montando o radar…
         <span class="rd-espera-x">leva alguns segundos: cada notícia é analisada, não só resumida</span></div>
     </div>`;
   }
 
   if(r?.erro){
-    return `<div class="radar">${cabeca}
+    return `<div class="radar">${cabeca(false)}
       <div class="rd-erro"><b>Não saiu:</b> ${escapar(r.erro)}
         ${r.comoResolver ? `<div class="rd-erro-x">${escapar(r.comoResolver)}</div>` : ""}</div>
       <div class="rd-pe">${botaoRadar()}</div>
@@ -2807,7 +2818,7 @@ function montarRadar(){
   }
 
   if(!r?.dados){
-    return `<div class="radar">${cabeca}
+    return `<div class="radar">${cabeca(false)}
       <div class="rd-espera">O radar é montado sob demanda: ele lê as manchetes do dia e
         devolve o que pode afetar a Patrimar, por área, com o que observar.
         <span class="rd-espera-x">nada é gerado sem este clique</span></div>
@@ -2819,14 +2830,14 @@ function montarRadar(){
   const hora = new Date(r.quando).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
 
   return `<div class="radar">
-    ${cabeca}
+    ${cabeca(true)}
     ${blocoAlertas(d.alertas)}
     ${blocoAreas(d.areas)}
     ${blocoNoticias(d.noticias, r.itens || [])}
     ${blocoDeOlho(d.deOlho)}
     <div class="rd-pe">
       <span>Escrito por IA a partir das manchetes do dia, às ${escapar(hora)} · confira antes de decidir</span>
-      <div class="rd-acoes">${botaoZap()}${botaoRadar()}</div>
+      ${botaoRadar()}
     </div>
   </div>`;
 }
