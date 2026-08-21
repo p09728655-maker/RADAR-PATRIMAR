@@ -782,6 +782,11 @@ html[data-tema="escuro"] .jn-rotulo{border-bottom-color:var(--border-forte)}
 html[data-tema="escuro"] .jn-chamada:hover .jn-chamada-t{color:#F2727A}
 
 .jn-editorial{min-width:0}
+/* Dentro da coluna mestra não há largura para rótulo e texto lado a lado: o
+   texto cairia numa faixa de dois dedos e o editorial esticaria página abaixo.
+   Aqui o rótulo vai acima, e a linha inteira usa a largura da coluna. */
+.jn-mestra .leitura-linha{grid-template-columns:1fr;gap:2px}
+.jn-mestra .leitura-secao{letter-spacing:.8px}
 
 .jn-caderno{margin-top:var(--s6);break-inside:avoid}
 .jn-caderno-topo{
@@ -841,10 +846,12 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
   .jn-nome{font-size:30pt;color:#000}
   .jn-linha{font-size:8pt;color:#444}
   .jn-assuntos{font-size:8pt;color:#555}
-  /* A capa não se parte no meio — mas também não reserva a folha inteira.
-     Forçar quebra depois dela deixava meia página em branco em dia de pouca
-     notícia; deixando fluir, os cadernos ocupam o que sobra. */
-  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:16pt;break-inside:avoid;margin-bottom:14pt}
+  /* NADA de break-inside na capa. Ela é alta — manchete, editorial inteiro e
+     quatro chamadas — e quando não cabe no que resta da folha o navegador não
+     a parte: empurra o bloco todo para a página seguinte e deixa o cabeçalho
+     sozinho numa folha em branco. Quem evita quebra feia são as peças
+     pequenas, logo abaixo; a capa flui e a página enche. */
+  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:16pt;margin-bottom:14pt}
   .jn-mestra{gap:12pt}
   .jn-tambem{border-left:1px solid #bbb;padding-left:12pt}
   .jn-tarja{color:#DB2126;font-size:8pt}
@@ -854,7 +861,13 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
   .jn-rotulo{border-bottom-color:#000;font-size:8pt}
   .jn-chamada{padding:5pt 0;border-bottom-color:#ddd}
   .jn-chamada-t{font-size:10pt}
-  .jn-editorial{break-inside:avoid}
+  /* O editorial também é alto demais para caber num "avoid": o que não pode
+     partir é cada linha de seção, para o rótulo não ficar órfão do texto. */
+  .jn-linha{break-inside:avoid}
+  .leitura-linha{break-inside:avoid}
+  .jn-fecho,.leitura-fecho{break-inside:avoid}
+  .jn-principal{break-inside:avoid}
+  .jn-chamada{break-inside:avoid}
   /* Sem o break-after da capa, os cadernos voltam a fluir juntos e a edição
      inteira cabe em duas páginas em vez de quatro. */
   .jn-caderno{margin-top:12pt;break-inside:avoid-page}
