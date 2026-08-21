@@ -35,6 +35,14 @@ const IMPACTOS = ["alto", "medio", "baixo"];
 
 const texto = { type: "string" };
 
+/* Os tetos de quantidade NÃO entram no esquema: a API recusa `maxItems` em
+   output_config.format.schema com 400 ("For 'array' type, property 'maxItems'
+   is not supported"). O esquema garante a FORMA — que campo existe e que
+   valor cada enum aceita; a quantidade é pedida na instrução e cortada aqui
+   depois, no LIMITES abaixo. Cortar no código é mais confiável de qualquer
+   jeito: vale mesmo que o modelo escreva demais. */
+const LIMITES = { alertas: 3, areas: 5, noticias: 20, deOlho: 5, areasPorNoticia: 3 };
+
 const ESQUEMA = {
   type: "object",
   additionalProperties: false,
@@ -42,7 +50,6 @@ const ESQUEMA = {
   properties: {
     alertas: {
       type: "array",
-      maxItems: 3,
       items: {
         type: "object",
         additionalProperties: false,
@@ -62,7 +69,6 @@ const ESQUEMA = {
     },
     areas: {
       type: "array",
-      maxItems: 5,
       items: {
         type: "object",
         additionalProperties: false,
@@ -72,7 +78,6 @@ const ESQUEMA = {
     },
     noticias: {
       type: "array",
-      maxItems: 20,
       items: {
         type: "object",
         additionalProperties: false,
@@ -82,7 +87,7 @@ const ESQUEMA = {
           id: texto,
           categoria: { type: "string", enum: CATEGORIAS },
           impacto: { type: "string", enum: IMPACTOS },
-          areas: { type: "array", maxItems: 3, items: { type: "string", enum: AREAS } },
+          areas: { type: "array", items: { type: "string", enum: AREAS } },
           oQueAconteceu: texto,
           porQueImporta: texto,
           oQueObservar: texto,
@@ -92,7 +97,6 @@ const ESQUEMA = {
     },
     deOlho: {
       type: "array",
-      maxItems: 5,
       items: {
         type: "object",
         additionalProperties: false,
@@ -274,6 +278,18 @@ export default async function handler(req, res) {
       // do que entregar meia tela montada com campo faltando.
       return res.status(502).json({ erro: "a resposta não veio no formato esperado" });
     }
+
+    /* Os tetos vivem aqui porque o esquema não os aceita. Sem isto, um dia de
+       muita notícia devolveria trinta itens e o radar viraria o clipping que
+       ele existe para não ser. */
+    const corta = (v, n) => Array.isArray(v) ? v.slice(0, n) : [];
+    radar = {
+      alertas:  corta(radar.alertas,  LIMITES.alertas),
+      areas:    corta(radar.areas,    LIMITES.areas),
+      noticias: corta(radar.noticias, LIMITES.noticias)
+        .map(n => ({ ...n, areas: corta(n.areas, LIMITES.areasPorNoticia) })),
+      deOlho:   corta(radar.deOlho,   LIMITES.deOlho)
+    };
 
     return res.status(200).json({
       radar,
