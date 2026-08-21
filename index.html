@@ -317,8 +317,24 @@ html[data-tema="escuro"] .btn-secundario[aria-pressed="true"]{background:var(--m
 }
 html[data-tema="escuro"] .mural-selo{background:#2B2718;color:#E4DCC0}
 .mural-selo.noticia{background:var(--ok-bg);color:var(--ok)}
-.mural-tirar{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 var(--s2);border-radius:var(--r-sm)}
-.mural-tirar:hover{color:var(--atencao);background:var(--surface-2)}
+/* Antes o ✕ só existia dentro do modo de fixar: para apagar um recado era
+   preciso clicar em "Fixar notícia", que é sobre outra coisa e ainda enche os
+   cartões de alfinete. Ninguém descobria. Agora ele mora no próprio aviso.
+
+   Mostrar o botão não afrouxa nada: apagar segue pedindo confirmação e a
+   senha, conferida no servidor. O que estava escondido era o caminho, não a
+   proteção. */
+.mural-tirar{
+  border:0;background:none;color:var(--border-forte);cursor:pointer;
+  padding:0 var(--s2);border-radius:var(--r-sm);flex:0 0 auto;
+  transition:color .15s, background .15s;
+}
+.mural-item:hover .mural-tirar{color:var(--muted)}
+.mural-tirar:hover,.mural-tirar:focus-visible{color:var(--atencao);background:var(--surface-2)}
+/* Em telas de toque não há hover: o botão fica sempre legível. */
+@media (hover:none){
+  .mural-tirar{color:var(--muted)}
+}
 .mural-vazio{font-size:var(--fs-small);color:var(--muted)}
 .mural-instrucao{
   display:flex;gap:var(--s3);align-items:flex-start;
@@ -1066,6 +1082,8 @@ const SECOES = [
     { v:"Automação moveleira", u:gn('(automação OR automatizar OR robô OR "célula automatizada") (fábrica de móveis OR marcenaria OR indústria moveleira OR moveleiro)') },
     { v:"Máquinas e usinagem", u:gn('(CNC OR nesting OR seccionadora OR "coladeira de bordas" OR "centro de usinagem") (móveis OR marcenaria OR madeira OR MDF)') },
     { v:"Fabricantes de máquina",u:gn('(Homag OR Biesse OR "SCM Group" OR Weinig OR Altendorf OR Felder) (móveis OR madeira OR marcenaria OR fábrica)') },
+    { v:"Robótica e controle",  u:gn('("robô industrial" OR robótica OR "braço robótico" OR "visão computacional" OR CLP OR sensores) (fábrica OR indústria OR produção OR automação)') },
+    { v:"Chão de fábrica digital",u:gn('(MES OR SCADA OR "IoT industrial" OR "gêmeo digital" OR "integração de máquinas" OR "coleta automática de dados") (fábrica OR indústria OR produção)') },
     { v:"New York Times",      u:"https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
                                reserva:gn('site:nytimes.com manufacturing OR supply chain') }
   ]},
@@ -1118,6 +1136,8 @@ const TEMAS = {
     [/(industria 4|automacao|automatiz|manufatura|produtividade|eficiencia)/, 4],
     // Máquina e chão de fábrica moveleiro: é o que muda o processo daqui
     [/(\bcnc\b|nesting|seccionadora|coladeira|centro de usinagem|usinagem|\brobo\b|robotic|celula automatizada|paletiza)/, 7],
+    // Tecnologia de automação pelo nome próprio, não pelo termo guarda-chuva
+    [/(\bclp\b|\bscada\b|\bmes\b|iot industrial|gemeo digital|visao computacional|braco robotico|sensor|coleta automatica)/, 6],
     [/(homag|biesse|\bscm group\b|weinig|altendorf|felder|schelling|\bima\b)/, 6],
     [/(ligna|interzum|xylexpo|fimma|holz-handwerk|iwf atlanta)/, 7],
     [/\b(feira|exposicao|mostra)\b/, 3],
@@ -1967,7 +1987,7 @@ function montarMural(){
       return `<div class="mural-item">
         <span class="mural-selo ${a.tipo === "noticia" ? "noticia" : ""}">${a.tipo === "noticia" ? "fixada" : "recado"}</span>
         ${a.link ? `<a class="mural-corpo" href="${escapar(a.link)}" target="_blank" rel="noopener noreferrer">${corpo}</a>` : corpo}
-        ${estado.publicando ? `<button class="mural-tirar" data-tirar="${escapar(a.id)}" title="Tirar do mural" aria-label="Tirar do mural">✕</button>` : ""}
+        ${podePublicar ? `<button class="mural-tirar" data-tirar="${escapar(a.id)}" title="Tirar do mural" aria-label="Tirar do mural">✕</button>` : ""}
       </div>`;
     }).join("")}</div>`;
   }
