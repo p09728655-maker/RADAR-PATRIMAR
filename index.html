@@ -736,10 +736,15 @@ html[data-tema="escuro"] .jn-nome{color:var(--text)}
 }
 .jn-assuntos{font-size:var(--fs-caption);color:var(--text-2);margin-top:var(--s2)}
 
-/* A abertura: manchete larga à esquerda, chamadas em coluna à direita */
-.jn-abertura{display:grid;grid-template-columns:1fr;gap:var(--s5)}
+/* A abertura: coluna mestra à esquerda com manchete e editorial, chamadas à
+   direita. O editorial estava num bloco largo abaixo, e quando a manchete não
+   tinha linha fina a coluna esquerda encolhia — sobrava meia página em branco
+   ao lado das chamadas, e no papel o editorial ia parar na página 2. Aqui ele
+   preenche esse vão e a capa fecha numa página só. */
+.jn-abertura{display:grid;grid-template-columns:1fr;gap:var(--s5);align-items:start}
+.jn-mestra{min-width:0;display:flex;flex-direction:column;gap:var(--s5)}
 @media (min-width:860px){
-  .jn-abertura{grid-template-columns:1.9fr 1fr;gap:var(--s6)}
+  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:var(--s6)}
   .jn-tambem{border-left:1px solid var(--border);padding-left:var(--s5)}
 }
 
@@ -776,7 +781,7 @@ html[data-tema="escuro"] .jn-rotulo{border-bottom-color:var(--border-forte)}
 .jn-chamada:hover .jn-chamada-t{color:var(--marca-bordeaux)}
 html[data-tema="escuro"] .jn-chamada:hover .jn-chamada-t{color:#F2727A}
 
-.jn-editorial{margin-top:var(--s6)}
+.jn-editorial{min-width:0}
 
 .jn-caderno{margin-top:var(--s6);break-inside:avoid}
 .jn-caderno-topo{
@@ -836,7 +841,11 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
   .jn-nome{font-size:30pt;color:#000}
   .jn-linha{font-size:8pt;color:#444}
   .jn-assuntos{font-size:8pt;color:#555}
-  .jn-abertura{grid-template-columns:1.9fr 1fr;gap:16pt;break-inside:avoid}
+  /* A capa não se parte no meio — mas também não reserva a folha inteira.
+     Forçar quebra depois dela deixava meia página em branco em dia de pouca
+     notícia; deixando fluir, os cadernos ocupam o que sobra. */
+  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:16pt;break-inside:avoid;margin-bottom:14pt}
+  .jn-mestra{gap:12pt}
   .jn-tambem{border-left:1px solid #bbb;padding-left:12pt}
   .jn-tarja{color:#DB2126;font-size:8pt}
   .jn-principal-t{font-size:20pt}
@@ -845,8 +854,10 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
   .jn-rotulo{border-bottom-color:#000;font-size:8pt}
   .jn-chamada{padding:5pt 0;border-bottom-color:#ddd}
   .jn-chamada-t{font-size:10pt}
-  .jn-editorial{margin-top:14pt;break-inside:avoid}
-  .jn-caderno{margin-top:14pt;break-inside:avoid-page}
+  .jn-editorial{break-inside:avoid}
+  /* Sem o break-after da capa, os cadernos voltam a fluir juntos e a edição
+     inteira cabe em duas páginas em vez de quatro. */
+  .jn-caderno{margin-top:12pt;break-inside:avoid-page}
   .jn-caderno-topo{border-bottom-color:#000;margin-bottom:8pt}
   .jn-caderno-nome{font-size:13pt}
   .jn-caderno-lista{grid-template-columns:1fr 1fr 1fr;gap:8pt 14pt}
@@ -1234,6 +1245,17 @@ const EXCLUIR = {
   patrimar: t => CONSTRUTORA.test(t) && !MOVEL.test(t)
 };
 
+/* ------------------------------------------------------------
+   Rede social não é veículo
+   ------------------------------------------------------------
+   O Google Notícias devolve post de Instagram e de X como se
+   fosse matéria. No jornal impresso isso saiu como uma chamada
+   com quatro arrobas e cortada no meio de um @handle — não
+   informa nada e estraga a página. Sai do painel inteiro. */
+const REDE_SOCIAL = /(^|\.)(instagram|facebook|twitter|x|tiktok|threads|linkedin|youtube|pinterest)\.com$/i;
+
+const ehRedeSocial = it => REDE_SOCIAL.test(String(it.origem || "").trim().toLowerCase());
+
 /* Chamada de engajamento, não notícia. Não elimina, mas perde posição. */
 const CHAMARIZ = /\b(veja|confira|saiba|assista|descubra|entenda|fotos|video|galeria|ranking|dicas|passo a passo|voce precisa)\b/;
 
@@ -1546,6 +1568,11 @@ function montarItem({ titulo, link, resumo, origem, dataBruta, veiculo }){
     titulo = titulo.slice(0, -(origem.length + 3)).trim();
   }
 
+  /* Título que termina em "(@" é post de rede social cortado pelo Google
+     Notícias no meio de um @handle. Aparava a frase e virava chamada
+     ilegível no jornal — melhor cortar na última frase inteira. */
+  if(/\(@?$/.test(titulo)) titulo = titulo.replace(/\s*\(@?$/, "");
+
   resumo = limparHtml(resumo);
   if(resumo.length > 240) resumo = resumo.slice(0, 240).trim() + "…";
   if(resumo.startsWith(titulo.slice(0, 30)) || /^<?a href/i.test(resumo)) resumo = "";
@@ -1781,6 +1808,7 @@ function recompor(secaoId){
 
   for(const fonte of fontesAtivas(secao)){
     for(const it of (estado.brutos[secaoId][fonte.v] || [])){
+      if(ehRedeSocial(it)) continue;
       const limpo = simples(it.titulo + " " + (it.resumo || ""));
       if(RUIDO.test(limpo)) continue;
       if(EXCLUIR[secaoId]?.(limpo)) continue;
@@ -2537,13 +2565,14 @@ function montarJornal(){
     </header>
 
     <div class="jn-abertura">
-      ${manchete}
+      <div class="jn-mestra">
+        ${manchete}
+        <div class="jn-editorial">
+          <div class="jn-rotulo">Editorial do dia</div>
+          ${blocoLeitura()}
+        </div>
+      </div>
       ${tambem}
-    </div>
-
-    <div class="jn-editorial">
-      <div class="jn-rotulo">Editorial do dia</div>
-      ${blocoLeitura()}
     </div>
 
     ${cadernos}

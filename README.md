@@ -291,6 +291,17 @@ A escolha das manchetes não usa IA: parte da mesma nota da grade (tema,
 cobertura, recência) e soma o peso dos assuntos mais citados do dia. Quantas
 entram por seção é `CONFIG.RESUMO_POR_SECAO`.
 
+A capa é uma coluna mestra com manchete e editorial à esquerda, e as chamadas
+à direita. O editorial já ficou num bloco largo abaixo, e a conta não fechava:
+quando a manchete não tinha linha fina, a coluna esquerda encolhia e sobrava
+meia página em branco ao lado das chamadas — no papel, o editorial ia parar na
+página 2. Na coluna mestra ele preenche esse vão e a capa fecha inteira.
+
+**Rede social não entra.** O Google Notícias devolve post de Instagram e de X
+como se fosse matéria. Uma dessas saiu impressa como chamada, com quatro
+arrobas e cortada no meio de um `@handle`. A constante `REDE_SOCIAL` corta na
+entrada, no painel inteiro — não só no jornal.
+
 O botão **Imprimir** abre a caixa de impressão do navegador, que também salva
 em PDF. É para isso que o jornal existe: circular na fábrica, onde nem todo
 mundo abre o painel. No papel saem só o logotipo, a data e a edição — sem
