@@ -20,10 +20,24 @@ const permitido = host =>
   DOMINIOS.some(d => host === d || host.endsWith("." + d));
 
 /* Nem todo feed é UTF-8. O da Folha, por exemplo, vem em ISO-8859-1 e, lido
-   como UTF-8, transforma "vigário" em "vig?rio". A codificação certa é
-   procurada em ordem: cabeçalho HTTP, declaração do próprio XML e, por fim,
-   os dois palpites comuns. Vence a primeira leitura sem caractere perdido. */
+   como UTF-8, transforma "vigário" em "vig?rio". Mas o erro contrário é mais
+   comum e mais silencioso, e é o que se resolve abaixo. */
 function decodificar(bytes, tipoHttp) {
+
+  /* UTF-8 primeiro, e em modo estrito. Texto latin-1 com acento quase nunca
+     forma sequência UTF-8 válida: "á" isolado é o byte 0xE1 seguido de um
+     espaço, e o decodificador estrito recusa. Então quem passa no estrito é
+     UTF-8 de verdade.
+
+     A ordem importa e antes estava invertida. O cabeçalho HTTP vinha
+     primeiro, e feed que declara ISO-8859-1 mas entrega bytes UTF-8 vencia
+     de saída — porque ler UTF-8 como windows-1252 nunca produz caractere
+     perdido, então o teste de "leitura sem perda" aprovava a leitura errada
+     e "persistência" chegava na tela como "persistÃªncia". */
+  try{
+    return new TextDecoder("utf-8", { fatal:true }).decode(bytes);
+  }catch{ /* não é UTF-8: o que o feed declarar decide */ }
+
   const espiada = new TextDecoder("windows-1252").decode(bytes.slice(0, 400));
 
   const candidatas = [
