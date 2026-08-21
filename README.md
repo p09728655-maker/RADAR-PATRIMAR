@@ -330,6 +330,36 @@ O botão **Imprimir** sai com o radar em formato de relatório: selo com borda e
 vez de fundo (fundo colorido some em impressora de escritório), título de
 categoria colado na primeira notícia e sem botão nenhum.
 
+### Mandar por WhatsApp
+
+No telefone ninguém imprime nem salva PDF — abaixo de 560px o botão de
+impressão sai da frente de propósito. O caminho de repassar o radar ali é o
+WhatsApp, e é o que faz o botão **Mandar por WhatsApp**, ao pé do radar: abre a
+conversa com o texto pronto, para escolher o contato ou o grupo. Vale no
+celular e no WhatsApp Web.
+
+O texto é montado do zero, não copiado da tela — o WhatsApp não entende HTML e
+mensagem longa demais não chega a abrir. Então vai um **resumo do radar**, com
+negrito e itálico no formato do próprio WhatsApp:
+
+- cabeçalho com a data e a hora em que o radar foi montado;
+- **alertas principais**, com impacto e horizonte;
+- **o que significa para a Patrimar**, por área;
+- **notícias** de maior impacto, cada uma com veículo, por que importa, ação
+  quando houver — e o link;
+- **de olho**;
+- o endereço do painel, para quem quiser o radar inteiro.
+
+Tudo cabe num teto de 4.000 caracteres. Cada campo entra aparado no talho da
+palavra e os blocos entram por ordem de importância, então o que sai no corte é
+sempre o menos essencial. As notícias têm espaço reservado antes de a leitura
+por área e o De olho se servirem: num dia de textos longos, sem essa reserva, a
+mensagem sairia sem nenhum link — e é o link que faz o resumo virar leitura.
+Notícia entra inteira ou não entra: cortar no meio partiria o endereço.
+
+No app instalado o botão navega direto, e o sistema entrega ao WhatsApp; no
+navegador abre em aba nova e o painel continua aberto atrás.
+
 ## Configurações
 
 A engrenagem no topo abre as configurações. Tudo ali fica gravado **neste

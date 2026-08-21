@@ -817,13 +817,26 @@ html[data-tema="escuro"] .rd-n-link:hover{color:#F2727A}
   margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--border);
   font-size:var(--fs-caption);color:var(--muted);
 }
-.rd-pe .btn{margin-left:auto}
+.rd-pe > .btn{margin-left:auto}
+
+/* Ações do radar: ficam juntas, encostadas à direita. No telefone passam
+   a ocupar a linha inteira — alvo de toque grande vale mais que simetria. */
+.rd-acoes{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;margin-left:auto}
+
+/* O verde é o do WhatsApp, mas fechado: numa folha corporativa o verde
+   berrante brigaria com o vermelho da marca. O ícone diz o resto. */
+.btn-zap{background:#1F8A4C;color:#fff}
+.btn-zap:hover{background:#18703D}
+html[data-tema="escuro"] .btn-zap{background:#25A15C}
+html[data-tema="escuro"] .btn-zap:hover{background:#2CB869}
 
 @media (max-width:640px){
   .rd-titulo{font-size:21px}
   .rd-alerta-t{font-size:var(--fs-h2)}
   .rd-area,.rd-campo{grid-template-columns:1fr;gap:var(--s1)}
   .rd-area-sub{margin-bottom:var(--s1)}
+  .rd-acoes{width:100%;margin-left:0}
+  .rd-acoes .btn{flex:1 1 auto;justify-content:center}
 }
 
 @media print{
@@ -2631,6 +2644,141 @@ function blocoDeOlho(deOlho){
   </section>`;
 }
 
+/* ---- mandar o radar pelo WhatsApp ---------------------------------------
+   No telefone ninguém imprime nem salva PDF — abaixo de 560px o botão de
+   impressão sai da frente de propósito. O jeito de repassar o radar ali é
+   o WhatsApp, e é isso que este botão faz: monta o radar em texto e abre a
+   conversa com ele pronto, para escolher o contato ou o grupo.
+
+   O texto é montado aqui, não copiado da tela: o WhatsApp não entende HTML,
+   e mensagem longa demais não chega a abrir. Por isso vai um resumo — os
+   alertas, a leitura por área, as notícias de maior impacto com o link e o
+   De olho — com um teto de caracteres e o endereço do painel no fim, para
+   quem quiser o radar inteiro. */
+
+const ZAP_LIMITE   = 4000;   // teto de caracteres da mensagem
+const ZAP_NOTICIAS = 8;      // quantas notícias, no máximo, vão no texto
+/* Espaço guardado para as notícias antes de a leitura por área e o De olho
+   se servirem. Sem esta reserva, um dia de textos longos entregaria uma
+   mensagem sem nenhum link — e é o link que faz o resumo virar leitura. */
+const ZAP_RESERVA  = 700;
+
+const enderecoDoPainel = () =>
+  /^https?:$/.test(location.protocol) ? location.origin + location.pathname : "";
+
+/* O modelo escreve texto livre: nada garante que ele caiba. Aqui cada
+   campo entra aparado no talho da palavra, e os blocos entram por ordem
+   de importância enquanto houver espaço — assim a mensagem nunca estoura
+   e o que sobra do corte é sempre o menos essencial. */
+function aparar(s, n){
+  const t = String(s ?? "").replace(/\s+/g, " ").trim();
+  if(t.length <= n) return t;
+  const c = t.slice(0, n);
+  return c.slice(0, Math.max(c.lastIndexOf(" "), n - 20)).trim() + "…";
+}
+
+function radarEmTexto(){
+  const r = estado.radar;
+  if(!r?.dados) return "";
+
+  const d = r.dados;
+  const itens = r.itens || [];
+  const quando = new Date(r.quando || Date.now());
+  const hora = quando.toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+
+  const endereco = enderecoDoPainel();
+  const pe = "_Resumo do radar do dia, escrito por IA a partir das manchetes. " +
+    "Confira antes de decidir._" +
+    (endereco ? `\nO radar completo está no painel: ${endereco}` : "");
+
+  // Cabeça e alertas são a mensagem: sem eles não há o que mandar.
+  const partes = [
+    `*RADAR DIÁRIO | PATRIMAR*\n${dataExtenso(quando)}, às ${hora}`,
+    d.alertas?.length
+      ? "*ALERTAS PRINCIPAIS*\n\n" + d.alertas.map((a, n) =>
+          `*${n + 1}. ${aparar(a.titulo, 120)}*\n${IMPACTO_NOME[a.impacto] || a.impacto} · ` +
+          `${HORIZONTE_NOME[a.horizonte] || a.horizonte}\n${aparar(a.resumo, 220)}\n` +
+          `_Por que importa:_ ${aparar(a.porQueImporta, 220)}`).join("\n\n")
+      : "*ALERTAS PRINCIPAIS*\nNada hoje que exija decisão."
+  ];
+
+  let usado = partes.join("\n\n").length + pe.length + 4;
+  const cabe = t => usado + t.length + 2 <= ZAP_LIMITE;
+  const juntar = t => { partes.push(t); usado += t.length + 2; };
+
+  const temNoticias = (d.noticias || []).some(n => itens[Number(String(n.id).replace(/^n/, ""))]);
+  const reserva = temNoticias ? ZAP_RESERVA : 0;
+
+  if(d.areas?.length){
+    // Tenta a leitura por área inteira; não cabendo com a reserva de pé, tenta
+    // uma versão mais enxuta antes de desistir dela.
+    for(const n of [240, 140]){
+      const t = "*O QUE SIGNIFICA PARA A PATRIMAR*\n\n" + d.areas.map(a =>
+        `*${AREA_NOME[a.area] || a.area}:* ${aparar(a.texto, n)}`).join("\n\n");
+      if(usado + t.length + 2 + reserva <= ZAP_LIMITE){ juntar(t); break; }
+    }
+  }
+
+  /* O De olho é curto e fecha o raciocínio: reserva-se o lugar dele antes
+     das notícias, que são as que sobram de espaço. */
+  const olho = d.deOlho?.length
+    ? "*DE OLHO*\n" + d.deOlho.map((o, n) =>
+        `${n + 1}. *${aparar(o.assunto, 80)}* — ${aparar(o.acompanhar, 180)}`).join("\n")
+    : "";
+  const comOlho = olho && usado + olho.length + 2 + reserva <= ZAP_LIMITE;
+  if(comOlho) usado += olho.length + 2;
+
+  /* Notícia entra inteira ou não entra: cortar no meio partiria o link. */
+  const noticias = [];
+  for(const n of (d.noticias || []).slice(0, ZAP_NOTICIAS)){
+    const item = itens[Number(String(n.id).replace(/^n/, ""))];
+    if(!item) continue;                        // id que não casa é descartado
+    const t = `*${aparar(item.titulo, 180)}*\n${item.origem || item.veiculo} · ` +
+      `impacto ${(IMPACTO_NOME[n.impacto] || n.impacto).toLowerCase()}\n` +
+      `${aparar(n.porQueImporta, 200)}${n.acao ? `\n_Ação:_ ${aparar(n.acao, 160)}` : ""}\n${item.link}`;
+    const comCabecalho = noticias.length ? t : "*NOTÍCIAS*\n\n" + t;
+    if(!cabe(comCabecalho)) break;
+    noticias.push(t);
+    usado += comCabecalho.length + 2;
+  }
+  if(noticias.length) partes.push("*NOTÍCIAS*\n\n" + noticias.join("\n\n"));
+
+  if(comOlho) partes.push(olho);
+  partes.push(pe);
+  return partes.join("\n\n");
+}
+
+function enviarRadarZap(){
+  const texto = radarEmTexto();
+  if(!texto) return;
+  /* wa.me sem número abre a lista de conversas com o texto pronto: quem
+     manda escolhe o contato ou o grupo. Serve no celular e no WhatsApp Web. */
+  const url = "https://wa.me/?text=" + encodeURIComponent(texto);
+
+  /* No app instalado não há aba para voltar, e abrir uma nem sempre leva a
+     algum lugar: navega-se direto e o sistema entrega ao WhatsApp. No
+     navegador vai em aba nova, e o painel continua aberto atrás.
+
+     A âncora existe porque window.open com "noopener" devolve null por
+     definição — não dá para saber por ela se abriu, e a queda para a
+     navegação direta acabaria levando as duas coisas ao mesmo tempo. */
+  if(emAplicativo()){ location.href = url; return; }
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function botaoZap(){
+  return `<button class="btn btn-zap" id="btnZap" title="Mandar o resumo do radar por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.96L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15h-.01a8.23 8.23 0 01-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.21 8.21 0 01-1.26-4.38c0-4.55 3.7-8.25 8.25-8.25a8.24 8.24 0 018.24 8.26c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.83-.85 2.02 0 1.19.87 2.34.99 2.5.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.39.51.58.19 1.11.16 1.53.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.11-.22-.17-.47-.29z"/></svg>
+    <span>Mandar por WhatsApp</span>
+  </button>`;
+}
+
 function montarRadar(){
   const r = estado.radar;
   const agora = new Date();
@@ -2678,7 +2826,7 @@ function montarRadar(){
     ${blocoDeOlho(d.deOlho)}
     <div class="rd-pe">
       <span>Escrito por IA a partir das manchetes do dia, às ${escapar(hora)} · confira antes de decidir</span>
-      ${botaoRadar()}
+      <div class="rd-acoes">${botaoZap()}${botaoRadar()}</div>
     </div>
   </div>`;
 }
@@ -2938,6 +3086,7 @@ el("btnImprimir").addEventListener("click", () => window.print());
 
 el("grade").addEventListener("click", e => {
   if(e.target.closest("#btnRadar")){ pedirRadar(); return; }
+  if(e.target.closest("#btnZap")){ enviarRadarZap(); return; }
 
   if(e.target.closest("#btnRecado")){
     abrirPublicacao({ tipo:"recado" });
