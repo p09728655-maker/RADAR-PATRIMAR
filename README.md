@@ -250,7 +250,7 @@ Como reserva, o painel mantém sete pontes públicas gratuitas na constante
 - se o feed do veículo estiver fora do ar, a fonte cai para o endereço
   `reserva` — uma busca no Google Notícias restrita àquele site.
 
-As requisições passam por uma fila única de seis simultâneas. Sem ela as 37
+As requisições passam por uma fila única de seis simultâneas. Sem ela as 38
 fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
@@ -269,7 +269,7 @@ que fazer.
 
 O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
-quem não respondeu. Listar as 37 fontes com bolinha verde não informava nada.
+quem não respondeu. Listar as 38 fontes com bolinha verde não informava nada.
 
 ## Jornal Patrimar
 
@@ -323,6 +323,26 @@ conta. Por isso ela mora no navegador.
 Vale saber: como a função aceita chave vinda do pedido, quem alcança
 `/api/resumir` pode mandar a própria chave e gastar a própria conta. Não
 expõe a chave de ninguém, mas o caminho existe.
+
+### Fontes
+
+A lista de todas as fontes, agrupada por seção, com uma caixinha cada. O que
+for desmarcado **não é buscado** — a fonte some da fila, do filtro de veículos
+e do rodapé, e o que ela já tinha em cache desaparece da tela.
+
+São 38 fontes, e cada uma custa uma ida à ponte numa fila de seis simultâneas.
+Desligar as que não interessam é o ajuste mais direto se a atualização estiver
+demorando.
+
+O atalho **ligar/desligar todas** de cada seção é alternador: com todas ligadas,
+um clique desliga a seção inteira; com alguma desligada, um clique liga tudo.
+
+A chave guardada leva o id da seção junto (`ppcp::Feiras internacionais`), porque
+nome de fonte se repete entre seções — *Feiras internacionais* existe em PPCP e
+em Tendências, e desligar uma não pode calar a outra.
+
+Salvar com mudança de fonte dispara uma atualização: fonte recém-ligada nunca
+foi lida e precisa ser buscada. Mexer só na régua não rebusca nada.
 
 ### Janela e régua
 

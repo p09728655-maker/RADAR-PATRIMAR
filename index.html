@@ -427,6 +427,47 @@ html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
 .dlg-nota svg{width:16px;height:16px;flex:0 0 16px;margin-top:2px;color:var(--muted)}
 .dlg-nota-x{margin-top:var(--s2);font-size:var(--fs-caption);color:var(--muted)}
 .dlg-campo select{width:100%}
+
+/* Lista de fontes: 37 caixinhas soltas seriam ilegíveis, então vão agrupadas
+   por seção, com rolagem própria para o diálogo não virar uma página. */
+.cfg-fontes{
+  max-height:250px;overflow-y:auto;
+  border:1px solid var(--border);border-radius:var(--r-md);
+  padding:var(--s3);background:var(--surface-2);
+}
+.cfg-grupo + .cfg-grupo{margin-top:var(--s4)}
+.cfg-grupo-topo{
+  display:flex;align-items:baseline;gap:var(--s2);
+  margin-bottom:var(--s2);padding-bottom:var(--s1);
+  border-bottom:1px solid var(--border);
+}
+.cfg-grupo-nome{
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--muted);
+}
+.cfg-todas{
+  margin-left:auto;font-size:var(--fs-caption);font-weight:600;
+  color:var(--info);background:none;border:0;cursor:pointer;padding:2px 4px;
+  border-radius:var(--r-sm);
+}
+.cfg-todas:hover{background:var(--bg)}
+.cfg-fonte{
+  display:flex;align-items:center;gap:var(--s2);
+  font-size:var(--fs-small);color:var(--text-2);
+  padding:3px 0;cursor:pointer;
+}
+/* O .dlg-campo estica todo input filho a 100% e põe borda e recheio — regra
+   feita para campo de texto. A caixinha precisa se desfazer disso, senão ela
+   ocupa a linha inteira e empurra o nome da fonte para fora da tela. */
+.cfg-fonte input[type="checkbox"]{
+  accent-color:var(--marca-vermelho);cursor:pointer;
+  flex:0 0 auto;width:auto;padding:0;border:0;background:none;box-shadow:none;
+  margin:0;
+}
+.cfg-fonte span{font-weight:400;min-width:0}
+.cfg-fonte:hover{color:var(--text)}
+/* Fonte desligada some da tela e não é buscada: o texto apagado diz isso. */
+.cfg-fonte input:not(:checked) + span{color:var(--muted);text-decoration:line-through}
 @media (max-width:560px){
   .leitura-linha{grid-template-columns:1fr;gap:var(--s1)}
 }
@@ -949,6 +990,11 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
       </select>
     </label>
 
+    <div class="dlg-campo">
+      <span>Fontes de notícia <i id="cfgFontesConta"></i></span>
+      <div class="cfg-fontes" id="cfgFontes"></div>
+    </div>
+
     <label class="dlg-campo"><span>Régua de relevância</span>
       <select id="cfgPiso">
         <option value="4">Frouxa — mostra quase tudo que chega</option>
@@ -1224,6 +1270,8 @@ const estado = {
   veiculo: "",
   periodo: 0,
   chaveIA: "",               // digitada nas configurações, vive só neste navegador
+  fontesOff: new Set(),      // fontes desligadas nas configurações
+
   ordem: "relevancia",       // relevância primeiro; a fila por horário fica a um clique
   densidade: "cartoes",      // cartões para explorar, lista para escanear
   assuntoAtivo: null,
@@ -1665,6 +1713,22 @@ async function buscarFonte(fonte, indice = 0){
 /* ============================================================
    6. CARGA DO PAINEL
    ============================================================ */
+/* ------------------------------------------------------------
+   Fontes ligadas e desligadas
+   ------------------------------------------------------------
+   São 37 fontes, e nem toda fábrica quer todas: cada uma custa
+   uma ida à ponte e alarga a fila de seis simultâneas. Nas
+   configurações dá para desligar as que não interessam.
+
+   A chave leva o id da seção junto porque nome de fonte se
+   repete — "Feiras internacionais" existe em PPCP e em
+   Tendências, e desligar uma não pode calar a outra. */
+const chaveFonte = (secaoId, veiculo) => secaoId + "::" + veiculo;
+
+const fonteLigada = (secaoId, fonte) => !estado.fontesOff.has(chaveFonte(secaoId, fonte.v));
+
+const fontesAtivas = secao => secao.fontes.filter(f => fonteLigada(secao.id, f));
+
 /* Nota de relevância de uma manchete dentro da sua seção. */
 function relevancia(item, secaoId){
   const t = simples(item.titulo);
@@ -1715,7 +1779,7 @@ function recompor(secaoId){
     else if(it.ts && it.ts > grupo.ts) grupo.ts = it.ts;
   };
 
-  for(const fonte of secao.fontes){
+  for(const fonte of fontesAtivas(secao)){
     for(const it of (estado.brutos[secaoId][fonte.v] || [])){
       const limpo = simples(it.titulo + " " + (it.resumo || ""));
       if(RUIDO.test(limpo)) continue;
@@ -1764,7 +1828,7 @@ async function carregarTudo(){
   if(estado.emCarga) return;
   estado.emCarga = true;
   estado.carregando = true;
-  estado.progresso = { feitas:0, total:SECOES.reduce((n, s) => n + s.fontes.length, 0) };
+  estado.progresso = { feitas:0, total:SECOES.reduce((n, s) => n + fontesAtivas(s).length, 0) };
   pontes.zerar();
   SECOES.forEach(s => { estado.falhas[s.id] = []; });
 
@@ -1781,7 +1845,7 @@ async function carregarTudo(){
   const tarefas = [];
   let indice = 0;
   for(const secao of ordemDasSecoes){
-    for(const fonte of secao.fontes){
+    for(const fonte of fontesAtivas(secao)){
       const meu = indice++;
       tarefas.push(enfileirar(async () => {
         try{
@@ -2625,7 +2689,7 @@ function renderizarRodape(){
   SECOES.forEach(s => (estado.falhas[s.id] || []).forEach(v => falhas.add(v)));
 
   const veiculos = new Set();
-  SECOES.forEach(s => s.fontes.forEach(f => veiculos.add(f.v)));
+  SECOES.forEach(s => fontesAtivas(s).forEach(f => veiculos.add(f.v)));
 
   /* Listar as 23 fontes com bolinha verde não informava nada: quando
      está tudo bem, o que o leitor precisa é de uma linha dizendo isso.
@@ -2675,7 +2739,7 @@ function montarFiltroVeiculos(){
   const atual = sel.value;
   const secao = SECOES.find(s => s.id === estado.secao);
   sel.innerHTML = '<option value="">Todos os veículos</option>' +
-    secao.fontes.map(f => `<option value="${escapar(f.v)}">${escapar(f.v)}</option>`).join("");
+    fontesAtivas(secao).map(f => `<option value="${escapar(f.v)}">${escapar(f.v)}</option>`).join("");
   sel.value = [...sel.options].some(o => o.value === atual) ? atual : "";
   estado.veiculo = sel.value;
 }
@@ -2801,7 +2865,45 @@ el("filtroOrdem").addEventListener("change", e => {
    para quem abrir o painel de outro aparelho. Colada no
    index.html ela seria legível por qualquer visitante do site e
    o GitHub a revogaria ao detectar o commit. */
+/* A lista é montada a cada abertura em vez de uma vez só: SECOES pode mudar
+   entre versões, e uma lista guardada envelheceria calada. */
+function montarListaDeFontes(){
+  el("cfgFontes").innerHTML = SECOES.map(secao => `
+    <div class="cfg-grupo">
+      <div class="cfg-grupo-topo">
+        <span class="cfg-grupo-nome">${escapar(secao.nome)}</span>
+        <button type="button" class="cfg-todas" data-secao="${escapar(secao.id)}">ligar/desligar todas</button>
+      </div>
+      ${secao.fontes.map(f => `
+        <label class="cfg-fonte">
+          <input type="checkbox" data-fonte="${escapar(chaveFonte(secao.id, f.v))}"
+                 ${fonteLigada(secao.id, f) ? "checked" : ""}>
+          <span>${escapar(f.v)}</span>
+        </label>`).join("")}
+    </div>`).join("");
+  atualizarContaDeFontes();
+}
+
+function atualizarContaDeFontes(){
+  const ligadas = [...el("cfgFontes").querySelectorAll("input[data-fonte]")]
+    .filter(c => c.checked).length;
+  const total = SECOES.reduce((n, s) => n + s.fontes.length, 0);
+  el("cfgFontesConta").textContent = `(${ligadas} de ${total} ligadas)`;
+}
+
+el("cfgFontes").addEventListener("change", atualizarContaDeFontes);
+
+el("cfgFontes").addEventListener("click", e => {
+  const botao = e.target.closest(".cfg-todas");
+  if(!botao) return;
+  const caixas = [...botao.closest(".cfg-grupo").querySelectorAll("input[data-fonte]")];
+  const ligarTodas = caixas.some(c => !c.checked);   // alguma desligada? liga tudo
+  caixas.forEach(c => { c.checked = ligarTodas; });
+  atualizarContaDeFontes();
+});
+
 function abrirConfig(){
+  montarListaDeFontes();
   el("cfgChave").value = estado.chaveIA;
   el("cfgJanela").value = CONFIG.JANELA;
   el("cfgPiso").value = String(CONFIG.PISO_RELEVANCIA);
@@ -2809,6 +2911,16 @@ function abrirConfig(){
 }
 
 function salvarConfig(){
+  const antes = [...estado.fontesOff].sort().join("|");
+  estado.fontesOff = new Set(
+    [...el("cfgFontes").querySelectorAll("input[data-fonte]")]
+      .filter(c => !c.checked)
+      .map(c => c.dataset.fonte)
+  );
+  // Set não sobrevive ao JSON: vai como lista.
+  guardar.gravar("radar_fontes_off", [...estado.fontesOff]);
+  const mudouFonte = antes !== [...estado.fontesOff].sort().join("|");
+
   estado.chaveIA = el("cfgChave").value.trim();
   CONFIG.JANELA = el("cfgJanela").value;
   CONFIG.PISO_RELEVANCIA = Number(el("cfgPiso").value) || 9;
@@ -2817,8 +2929,18 @@ function salvarConfig(){
   guardar.gravar("radar_janela", CONFIG.JANELA);
   guardar.gravar("radar_piso", CONFIG.PISO_RELEVANCIA);
 
-  // A régua muda o que aparece sem rebuscar; a janela só vale na próxima busca.
-  reordenar();
+  /* Ligar uma fonte exige buscá-la: ela nunca foi lida. Desligar não exige
+     nada — o recompor já a ignora. Como só quem liga precisa de rede, e não
+     dá para saber qual dos dois foi sem comparar, recarrega quando mudou. */
+  if(mudouFonte){
+    SECOES.forEach(sec => recompor(sec.id));   // o que saiu some na hora
+    montarFiltroVeiculos();
+    renderizar();
+    carregarTudo();
+  }else{
+    // A régua muda o que aparece sem rebuscar; a janela só vale na próxima busca.
+    reordenar();
+  }
 }
 
 el("btnConfig").addEventListener("click", abrirConfig);
@@ -2966,6 +3088,8 @@ document.addEventListener("visibilitychange", () => {
   estado.ultimaVisita = guardar.ler("radar_visita") || 0;
 
   estado.chaveIA = guardar.ler("radar_chave") || "";
+  const off = guardar.ler("radar_fontes_off");
+  if(Array.isArray(off)) estado.fontesOff = new Set(off);
   const janela = guardar.ler("radar_janela");
   if(typeof janela === "string") CONFIG.JANELA = janela;
   const piso = guardar.ler("radar_piso");
