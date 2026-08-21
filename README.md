@@ -1,9 +1,9 @@
 # Radar Diário — Patrimar
 
 Painel de notícias em arquivo único, sem etapa de compilação. Lê feeds RSS
-públicos direto no navegador e organiza em quatro seções, todas voltadas ao
-ramo: **Patrimar**, **PPCP e Indústria**, **Moveleiro** e **Inteligência
-Artificial**.
+públicos direto no navegador e organiza em cinco seções, todas voltadas ao
+ramo: **Patrimar**, **PPCP e Indústria**, **Moveleiro**, **Tendências** e
+**Inteligência Artificial**.
 
 A aba Patrimar é a da casa: abre o painel, fica marcada com a estrela da
 marca e reúne menções à empresa, o mercado de planejados e a concorrência.
@@ -76,6 +76,29 @@ duas medidas, porque uma só erra:
 
 O que sobrevive guarda a lista de quem publicou, e é esse número que aparece
 no cartão e vai junto para a leitura do dia.
+
+### Tendências tem régua própria
+
+Cor, acabamento e textura decidem o que a fábrica vai produzir, mas não se
+parecem com notícia de indústria. Por isso a seção é separada em vez de
+misturada no Moveleiro: a nota de lá premia "exportação", "MDF" e
+"moveleira", então matéria sobre cor do ano pontuaria baixo e a régua a
+cortaria.
+
+A seção tem pesos próprios em `TEMAS.tendencias` — tendência, coleção,
+paleta, Pantone, acabamento, revestimento, marcenaria, interiores.
+
+E tem uma exceção que importa: o desconto por **chamariz de clique não vale
+aqui**. "Veja as cores que vão dominar 2026" e "confira os acabamentos do
+Salone" é como se escreve sobre design; ali a palavra é o gênero do texto,
+não isca. Punir isso esvaziaria a seção inteira. A lista de seções isentas é
+a constante `SEM_CHAMARIZ`.
+
+O corte de ruído continua valendo: "horóscopo do dia: cores da sorte para
+cada signo" sai, mesmo falando de cor.
+
+Para juntar tudo no Moveleiro em vez de manter a aba, basta mover as fontes
+de `SECOES` e acrescentar as linhas de `TEMAS.tendencias` em `TEMAS.moveleiro`.
 
 ### A outra Patrimar
 
@@ -215,7 +238,7 @@ Como reserva, o painel mantém sete pontes públicas gratuitas na constante
 - se o feed do veículo estiver fora do ar, a fonte cai para o endereço
   `reserva` — uma busca no Google Notícias restrita àquele site.
 
-As requisições passam por uma fila única de seis simultâneas. Sem ela as 24
+As requisições passam por uma fila única de seis simultâneas. Sem ela as 30
 fontes disparam de uma vez, o navegador segura a maioria na fila de conexões
 e o tempo limite estoura antes de a requisição sair — que era o motivo mais
 comum de o painel abrir vazio.
@@ -234,7 +257,7 @@ que fazer.
 
 O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
-quem não respondeu. Listar as 24 fontes com bolinha verde não informava nada.
+quem não respondeu. Listar as 30 fontes com bolinha verde não informava nada.
 
 ## Jornal Patrimar
 

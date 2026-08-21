@@ -1065,6 +1065,14 @@ const SECOES = [
     { v:"Movelaria/varejo",  u:gn('"varejo de móveis" (vendas OR mercado OR faturamento OR demanda)') },
     { v:"Entidades e feiras",u:gn('(Movergs OR Sindmóveis OR Abimóvel OR Movelsul OR FIMMA OR "Salão Design") (móveis OR moveleiro OR moveleira)') }
   ]},
+  { id:"tendencias", nome:"Tendências", fontes:[
+    { v:"Tendências em móveis",  u:gn('(tendência OR tendências) (móveis OR mobiliário OR planejados OR marcenaria) (design OR mercado OR coleção)') },
+    { v:"Cores e paletas",       u:gn('("cor do ano" OR "cores do ano" OR paleta OR "cartela de cores") (decoração OR móveis OR interiores OR marcenaria)') },
+    { v:"Pantone",               u:gn('Pantone ("cor do ano" OR paleta OR tendência) (design OR decoração OR interiores)') },
+    { v:"Design de interiores",  u:gn('"design de interiores" (tendência OR lançamento OR cozinha OR dormitório OR marcenaria)') },
+    { v:"Acabamentos e texturas",u:gn('(acabamento OR textura OR revestimento OR laminado OR ripado OR fresado) (móveis OR marcenaria OR planejados)') },
+    { v:"Feiras e mostras",      u:gn('("Salão do Móvel" OR "Salone del Mobile" OR "CASACOR" OR "Expo Revestir" OR "Movelsul") (tendência OR design OR lançamento)') }
+  ]},
   { id:"ia", nome:"Inteligência Artificial", fontes:[
     { v:"IA na indústria",  u:gn('"inteligência artificial" (indústria OR manufatura OR fábrica) -entretenimento -celular') },
     { v:"IA em produção",   u:gn('"inteligência artificial" ("chão de fábrica" OR "planejamento da produção" OR "previsão de demanda" OR "manutenção preditiva")') },
@@ -1100,6 +1108,12 @@ const TEMAS = {
     [/(movergs|abimovel|sindmoveis|movelsul|fimma|bento goncalves|arapongas|votuporanga|mirassol|uba\b)/, 4],
     [/\b(exportac|importac|vendas|varejo|demanda|faturamento|producao)/, 3]
   ],
+  tendencias: [
+    [/(tendencia|lancamento|colecao|novidade|inspiracao)/, 6],
+    [/(cor do ano|cores|paleta|pantone|tonalidade|acabamento|textura|revestimento|laminado|ripado)/, 6],
+    [/(moveis|movel|planejad|marcenaria|mobiliario|interiores|decoracao|cozinha|dormitorio|estofad)/, 5],
+    [/(salone|salao do movel|casacor|casa cor|expo revestir|milao|arquitetura|design)/, 3]
+  ],
   ia: [
     [/(industria|fabrica|manufatura|producao|logistica|previsao de demanda|chao de fabrica)/, 7],
     [/(automac|robo|visao computacional|manutencao preditiva|gemeo digital|planejamento)/, 4],
@@ -1132,6 +1146,11 @@ const EXCLUIR = {
 
 /* Chamada de engajamento, não notícia. Não elimina, mas perde posição. */
 const CHAMARIZ = /\b(veja|confira|saiba|assista|descubra|entenda|fotos|video|galeria|ranking|dicas|passo a passo|voce precisa)\b/;
+
+/* Menos em Tendências. "Veja as cores que vão dominar 2026" e "confira os
+   acabamentos do Salone" é como se escreve sobre design — ali a palavra é o
+   gênero do texto, não isca. Punir isso esvaziaria a seção inteira. */
+const SEM_CHAMARIZ = new Set(["tendencias"]);
 
 /* Ordenações oferecidas na barra de controle. */
 const ORDENS = {
@@ -1621,7 +1640,7 @@ function relevancia(item, secaoId){
   nota += Math.max(0, 36 - horas) / 5;
   if(horas > 72) nota -= Math.min(12, (horas - 72) / 24 * 3);
 
-  if(CHAMARIZ.test(t)) nota -= 5;          // chamariz de clique desce
+  if(CHAMARIZ.test(t) && !SEM_CHAMARIZ.has(secaoId)) nota -= 5;
   if(!item.ts) nota -= 3;                  // sem data, não dá para confiar na fila
   if(item.resumo) nota += 1;               // linha fina ajuda a decidir se vale abrir
 
