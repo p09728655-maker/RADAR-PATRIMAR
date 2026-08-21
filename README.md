@@ -271,42 +271,64 @@ O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
 fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
 quem não respondeu. Listar as 38 fontes com bolinha verde não informava nada.
 
-## Jornal Patrimar
+## Radar executivo
 
-O botão **Jornal**, na barra de filtros, troca a grade pela edição do dia.
-Não é a mesma lista com outra roupa: a grade responde "o que saiu hoje", o
-jornal responde "o que eu conto na reunião".
+O botão **Radar**, na barra de filtros, troca a grade pelo radar do dia. Ele
+não responde *"quais notícias saíram hoje"* — a grade já faz isso. Responde
+*"o que aconteceu hoje que pode importar para a Patrimar, e o que observar ou
+fazer"*.
 
-A edição tem:
+A estrutura é fixa e cada parte só aparece se tiver conteúdo:
 
-- **Manchete** — a melhor notícia do dia, ocupando a capa. A seção Patrimar
-  tem preferência (`PESO_DA_CASA`), e manchete com linha fina larga na
-  frente: capa sem linha fina obriga o leitor a decidir sozinho se importa,
-  e ainda deixa meia página em branco.
-- **Também nesta edição** — as quatro seguintes, em coluna ao lado.
-- **Editorial do dia** — a leitura escrita pela IA, quando pedida.
-- **Cadernos** — o resto de cada seção, sem repetir o que já saiu na capa.
+1. **Alertas principais** — no máximo três, com impacto (alto/médio/baixo) e
+   horizonte (imediato / esta semana / próximas semanas / longo prazo). Dia
+   sem alerta diz que não há, em vez de promover notícia média para encher.
+2. **O que isso significa para a Patrimar** — leitura por área: Comercial,
+   PPCP, Compras, Produção, Financeiro. Só entram as áreas realmente tocadas.
+3. **Notícias por categoria** — PPCP & Indústria, Mercado moveleiro, Mercado &
+   Negócios, Tecnologia & IA, Tendências. Categoria sem notícia relevante não
+   aparece. Cada notícia traz o que aconteceu, por que importa, o que observar
+   e a ação — ou *"Monitorar."* quando não há ação justificável.
+4. **De olho** — de três a cinco assuntos para acompanhar, sem repetir o texto
+   das notícias.
 
-A escolha das manchetes não usa IA: parte da mesma nota da grade (tema,
-cobertura, recência) e soma o peso dos assuntos mais citados do dia. Quantas
-entram por seção é `CONFIG.RESUMO_POR_SECAO`.
+### Por que isso é escrito por IA
 
-A capa é uma coluna mestra com manchete e editorial à esquerda, e as chamadas
-à direita. O editorial já ficou num bloco largo abaixo, e a conta não fechava:
-quando a manchete não tinha linha fina, a coluna esquerda encolhia e sobrava
-meia página em branco ao lado das chamadas — no papel, o editorial ia parar na
-página 2. Na coluna mestra ele preenche esse vão e a capa fecha inteira.
+Impacto, área atingida e consequência são julgamento sobre cada notícia.
+Contagem de palavra-chave sabe **ordenar** — é o que a régua da grade faz —
+mas não sabe dizer *por que* uma manchete importa sem inventar. Como inventar
+é o pior resultado possível num radar de decisão, essa parte é escrita pelo
+modelo, em `api/resumir.js`.
 
-**Rede social não entra.** O Google Notícias devolve post de Instagram e de X
-como se fosse matéria. Uma dessas saiu impressa como chamada, com quatro
-arrobas e cortada no meio de um `@handle`. A constante `REDE_SOCIAL` corta na
-entrada, no painel inteiro — não só no jornal.
+A instrução tem uma regra que manda nas outras: **não inventar relação com a
+Patrimar**. Sem impacto sustentado pela manchete, a classificação é baixa e o
+campo diz *"Sem relação direta com a operação."*
 
-O botão **Imprimir** abre a caixa de impressão do navegador, que também salva
-em PDF. É para isso que o jornal existe: circular na fábrica, onde nem todo
-mundo abre o painel. No papel saem só o logotipo, a data e a edição — sem
-cabeçalho do app, filtros ou rodapé. Imprimir fora do jornal sai a seção
-aberta, em lista.
+### Como o front e o modelo se entendem
+
+A resposta volta em **JSON validado por esquema** (`output_config.format`),
+não em texto — assim não há texto para interpretar e nenhum campo aparece
+faltando na tela.
+
+As manchetes vão numeradas (`n0`, `n1`…) e cada análise volta com o id que
+entrou. **Link, veículo e hora saem do painel**, do item de verdade: o modelo
+não repete metadado, e por isso não erra crédito nem endereço. Id que não casa
+com nenhum item é descartado em silêncio.
+
+A chamada é sob demanda, no botão. É bem maior que o resumo que existia antes
+— por isso `maxDuration` de 60 segundos na função, e `effort: "medium"`:
+esforço baixo devolve classificação preguiçosa, que aqui é o pior defeito.
+
+### Cores de impacto
+
+O vermelho da marca (`#DB2126`) fica só na identidade, no filete do cabeçalho.
+Impacto alto usa um vermelho de status próprio, mais fechado. Se fossem o
+mesmo, a marca viraria alarme e o alarme viraria enfeite. E nenhum estado
+depende só de cor: o selo sempre traz a palavra — Alto, Médio, Baixo.
+
+O botão **Imprimir** sai com o radar em formato de relatório: selo com borda em
+vez de fundo (fundo colorido some em impressora de escritório), título de
+categoria colado na primeira notícia e sem botão nenhum.
 
 ## Configurações
 
