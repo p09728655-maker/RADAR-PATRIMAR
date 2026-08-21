@@ -12,6 +12,60 @@ Não há seção de notícia geral. Feed de jornal aberto trazia terremoto,
 estreia de série e emoji junto com o que interessa; as fontes de hoje são
 consultas fechadas no assunto.
 
+## O que sobe primeiro
+
+A grade não é uma fila por horário. Notícia recente e irrelevante ficava
+acima da que interessava, e a mesma notícia aparecia três vezes com o crédito
+de três veículos. Agora cada manchete recebe uma nota:
+
+- **Tema** — palavras que pesam naquela seção, na constante `TEMAS`. "Patrimar"
+  vale mais do que "planejados", que vale mais do que "franquia".
+- **Cobertura** — em quantos veículos diferentes o mesmo assunto apareceu.
+  Assunto que saiu em quatro lugares costuma ser o que importa; o cartão
+  mostra isso como *"4 veículos"*.
+- **Recência** — conta, mas não decide sozinha: o de ontem não zera.
+- **Descontos** — chamada de clique ("veja", "confira", "10 fotos") perde
+  posição; manchete sem data também.
+
+Assunto que nunca vai interessar ao PCP — horóscopo, futebol, sorteio — sai
+antes de disputar espaço, pela constante `RUIDO`.
+
+O primeiro colocado vira **destaque**: ocupa a largura de dois cartões, com
+título maior e o filete vermelho da marca. Só ele usa o vermelho, que assim
+volta a ser âncora em vez de enfeite repetido em toda a grade. O destaque só
+aparece com a fila por relevância e sem filtro ligado — fora disso o primeiro
+lugar seria acidente de ordenação.
+
+O seletor **Mais relevantes / Mais recentes** troca a fila sem rebuscar nada,
+e a escolha fica gravada no aparelho.
+
+### Notícia repetida
+
+Dois veículos publicam o mesmo fato com títulos diferentes. Comparar o texto
+inteiro não pega isso; comparar as palavras que carregam sentido, pega. São
+duas medidas, porque uma só erra:
+
+- **Jaccard** (palavras em comum sobre o total) compara títulos de tamanho
+  parecido, mas pune o curto: *"Patrimar anuncia expansão da fábrica em MG"*
+  contra *"Patrimar Móveis anuncia expansão da fábrica em Minas Gerais"* dá
+  0,57 e escaparia, embora o curto esteja inteiro dentro do longo.
+- **Contenção** (comuns sobre o menor dos dois) pega esse caso, mas sozinha é
+  frouxa — dois títulos de três palavras se parecem por acidente. Vale só
+  quando o título curto já tem quatro palavras com sentido.
+
+O que sobrevive guarda a lista de quem publicou, e é esse número que aparece
+no cartão e vai junto para a leitura do dia.
+
+## Cartões ou lista
+
+O botão ao lado dos filtros alterna a densidade. **Cartões** para explorar,
+com linha fina e resumo. **Lista** para escanear: uma linha por notícia, três
+vezes mais manchete na mesma tela. A escolha fica gravada no aparelho.
+
+No celular, os filtros de ordenação, veículo e período ficam atrás do botão
+**Filtros** — no telefone eles custavam quatro linhas de tela antes da
+primeira notícia. Busca, resumo e densidade seguem à vista.
+
 ## Arquivos
 
 | Arquivo | Função |
@@ -110,17 +164,20 @@ para outro intermediário, como um Apps Script, basta trocar o valor de
 ### Quando uma fonte não responde
 
 O painel não apaga o que já tinha: mantém as notícias anteriores daquela
-fonte, marca o veículo em âmbar no rodapé e mostra o horário de cada matéria,
-para não passar manchete velha por nova. Se nenhuma fonte de uma seção
-responder, aparece um aviso explicando o que fazer.
+fonte e mostra o horário de cada matéria, para não passar manchete velha por
+nova. Se nenhuma fonte de uma seção responder, aparece um aviso explicando o
+que fazer.
+
+O rodapé mostra só a exceção. Com tudo no ar, é uma linha dizendo quantas
+fontes responderam; havendo falha, aparece a contagem em âmbar e o nome de
+quem não respondeu. Listar as 26 fontes com bolinha verde não informava nada.
 
 ## Resumo do dia e impressão
 
 O botão **Resumo do dia**, na barra de filtros, troca a lista pelas principais
-manchetes de cada seção. A escolha não usa IA: cada manchete ganha nota pelos
-assuntos mais repetidos do dia que ela contém, com um empurrão para as mais
-recentes — assunto que vários veículos publicam ao mesmo tempo costuma ser o
-que importa. Quantas entram por seção é `CONFIG.RESUMO_POR_SECAO`.
+manchetes de cada seção. A escolha não usa IA: parte da mesma nota da grade
+(tema, cobertura, recência) e soma o peso dos assuntos mais citados do dia.
+Quantas entram por seção é `CONFIG.RESUMO_POR_SECAO`.
 
 O botão **Imprimir** abre a caixa de impressão do navegador, que também salva
 em PDF. O papel sai sem cabeçalho, filtros nem rodapé: só o logotipo, a data e
@@ -192,7 +249,17 @@ das variáveis que aquele deploy enxerga — nomes apenas, nunca valores.
 Dentro do **Resumo do dia** há o botão **Escrever a leitura do dia**. Ele
 manda as manchetes já selecionadas para `api/resumir.js`, que chama o Claude
 e devolve um parágrafo de abertura, uma linha por seção e um "De olho:" com o
-que merece acompanhamento.
+que merece acompanhamento. As três partes são renderizadas com pesos
+diferentes na tela: bloco de texto corrido fazia a leitura parecer rasa mesmo
+quando não era.
+
+Junto de cada título vai o veículo, **há quantas horas saiu** e **em quantos
+veículos o assunto apareceu**. Sem a hora o modelo não sabe o que é de hoje;
+sem a cobertura não sabe o que repercutiu. A instrução pede a consequência
+para a fábrica, não a repetição da manchete: *"aço subiu"* é a manchete,
+*"componente metálico de gaveta e corrediça encarece"* é a leitura. E manda
+dizer com todas as letras quando o dia não teve nada que afete a Patrimar,
+em vez de forçar relevância.
 
 É sob demanda, nunca automático: sem clique, não há chamada nem custo. O
 modelo é instruído a usar apenas as manchetes recebidas, sem completar com
