@@ -381,40 +381,9 @@ html[data-tema="escuro"] .mural-instrucao{background:#2B2718;color:#E4DCC0}
 @media (max-width:640px){ .dlg-dupla{grid-template-columns:1fr} }
 
 /* Leitura escrita pela IA: é o editorial do jornal */
-.leitura{
-  border:1px solid var(--border);border-left:3px solid var(--marca-grafite);
-  border-radius:var(--r-md);background:var(--surface);
-  padding:var(--s4);
-}
-html[data-tema="escuro"] .leitura{border-left-color:var(--marca-areia)}
-.leitura-espera{
-  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
-  font-size:var(--fs-small);color:var(--muted);
-  background:none;border-style:dashed;
-}
-.leitura-texto p{margin-bottom:var(--s2);line-height:1.55}
-.leitura-texto p:last-child{margin-bottom:0}
 /* Um bloco cinza de texto corrido é o que fazia a leitura parecer rasa
    mesmo quando não era. As três partes têm papéis diferentes e agora
    se distinguem na tela. */
-.leitura-fio{font-size:var(--fs-h2);line-height:1.45;color:var(--text);font-weight:500}
-.leitura-linhas{display:flex;flex-direction:column;gap:var(--s2);margin-top:var(--s4)}
-.leitura-linha{
-  display:grid;grid-template-columns:minmax(0,150px) 1fr;gap:var(--s3);
-  align-items:baseline;font-size:var(--fs-md);line-height:1.5;
-  padding-top:var(--s2);border-top:1px solid var(--border);
-}
-.leitura-secao{
-  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;
-  letter-spacing:.5px;color:var(--muted);
-}
-.leitura-fecho{
-  margin-top:var(--s4);padding:var(--s3);border-radius:var(--r-md);
-  background:var(--marca-areia);color:#5C4B12;
-  font-size:var(--fs-md);line-height:1.5;
-}
-html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
-.leitura-fecho b{font-weight:700}
 .fonte-falha{font-weight:700;color:var(--atencao)}
 
 /* Nota explicativa dentro do diálogo de configurações */
@@ -469,16 +438,7 @@ html[data-tema="escuro"] .leitura-fecho{background:#2B2718;color:#E4DCC0}
 /* Fonte desligada some da tela e não é buscada: o texto apagado diz isso. */
 .cfg-fonte input:not(:checked) + span{color:var(--muted);text-decoration:line-through}
 @media (max-width:560px){
-  .leitura-linha{grid-template-columns:1fr;gap:var(--s1)}
 }
-.leitura-pe{
-  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
-  margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--border);
-  font-size:var(--fs-caption);color:var(--muted);
-}
-.leitura-pe .btn{margin-left:auto}
-.leitura-erro{margin-top:var(--s3);font-size:var(--fs-small);color:var(--atencao)}
-.leitura-ajuda{margin-top:var(--s1);font-size:var(--fs-caption);color:var(--text-2)}
 
 
 /* Cabeçalho impresso: só existe no papel */
@@ -705,108 +665,166 @@ html[data-tema="escuro"] .faixa-arquivo{background:#2B2718;border-left-color:var
 /* Celular: uma notícia por vez */
 @media (max-width:640px){
   .grade{grid-template-columns:1fr;gap:var(--s2)}
-  .jn-nome{font-size:28px}
-  .jn-principal-t{font-size:24px}
-  .jn-caderno-lista{grid-template-columns:1fr}
 }
 @media (min-width:1500px){
   .grade{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
   .topo-in,.nav-in,.controles,main,.assuntos,.rodape,.dica{padding-left:var(--s6);padding-right:var(--s6)}
 }
 /* ============================================================
-   JORNAL PATRIMAR
+   RADAR EXECUTIVO
+   ============================================================
+   Relatório corporativo, não jornal: hierarquia forte, texto
+   curto, muito branco e quase nenhum enfeite. O leitor tem de
+   pegar o essencial em menos de um minuto, na tela e no papel.
+
+   Sobre o vermelho: o da marca (#DB2126) fica só na identidade,
+   no filete do cabeçalho. Impacto alto usa um vermelho de status
+   próprio, mais fechado — se os dois fossem o mesmo, a marca
+   viraria alarme e o alarme viraria enfeite. E nenhum estado
+   depende só de cor: o selo sempre traz a palavra.
    ============================================================ */
-.jornal{grid-column:1/-1;max-width:1100px;margin:0 auto;width:100%}
-
-.jn-cabeca{
-  text-align:center;
-  border-bottom:3px double var(--marca-grafite);
-  padding-bottom:var(--s4);margin-bottom:var(--s5);
+:root{
+  --rd-alto:#B42318;  --rd-alto-bg:#FEF3F2;
+  --rd-medio:#B4650A; --rd-medio-bg:#FDF2E0;
+  --rd-baixo:#5A6470; --rd-baixo-bg:#F1F3F5;
 }
-html[data-tema="escuro"] .jn-cabeca{border-bottom-color:var(--border-forte)}
-.jn-logo{height:30px;width:auto;margin-bottom:var(--s3)}
-.jn-nome{
-  font-size:38px;font-weight:700;line-height:1;letter-spacing:-1px;
-  color:var(--marca-grafite);
-}
-html[data-tema="escuro"] .jn-nome{color:var(--text)}
-.jn-linha{
-  font-size:var(--fs-small);color:var(--muted);margin-top:var(--s2);
-  text-transform:uppercase;letter-spacing:1px;font-weight:600;
-}
-.jn-assuntos{font-size:var(--fs-caption);color:var(--text-2);margin-top:var(--s2)}
-
-/* A abertura: coluna mestra à esquerda com manchete e editorial, chamadas à
-   direita. O editorial estava num bloco largo abaixo, e quando a manchete não
-   tinha linha fina a coluna esquerda encolhia — sobrava meia página em branco
-   ao lado das chamadas, e no papel o editorial ia parar na página 2. Aqui ele
-   preenche esse vão e a capa fecha numa página só. */
-.jn-abertura{display:grid;grid-template-columns:1fr;gap:var(--s5);align-items:start}
-.jn-mestra{min-width:0;display:flex;flex-direction:column;gap:var(--s5)}
-@media (min-width:860px){
-  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:var(--s6)}
-  .jn-tambem{border-left:1px solid var(--border);padding-left:var(--s5)}
+html[data-tema="escuro"]{
+  --rd-alto:#F98080;  --rd-alto-bg:#2E1614;
+  --rd-medio:#E0A44A; --rd-medio-bg:#332510;
+  --rd-baixo:#9AA4B0; --rd-baixo-bg:#22272D;
 }
 
-.jn-tarja{
-  display:inline-block;
-  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:1px;
-  color:var(--marca-vermelho);margin-bottom:var(--s2);
+.radar{grid-column:1/-1;max-width:880px;margin:0 auto;width:100%}
+
+/* ---- cabeçalho ---- */
+.rd-cabeca{border-bottom:2px solid var(--marca-vermelho);padding-bottom:var(--s4);margin-bottom:var(--s7)}
+.rd-marca{display:flex;align-items:center;gap:var(--s3)}
+.rd-logo{height:26px;width:auto}
+.rd-titulo{
+  font-size:26px;font-weight:700;letter-spacing:-.4px;line-height:1.1;color:var(--text);
 }
-html[data-tema="escuro"] .jn-tarja{color:#F2727A}
-.jn-principal{display:block}
-.jn-principal-t{
-  font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.5px;
-  color:var(--text);
+.rd-titulo span{font-weight:400;color:var(--muted)}
+.rd-data{font-size:var(--fs-small);color:var(--text-2);margin-top:var(--s3)}
+.rd-eixos{
+  font-size:var(--fs-label);font-weight:600;text-transform:uppercase;
+  letter-spacing:1.4px;color:var(--muted);margin-top:2px;
 }
-.jn-principal:hover .jn-principal-t{color:var(--marca-bordeaux)}
-html[data-tema="escuro"] .jn-principal:hover .jn-principal-t{color:#F2727A}
-.jn-principal-r{
-  font-size:var(--fs-h2);color:var(--text-2);line-height:1.5;margin-top:var(--s3);
+
+/* ---- seções ---- */
+.rd-sec{margin-bottom:var(--s7)}
+.rd-sec-t{
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:1.6px;
+  color:var(--muted);padding-bottom:var(--s2);margin-bottom:var(--s4);
+  border-bottom:1px solid var(--border);
 }
-.jn-creditos{
-  font-size:var(--fs-caption);color:var(--muted);margin-top:var(--s2);
+.rd-vazio{font-size:var(--fs-body);color:var(--text-2);line-height:1.55}
+
+/* ---- selo de impacto: cor + palavra, nunca só cor ---- */
+.rd-selo{
+  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  padding:2px 9px;border-radius:3px;flex:0 0 auto;
+}
+.rd-alto {background:var(--rd-alto-bg); color:var(--rd-alto)}
+.rd-medio{background:var(--rd-medio-bg);color:var(--rd-medio)}
+.rd-baixo{background:var(--rd-baixo-bg);color:var(--rd-baixo)}
+.rd-borda-alto {border-left:3px solid var(--rd-alto)}
+.rd-borda-medio{border-left:3px solid var(--rd-medio)}
+.rd-borda-baixo{border-left:3px solid var(--border-forte)}
+
+.rd-num{
+  font-size:var(--fs-label);font-weight:700;color:var(--muted);
+  font-variant-numeric:tabular-nums;flex:0 0 auto;
+}
+.rd-rot{
+  display:block;font-size:var(--fs-label);font-weight:700;text-transform:uppercase;
+  letter-spacing:1px;color:var(--muted);margin-bottom:3px;
+}
+
+/* ---- alertas ---- */
+.rd-alertas{display:flex;flex-direction:column;gap:var(--s5)}
+.rd-alerta{padding-left:var(--s4);break-inside:avoid}
+.rd-alerta-topo{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s2)}
+.rd-horizonte{
+  font-size:var(--fs-label);font-weight:600;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);
+}
+.rd-alerta-t{font-size:var(--fs-h1);font-weight:700;line-height:1.25;letter-spacing:-.2px}
+.rd-alerta-r{font-size:var(--fs-body);color:var(--text-2);line-height:1.55;margin-top:var(--s2)}
+.rd-porque{margin-top:var(--s3);padding-top:var(--s3);border-top:1px solid var(--border)}
+.rd-porque p{font-size:var(--fs-body);line-height:1.55;color:var(--text)}
+
+/* ---- áreas ---- */
+.rd-areas{display:flex;flex-direction:column;gap:var(--s4)}
+.rd-area{
+  display:grid;grid-template-columns:minmax(0,190px) 1fr;gap:var(--s4);
+  align-items:baseline;padding-top:var(--s3);border-top:1px solid var(--border);
+  break-inside:avoid;
+}
+.rd-area:first-child{border-top:0;padding-top:0}
+.rd-area-nome{display:block;font-size:var(--fs-h2);font-weight:700;line-height:1.2}
+.rd-area-sub{
+  display:block;font-size:var(--fs-caption);color:var(--muted);
+  line-height:1.4;margin-top:2px;
+}
+.rd-area-txt{font-size:var(--fs-md);line-height:1.6;color:var(--text-2)}
+
+/* ---- notícias ---- */
+.rd-cat .rd-sec-t{color:var(--text);font-size:var(--fs-caption);letter-spacing:1.4px}
+.rd-noticia{
+  padding:0 0 var(--s5) var(--s4);margin-bottom:var(--s5);
+  border-bottom:1px solid var(--border);break-inside:avoid;
+}
+.rd-noticia:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.rd-n-topo{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s2);flex-wrap:wrap}
+.rd-areas-tag{
+  font-size:var(--fs-label);font-weight:600;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);
+}
+.rd-n-t{font-size:var(--fs-h2);font-weight:700;line-height:1.3}
+.rd-n-link{color:var(--text)}
+.rd-n-link:hover{color:var(--marca-bordeaux)}
+html[data-tema="escuro"] .rd-n-link:hover{color:#F2727A}
+.rd-fonte{
+  font-size:var(--fs-caption);color:var(--muted);margin-top:var(--s1);
   text-transform:uppercase;letter-spacing:.4px;font-weight:600;
 }
+.rd-campo{
+  display:grid;grid-template-columns:minmax(0,150px) 1fr;gap:var(--s3);
+  align-items:baseline;margin-top:var(--s3);
+}
+.rd-campo p{font-size:var(--fs-md);line-height:1.55;color:var(--text-2)}
+.rd-campo .rd-rot{margin-bottom:0}
 
-.jn-rotulo{
-  font-size:var(--fs-label);font-weight:700;text-transform:uppercase;letter-spacing:1px;
-  color:var(--muted);padding-bottom:var(--s2);margin-bottom:var(--s3);
-  border-bottom:2px solid var(--marca-grafite);
+/* ---- de olho ---- */
+.rd-olho{list-style:none;display:flex;flex-direction:column;gap:var(--s4)}
+.rd-olho-item{
+  display:grid;grid-template-columns:auto 1fr;gap:var(--s3);
+  align-items:baseline;break-inside:avoid;
 }
-html[data-tema="escuro"] .jn-rotulo{border-bottom-color:var(--border-forte)}
-.jn-chamada{display:block;padding:var(--s3) 0;border-bottom:1px solid var(--border)}
-.jn-chamada:last-child{border-bottom:0}
-.jn-chamada-t{font-size:var(--fs-body);font-weight:600;line-height:1.35}
-.jn-chamada:hover .jn-chamada-t{color:var(--marca-bordeaux)}
-html[data-tema="escuro"] .jn-chamada:hover .jn-chamada-t{color:#F2727A}
+.rd-olho-t{font-size:var(--fs-h2);font-weight:600;line-height:1.3}
+.rd-olho-x{font-size:var(--fs-md);color:var(--text-2);line-height:1.55;margin-top:2px}
 
-.jn-editorial{min-width:0}
-/* Dentro da coluna mestra não há largura para rótulo e texto lado a lado: o
-   texto cairia numa faixa de dois dedos e o editorial esticaria página abaixo.
-   Aqui o rótulo vai acima, e a linha inteira usa a largura da coluna. */
-.jn-mestra .leitura-linha{grid-template-columns:1fr;gap:2px}
-.jn-mestra .leitura-secao{letter-spacing:.8px}
+/* ---- estados e pé ---- */
+.rd-espera,.rd-erro{
+  font-size:var(--fs-body);line-height:1.6;color:var(--text-2);
+  border:1px dashed var(--border-forte);border-radius:var(--r-md);padding:var(--s5);
+}
+.rd-espera-x{display:block;font-size:var(--fs-small);color:var(--muted);margin-top:var(--s2)}
+.rd-erro{border-style:solid;border-color:var(--atencao);color:var(--atencao)}
+.rd-erro-x{font-size:var(--fs-small);color:var(--text-2);margin-top:var(--s2)}
+.rd-pe{
+  display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap;
+  margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--border);
+  font-size:var(--fs-caption);color:var(--muted);
+}
+.rd-pe .btn{margin-left:auto}
 
-.jn-caderno{margin-top:var(--s6);break-inside:avoid}
-.jn-caderno-topo{
-  display:flex;align-items:baseline;gap:var(--s3);
-  border-bottom:2px solid var(--marca-grafite);
-  padding-bottom:var(--s2);margin-bottom:var(--s4);
+@media (max-width:640px){
+  .rd-titulo{font-size:21px}
+  .rd-alerta-t{font-size:var(--fs-h2)}
+  .rd-area,.rd-campo{grid-template-columns:1fr;gap:var(--s1)}
+  .rd-area-sub{margin-bottom:var(--s1)}
 }
-html[data-tema="escuro"] .jn-caderno-topo{border-bottom-color:var(--border-forte)}
-.jn-caderno-nome{
-  font-size:var(--fs-h1);font-weight:700;letter-spacing:-.2px;
-}
-.jn-caderno-qtd{font-size:var(--fs-label);color:var(--muted);font-weight:600;margin-left:auto}
-.jn-caderno-lista{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));
-  gap:var(--s4) var(--s5);
-}
-.jn-nota{display:block;break-inside:avoid}
-.jn-nota-t{font-size:var(--fs-md);font-weight:600;line-height:1.4}
-.jn-nota:hover .jn-nota-t{color:var(--marca-bordeaux)}
-html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
 
 @media print{
   @page{ margin:14mm; }
@@ -835,56 +853,69 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
   .noticia-destaque{border-left-color:#DB2126}
   .noticia-destaque .n-titulo{font-size:12pt}
   .n-cobertura{background:none;color:#555;padding:0;font-weight:600}
+
+  /* ---- radar no papel ----------------------------------------------------
+     Mesma hierarquia da tela, com o corpo de um relatório impresso. O
+     cabeçalho da grade sai de cena: o radar tem o seu. */
+  main:has(.radar) .folha-topo{display:none}
+  .radar{max-width:none}
+  .rd-cabeca{border-bottom:2pt solid #DB2126;padding-bottom:8pt;margin-bottom:16pt}
+  .rd-logo{height:22px}
+  .rd-titulo{font-size:20pt;color:#000}
+  .rd-titulo span{color:#666}
+  .rd-data{font-size:9pt;color:#444}
+  .rd-eixos{font-size:7.5pt;color:#666}
+
+  .rd-sec{margin-bottom:16pt}
+  .rd-sec-t{font-size:8pt;color:#666;border-bottom-color:#ccc;margin-bottom:8pt}
+  /* Título de categoria não pode fechar a página sozinho, com a primeira
+     notícia na folha seguinte: ele fica colado no que anuncia. */
+  .rd-cat .rd-sec-t{color:#000;font-size:9pt;break-after:avoid}
+  .rd-sec-t{break-after:avoid}
+
+  /* Fundo colorido some na impressora de escritório e o selo viraria um
+     retângulo cinza. No papel ele fica com borda e a palavra em cor. */
+  .rd-selo{background:none;border:0.5pt solid currentColor;padding:1px 5px;font-size:7pt}
+  .rd-alto {color:#B42318}
+  .rd-medio{color:#B4650A}
+  .rd-baixo{color:#5A6470}
+  .rd-borda-alto {border-left:2pt solid #B42318}
+  .rd-borda-medio{border-left:2pt solid #B4650A}
+  .rd-borda-baixo{border-left:2pt solid #ccc}
+
+  .rd-alertas{gap:12pt}
+  .rd-alerta-t{font-size:13pt}
+  .rd-alerta-r,.rd-porque p{font-size:10pt;color:#333}
+  .rd-porque{border-top-color:#ddd}
+  .rd-rot,.rd-horizonte,.rd-areas-tag,.rd-num{color:#666;font-size:7.5pt}
+
+  .rd-area{border-top-color:#ddd}
+  .rd-area-nome{font-size:11pt}
+  .rd-area-sub,.rd-fonte{color:#666;font-size:7.5pt}
+  .rd-area-txt,.rd-campo p,.rd-olho-x{font-size:9.5pt;color:#333}
+
+  .rd-noticia{border-bottom-color:#ddd;padding-bottom:10pt;margin-bottom:10pt}
+  .rd-n-t{font-size:11.5pt}
+  .rd-olho-t{font-size:11pt}
+
+  /* Botão e caixas de espera não existem no papel. */
+  .rd-pe .btn,.rd-espera,.rd-erro{display:none}
+  .rd-pe{border-top-color:#ddd;color:#666;font-size:8pt;margin-top:14pt}
   .aviso{border-color:#999;color:#333;background:none}
 
   /* O jornal é o formato pensado para o papel — é para isso que ele existe */
-  .jornal{max-width:none}
   /* O cabeçalho de impressão da grade duplicaria o cabeçalho do jornal */
-  main:has(.jornal) .folha-topo{display:none}
-  .jn-cabeca{border-bottom:3px double #000;padding-bottom:8pt;margin-bottom:12pt}
-  .jn-logo{height:26px}
-  .jn-nome{font-size:30pt;color:#000}
-  .jn-linha{font-size:8pt;color:#444}
-  .jn-assuntos{font-size:8pt;color:#555}
   /* NADA de break-inside na capa. Ela é alta — manchete, editorial inteiro e
      quatro chamadas — e quando não cabe no que resta da folha o navegador não
      a parte: empurra o bloco todo para a página seguinte e deixa o cabeçalho
      sozinho numa folha em branco. Quem evita quebra feia são as peças
      pequenas, logo abaixo; a capa flui e a página enche. */
-  .jn-abertura{grid-template-columns:1.85fr 1fr;gap:16pt;margin-bottom:14pt}
-  .jn-mestra{gap:12pt}
-  .jn-tambem{border-left:1px solid #bbb;padding-left:12pt}
-  .jn-tarja{color:#DB2126;font-size:8pt}
-  .jn-principal-t{font-size:20pt}
-  .jn-principal-r{font-size:10.5pt;color:#333}
-  .jn-creditos{font-size:7.5pt;color:#555}
-  .jn-rotulo{border-bottom-color:#000;font-size:8pt}
-  .jn-chamada{padding:5pt 0;border-bottom-color:#ddd}
-  .jn-chamada-t{font-size:10pt}
   /* O editorial também é alto demais para caber num "avoid": o que não pode
      partir é cada linha de seção, para o rótulo não ficar órfão do texto. */
-  .jn-linha{break-inside:avoid}
-  .leitura-linha{break-inside:avoid}
-  .jn-fecho,.leitura-fecho{break-inside:avoid}
-  .jn-principal{break-inside:avoid}
-  .jn-chamada{break-inside:avoid}
   /* Sem o break-after da capa, os cadernos voltam a fluir juntos e a edição
      inteira cabe em duas páginas em vez de quatro. */
-  .jn-caderno{margin-top:12pt;break-inside:avoid-page}
-  .jn-caderno-topo{border-bottom-color:#000;margin-bottom:8pt}
-  .jn-caderno-nome{font-size:13pt}
-  .jn-caderno-lista{grid-template-columns:1fr 1fr 1fr;gap:8pt 14pt}
-  .jn-nota-t{font-size:9.5pt}
   .mural{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none;margin-bottom:10pt}
   .mural-acoes,.mural-tirar,.n-fixar,.mural-instrucao{display:none}
-  .leitura{border:0;border-left:2px solid #DB2126;border-radius:0;padding:0 0 0 8px;background:none}
-  .leitura-espera,.leitura-pe .btn,.leitura-erro{display:none}
-  .leitura-fio{font-size:11.5pt;font-weight:600}
-  .leitura-linhas{gap:4pt;margin-top:8pt}
-  .leitura-linha{border-top-color:#ddd;padding-top:4pt;font-size:10pt}
-  .leitura-secao{color:#555}
-  .leitura-fecho{background:none;color:#000;padding:6pt 0 0;border-top:1px solid #ddd;border-radius:0}
-  .leitura-pe{border-top:0;padding-top:2pt;margin-top:4pt;color:#666;font-size:8pt}
 
   a{color:#000}
 }
@@ -964,9 +995,9 @@ html[data-tema="escuro"] .jn-nota:hover .jn-nota-t{color:#F2727A}
     <optgroup label="Arquivo" id="grupoArquivo"></optgroup>
   </select>
   </div>
-  <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Jornal Patrimar: a edição do dia, pronta para imprimir">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a2 2 0 012 2v11a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"/><path d="M19 8h1a2 2 0 012 2v8a2 2 0 01-2 2"/><path d="M7 9h7M7 13h7M7 17h4"/></svg>
-    <span class="btn-rotulo">Jornal</span>
+  <button class="btn btn-secundario" id="btnResumo" aria-pressed="false" title="Radar executivo: o que do dia pode afetar a Patrimar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+    <span class="btn-rotulo">Radar</span>
   </button>
   <button class="btn btn-secundario btn-so-icone" id="btnDensidade" title="Alternar entre cartões e lista" aria-label="Alternar entre cartões e lista">
     <svg id="iconeDensidade" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -1296,7 +1327,7 @@ const estado = {
   emCarga: false,            // trava contra duas atualizações ao mesmo tempo
   resumo: false,             // visão de resumo do dia, pensada para o papel
   arquivo: null,             // { ano, termo, itens, carregando, erro } quando busca no arquivo
-  leitura: null,             // { texto, carregando, erro } da leitura escrita pela IA
+  radar: null,               // { dados, itens, carregando, erro } do radar escrito pela IA
   mural: { itens:[], carregado:false, erro:"", comoResolver:"" },
   publicando: false,         // modo de publicação: mostra alfinete nos cartões
   senhaMural: "",            // fica só na memória da aba, nunca é gravada
@@ -2314,90 +2345,6 @@ function itensDoResumo(secaoId, quantos, peso){
 /* A leitura do dia é escrita pelo Claude, na função api/resumir.js. A chave
    da API mora na Vercel; daqui só sai manchete e só volta texto pronto.
    É sob demanda, no botão: cada clique custa alguns centavos. */
-async function pedirLeitura(){
-  const manchetes = [];
-  const assuntos = calcularAssuntos();
-  const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
-
-  /* O que vai junto do título muda a qualidade do texto que volta.
-     Sem a hora, o modelo não sabe o que é de hoje; sem a cobertura,
-     não sabe o que repercutiu; sem a linha fina, escreve no escuro. */
-  for(const secao of SECOES){
-    for(const i of itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso)){
-      manchetes.push({
-        secao: secao.nome,
-        titulo: i.titulo,
-        veiculo: i.origem || i.veiculo,
-        cobertura: i.cobertura || 1,
-        horas: i.ts ? Math.round((Date.now() - i.ts) / 3600000) : null,
-        resumo: i.resumo || ""
-      });
-    }
-  }
-
-  if(!manchetes.length){
-    estado.leitura = { texto:"", carregando:false, erro:"não há manchete para ler ainda" };
-    renderizar();
-    return;
-  }
-
-  estado.leitura = { texto:"", carregando:true, erro:"" };
-  renderizar();
-
-  try{
-    const r = await fetch("/api/resumir", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      // A chave só sai daqui se a pessoa tiver digitado uma nas configurações.
-      // Sem ela, a função usa a variável de ambiente da Vercel.
-      body: JSON.stringify(estado.chaveIA
-        ? { itens: manchetes, chave: estado.chaveIA }
-        : { itens: manchetes })
-    });
-    const dados = await r.json().catch(() => ({}));
-
-    if(!r.ok){
-      estado.leitura = {
-        texto:"", carregando:false,
-        erro: dados.erro || ("a função respondeu " + r.status),
-        comoResolver: dados.comoResolver || ""
-      };
-    }else{
-      estado.leitura = { texto: dados.resumo || "", carregando:false, erro:"" };
-    }
-  }catch(e){
-    estado.leitura = { texto:"", carregando:false, erro: e?.message || "não foi possível falar com a função" };
-  }
-  renderizar();
-}
-
-/* A leitura volta em três partes: o fio do dia, uma linha por seção no
-   formato "Seção — o que muda" e o fecho começando por "De olho:". Sai
-   como texto porque texto é o que o modelo escreve bem; a hierarquia é
-   trabalho daqui. Se vier em formato diferente, cai no parágrafo comum
-   em vez de sumir da tela. */
-function montarLeitura(texto){
-  const linhas = texto.split(/\n+/).map(l => l.trim()).filter(Boolean);
-  const fio = [];
-  const destaques = [];
-  let fecho = "";
-
-  for(const linha of linhas){
-    if(/^de olho\s*:/i.test(linha)){ fecho = linha.replace(/^de olho\s*:\s*/i, ""); continue; }
-    const corte = linha.match(/^(.{2,40}?)\s+[—–-]\s+(.+)$/);
-    if(corte && destaques.length < 8){ destaques.push([corte[1], corte[2]]); continue; }
-    fio.push(linha);
-  }
-
-  return (fio.length ? `<p class="leitura-fio">${escapar(fio.join(" "))}</p>` : "") +
-    (destaques.length ? `<div class="leitura-linhas">${destaques.map(([secao, texto]) => `
-      <div class="leitura-linha">
-        <span class="leitura-secao">${escapar(secao)}</span>
-        <span>${escapar(texto)}</span>
-      </div>`).join("")}</div>` : "") +
-    (fecho ? `<div class="leitura-fecho"><b>De olho:</b> ${escapar(fecho)}</div>` : "");
-}
-
 /* ------------------------------------------------------------
    Recado vindo de outro app da casa
    ------------------------------------------------------------
@@ -2454,143 +2401,288 @@ function recadoDaURL(){
   abrirPublicacao(recado);
 }
 
-function blocoLeitura(){
-  const l = estado.leitura;
-  const botao = `<button class="btn btn-secundario" id="btnLeitura" ${l?.carregando ? "disabled" : ""}>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>
-    <span>${l?.texto ? "Reescrever leitura" : "Escrever a leitura do dia"}</span>
-  </button>`;
+/* ============================================================
+   RADAR EXECUTIVO
+   ============================================================
+   O painel responde "o que saiu hoje". O radar responde outra
+   pergunta, que é a que interessa a quem decide: o que aconteceu
+   hoje que pode importar para a Patrimar, e o que fazer a
+   respeito.
 
-  if(l?.carregando){
-    return `<div class="leitura leitura-espera">${botao}<span>Lendo as manchetes…</span></div>`;
-  }
-  if(l?.erro){
-    return `<div class="leitura">${botao}
-      <div class="leitura-erro"><b>Não saiu:</b> ${escapar(l.erro)}${
-        l.comoResolver ? `<div class="leitura-ajuda">${escapar(l.comoResolver)}</div>` : ""}</div>
-    </div>`;
-  }
-  if(l?.texto){
-    return `<div class="leitura">
-      <div class="leitura-texto">${montarLeitura(l.texto)}</div>
-      <div class="leitura-pe">Escrito por IA a partir das manchetes acima · confira antes de repassar ${botao}</div>
-    </div>`;
-  }
-  return `<div class="leitura leitura-espera">${botao}<span>Um parágrafo com o fio do dia, escrito na hora.</span></div>`;
-}
+   Isso é julgamento por notícia — impacto, área atingida,
+   consequência — e não sai de contagem de palavra-chave. Por isso
+   o radar é escrito pelo Claude, em api/resumir.js, e volta em
+   JSON com esquema fixo. Aqui só se desenha o que veio.
 
-/* ------------------------------------------------------------
-   Jornal Patrimar
-   ------------------------------------------------------------
-   A grade responde "o que saiu hoje". O jornal responde outra
-   pergunta: "o que eu conto na reunião". Por isso não é a mesma
-   lista com outra roupa — é uma edição, com uma manchete que
-   assume o dia, o editorial escrito pela IA e cadernos por seção.
+   As manchetes vão numeradas; cada análise volta com o id que
+   entrou. O link, o veículo e a hora saem daqui, do item de
+   verdade — o modelo não repete metadado, e assim não erra. */
 
-   Pensado para sair no papel: é assim que circula na fábrica,
-   onde nem todo mundo abre o painel.
+const AREA_NOME = {
+  comercial:  "Comercial",
+  ppcp:       "PPCP",
+  compras:    "Compras",
+  producao:   "Produção",
+  financeiro: "Financeiro"
+};
 
-   A seção da casa tem preferência na escolha da manchete. Se a
-   melhor notícia do dia é sobre a Patrimar, é ela que abre. */
-const PESO_DA_CASA = 6;
+const AREA_PERGUNTA = {
+  comercial:  "Mercado e clientes",
+  ppcp:       "Demanda, capacidade, sequenciamento e prazo",
+  compras:    "Matéria-prima, componentes e fornecedores",
+  producao:   "Capacidade, produtividade e gargalos",
+  financeiro: "Crédito, recebimento e caixa"
+};
 
-function montarJornal(){
+const CATEGORIA_NOME = {
+  ppcp:       "🏭 PPCP & Indústria",
+  moveleiro:  "🪑 Mercado moveleiro",
+  mercado:    "📈 Mercado & Negócios",
+  tecnologia: "🤖 Tecnologia & IA",
+  tendencias: "🎯 Tendências"
+};
+
+const IMPACTO_NOME = { alto:"Alto", medio:"Médio", baixo:"Baixo" };
+
+const HORIZONTE_NOME = {
+  imediato:          "Imediato",
+  esta_semana:       "Esta semana",
+  proximas_semanas:  "Próximas semanas",
+  longo_prazo:       "Longo prazo"
+};
+
+/* Quantas manchetes o modelo recebe para escolher. Mais que isso encarece
+   sem melhorar: o que passa daqui já é cauda da relevância. */
+const MANCHETES_NO_RADAR = 60;
+
+async function pedirRadar(){
   const assuntos = calcularAssuntos();
   const peso = new Map(assuntos.map((a, i) => [a.chave, assuntos.length - i]));
+
+  /* A ordem importa e é contrato com o servidor: ele numera por posição
+     (n0, n1…) e devolve o mesmo id. Guardamos a lista para casar de volta. */
+  const enviados = [];
+  for(const secao of SECOES){
+    for(const i of itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso)){
+      enviados.push({ item: i, secao });
+    }
+  }
+  const lista = enviados.slice(0, MANCHETES_NO_RADAR);
+
+  if(!lista.length){
+    estado.radar = { carregando:false, erro:"não há manchete para analisar ainda" };
+    renderizar();
+    return;
+  }
+
+  estado.radar = { carregando:true, erro:"" };
+  renderizar();
+
+  try{
+    const r = await fetch("/api/resumir", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({
+        ...(estado.chaveIA ? { chave: estado.chaveIA } : {}),
+        itens: lista.map(({ item, secao }) => ({
+          secao: secao.nome,
+          titulo: item.titulo,
+          veiculo: item.origem || item.veiculo,
+          cobertura: item.cobertura || 1,
+          horas: item.ts ? Math.round((Date.now() - item.ts) / 3600000) : null,
+          resumo: item.resumo || ""
+        }))
+      })
+    });
+    const dados = await r.json().catch(() => ({}));
+
+    if(!r.ok){
+      estado.radar = {
+        carregando:false, erro: dados.erro || ("a função respondeu " + r.status),
+        comoResolver: dados.comoResolver || ""
+      };
+    }else{
+      estado.radar = {
+        carregando:false, erro:"",
+        dados: dados.radar,
+        // n3 → a notícia de verdade, com link e veículo
+        itens: lista.map(e => e.item),
+        quando: Date.now()
+      };
+    }
+  }catch(e){
+    estado.radar = { carregando:false, erro: e?.message || "não foi possível falar com a função" };
+  }
+  renderizar();
+}
+
+const selo = imp => `<span class="rd-selo rd-${escapar(imp)}">${escapar(IMPACTO_NOME[imp] || imp)}</span>`;
+
+function botaoRadar(){
+  const r = estado.radar;
+  return `<button class="btn btn-primario" id="btnRadar" ${r?.carregando ? "disabled" : ""}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M18 15l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg>
+    <span>${r?.dados ? "Refazer o radar" : "Montar o radar do dia"}</span>
+  </button>`;
+}
+
+function blocoAlertas(alertas){
+  if(!alertas?.length){
+    /* Dia sem alerta é resultado, não falha. Dizer isso vale mais do que
+       promover notícia média a alerta para encher a seção. */
+    return `<section class="rd-sec">
+      <h2 class="rd-sec-t">Alertas principais</h2>
+      <p class="rd-vazio">Nada hoje que exija decisão. As notícias abaixo seguem valendo a leitura.</p>
+    </section>`;
+  }
+  return `<section class="rd-sec">
+    <h2 class="rd-sec-t">${alertas.length === 1 ? "Alerta principal" : alertas.length + " alertas principais"}</h2>
+    <div class="rd-alertas">
+      ${alertas.map((a, n) => `
+        <article class="rd-alerta rd-borda-${escapar(a.impacto)}">
+          <div class="rd-alerta-topo">
+            <span class="rd-num">${String(n + 1).padStart(2, "0")}</span>
+            ${selo(a.impacto)}
+            <span class="rd-horizonte">${escapar(HORIZONTE_NOME[a.horizonte] || a.horizonte)}</span>
+          </div>
+          <h3 class="rd-alerta-t">${escapar(a.titulo)}</h3>
+          <p class="rd-alerta-r">${escapar(a.resumo)}</p>
+          <div class="rd-porque">
+            <span class="rd-rot">Por que importa</span>
+            <p>${escapar(a.porQueImporta)}</p>
+          </div>
+        </article>`).join("")}
+    </div>
+  </section>`;
+}
+
+function blocoAreas(areas){
+  if(!areas?.length) return "";
+  return `<section class="rd-sec">
+    <h2 class="rd-sec-t">O que isso significa para a Patrimar</h2>
+    <div class="rd-areas">
+      ${areas.map(a => `
+        <div class="rd-area">
+          <div class="rd-area-cab">
+            <span class="rd-area-nome">${escapar(AREA_NOME[a.area] || a.area)}</span>
+            <span class="rd-area-sub">${escapar(AREA_PERGUNTA[a.area] || "")}</span>
+          </div>
+          <p class="rd-area-txt">${escapar(a.texto)}</p>
+        </div>`).join("")}
+    </div>
+  </section>`;
+}
+
+function blocoNoticias(noticias, itens){
+  if(!noticias?.length) return "";
+
+  // Agrupa por categoria mantendo a ordem em que a análise as devolveu.
+  const grupos = new Map();
+  for(const n of noticias){
+    const item = itens[Number(String(n.id).replace(/^n/, ""))];
+    if(!item) continue;                        // id que não casa é descartado
+    if(!grupos.has(n.categoria)) grupos.set(n.categoria, []);
+    grupos.get(n.categoria).push({ n, item });
+  }
+  if(!grupos.size) return "";
+
+  const campo = (rotulo, valor) => valor
+    ? `<div class="rd-campo"><span class="rd-rot">${rotulo}</span><p>${escapar(valor)}</p></div>`
+    : "";
+
+  return [...grupos.entries()].map(([cat, lista]) => `
+    <section class="rd-sec rd-cat">
+      <h2 class="rd-sec-t">${escapar(CATEGORIA_NOME[cat] || cat)}</h2>
+      ${lista.map(({ n, item }) => `
+        <article class="rd-noticia rd-borda-${escapar(n.impacto)}">
+          <div class="rd-n-topo">
+            ${selo(n.impacto)}
+            ${n.areas?.length ? `<span class="rd-areas-tag">${
+              n.areas.map(a => escapar(AREA_NOME[a] || a)).join(" · ")}</span>` : ""}
+          </div>
+          <h3 class="rd-n-t">
+            <a class="rd-n-link" href="${escapar(item.link)}" target="_blank" rel="noopener noreferrer">${escapar(item.titulo)}</a>
+          </h3>
+          <div class="rd-fonte">${escapar(item.origem || item.veiculo)}${
+            item.ts ? " · " + escapar(tempoRelativo(item.ts)) : ""}${
+            item.cobertura > 1 ? " · " + item.cobertura + " veículos" : ""}</div>
+          ${campo("O que aconteceu", n.oQueAconteceu)}
+          ${campo("Por que importa", n.porQueImporta)}
+          ${campo("O que observar", n.oQueObservar)}
+          ${campo("Ação", n.acao)}
+        </article>`).join("")}
+    </section>`).join("");
+}
+
+function blocoDeOlho(deOlho){
+  if(!deOlho?.length) return "";
+  return `<section class="rd-sec">
+    <h2 class="rd-sec-t">De olho</h2>
+    <ol class="rd-olho">
+      ${deOlho.map((o, n) => `
+        <li class="rd-olho-item">
+          <span class="rd-num">${String(n + 1).padStart(2, "0")}</span>
+          <div>
+            <div class="rd-olho-t">${escapar(o.assunto)}</div>
+            <p class="rd-olho-x">${escapar(o.acompanhar)}</p>
+          </div>
+        </li>`).join("")}
+    </ol>
+  </section>`;
+}
+
+function montarRadar(){
+  const r = estado.radar;
   const agora = new Date();
-  const hora = new Date(estado.ultimaAtualizacao || agora)
-    .toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+  const cabeca = `<header class="rd-cabeca">
+    <div class="rd-marca">
+      <img class="rd-logo" src="logo-patrimar.png" width="760" height="246" alt="">
+      <h1 class="rd-titulo">Radar Diário <span>| Patrimar</span></h1>
+    </div>
+    <div class="rd-data">${escapar(dataExtenso(agora))}</div>
+    <div class="rd-eixos">Mercado · Indústria · PPCP · Tecnologia</div>
+  </header>`;
 
-  // Cada seção entrega suas melhores; a manchete sai do conjunto todo.
-  const porSecao = SECOES.map(secao => ({
-    secao,
-    itens: itensDoResumo(secao.id, CONFIG.RESUMO_POR_SECAO, peso),
-    total: (estado.itens[secao.id] || []).length
-  })).filter(b => b.itens.length);
-
-  if(!porSecao.length){
-    return `<div class="estado">
-      <div class="estado-t">A edição de hoje ainda está vazia</div>
-      <div class="estado-d">Nenhuma manchete chegou. Use o botão Atualizar e volte ao jornal em seguida.</div>
+  if(r?.carregando){
+    return `<div class="radar">${cabeca}
+      <div class="rd-espera">Lendo as manchetes e montando o radar…
+        <span class="rd-espera-x">leva alguns segundos: cada notícia é analisada, não só resumida</span></div>
     </div>`;
   }
 
-  /* Manchete sem linha fina é capa fraca: o leitor lê seis palavras e
-     tem de decidir sozinho se importa. Além disso deixa meia página em
-     branco ao lado das chamadas. Quem tem resumo larga na frente. */
-  const candidatos = porSecao.flatMap(b => b.itens.map(it => ({
-    it, secao: b.secao,
-    nota: (it.nota || 0)
-      + (b.secao.destaque ? PESO_DA_CASA : 0)
-      + (it.resumo ? 4 : 0)
-  })));
-  candidatos.sort((a, b) => b.nota - a.nota);
+  if(r?.erro){
+    return `<div class="radar">${cabeca}
+      <div class="rd-erro"><b>Não saiu:</b> ${escapar(r.erro)}
+        ${r.comoResolver ? `<div class="rd-erro-x">${escapar(r.comoResolver)}</div>` : ""}</div>
+      <div class="rd-pe">${botaoRadar()}</div>
+    </div>`;
+  }
 
-  const principal = candidatos[0];
-  const chamadas = candidatos.slice(1, 5);
-  const usados = new Set([principal, ...chamadas].map(c => c.it.chave));
+  if(!r?.dados){
+    return `<div class="radar">${cabeca}
+      <div class="rd-espera">O radar é montado sob demanda: ele lê as manchetes do dia e
+        devolve o que pode afetar a Patrimar, por área, com o que observar.
+        <span class="rd-espera-x">nada é gerado sem este clique</span></div>
+      <div class="rd-pe">${botaoRadar()}</div>
+    </div>`;
+  }
 
-  const creditos = i => [
-    i.origem || i.veiculo,
-    i.ts ? tempoRelativo(i.ts) : "",
-    i.cobertura > 1 ? i.cobertura + " veículos" : ""
-  ].filter(Boolean).map(escapar).join(" · ");
+  const d = r.dados;
+  const hora = new Date(r.quando).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
 
-  const manchete = `<a class="jn-principal" href="${escapar(principal.it.link)}" target="_blank" rel="noopener noreferrer">
-    <span class="jn-tarja">${escapar(principal.secao.nome)}</span>
-    <h2 class="jn-principal-t">${escapar(principal.it.titulo)}</h2>
-    ${principal.it.resumo ? `<p class="jn-principal-r">${escapar(principal.it.resumo)}</p>` : ""}
-    <div class="jn-creditos">${creditos(principal.it)}</div>
-  </a>`;
-
-  const tambem = chamadas.length ? `<div class="jn-tambem">
-    <div class="jn-rotulo">Também nesta edição</div>
-    ${chamadas.map(c => `<a class="jn-chamada" href="${escapar(c.it.link)}" target="_blank" rel="noopener noreferrer">
-      <div class="jn-chamada-t">${escapar(c.it.titulo)}</div>
-      <div class="jn-creditos">${escapar(c.secao.nome)} · ${creditos(c.it)}</div>
-    </a>`).join("")}
-  </div>` : "";
-
-  const cadernos = porSecao.map(b => {
-    const restantes = b.itens.filter(i => !usados.has(i.chave));
-    if(!restantes.length) return "";
-    return `<section class="jn-caderno">
-      <div class="jn-caderno-topo">
-        <h3 class="jn-caderno-nome">${escapar(b.secao.nome)}</h3>
-        <span class="jn-caderno-qtd">${restantes.length} de ${b.total}</span>
-      </div>
-      <div class="jn-caderno-lista">
-        ${restantes.map(i => `<a class="jn-nota" href="${escapar(i.link)}" target="_blank" rel="noopener noreferrer">
-          <div class="jn-nota-t">${escapar(i.titulo)}</div>
-          <div class="jn-creditos">${creditos(i)}</div>
-        </a>`).join("")}
-      </div>
-    </section>`;
-  }).join("");
-
-  return `<div class="jornal">
-    <header class="jn-cabeca">
-      <img class="jn-logo" src="logo-patrimar.png" width="760" height="246" alt="">
-      <div class="jn-nome">Jornal Patrimar</div>
-      <div class="jn-linha">Edição de ${escapar(dataExtenso(agora))} · fechada às ${escapar(hora)}</div>
-      ${assuntos.length ? `<div class="jn-assuntos">${
-        assuntos.slice(0, 6).map(a => escapar(a.rotulo)).join(" · ")}</div>` : ""}
-    </header>
-
-    <div class="jn-abertura">
-      <div class="jn-mestra">
-        ${manchete}
-        <div class="jn-editorial">
-          <div class="jn-rotulo">Editorial do dia</div>
-          ${blocoLeitura()}
-        </div>
-      </div>
-      ${tambem}
+  return `<div class="radar">
+    ${cabeca}
+    ${blocoAlertas(d.alertas)}
+    ${blocoAreas(d.areas)}
+    ${blocoNoticias(d.noticias, r.itens || [])}
+    ${blocoDeOlho(d.deOlho)}
+    <div class="rd-pe">
+      <span>Escrito por IA a partir das manchetes do dia, às ${escapar(hora)} · confira antes de decidir</span>
+      ${botaoRadar()}
     </div>
-
-    ${cadernos}
   </div>`;
 }
+
 
 function cartaoNoticia(i, termo, destaque){
   // Na primeira visita não há "desde a última vez": sem esta guarda,
@@ -2665,9 +2757,9 @@ function renderizarGrade(){
   }
 
   if(estado.resumo){
-    grade.innerHTML = montarJornal();
+    grade.innerHTML = montarRadar();
     const total = SECOES.reduce((n, sec) => n + (estado.itens[sec.id] || []).length, 0);
-    el("contagem").textContent = total ? `edição de ${total} notícias` : "";
+    el("contagem").textContent = total ? `${total} manchetes analisadas` : "";
     return;
   }
 
@@ -2845,7 +2937,7 @@ el("btnResumo").addEventListener("click", () => {
 el("btnImprimir").addEventListener("click", () => window.print());
 
 el("grade").addEventListener("click", e => {
-  if(e.target.closest("#btnLeitura")){ pedirLeitura(); return; }
+  if(e.target.closest("#btnRadar")){ pedirRadar(); return; }
 
   if(e.target.closest("#btnRecado")){
     abrirPublicacao({ tipo:"recado" });
